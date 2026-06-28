@@ -1,0 +1,652 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MEDITRACK</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: Arial, sans-serif; background: #f0f4f8; }
+        .header { background: #0066cc; color: white; padding: 20px; text-align: center; }
+        .header h1 { font-size: 24px; }
+        .header p { font-size: 12px; opacity: 0.8; }
+        .search-box { padding: 15px; background: white; }
+        .search-box input { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px; font-size: 16px; }
+        .patient-card { background: white; margin: 10px 15px; padding: 15px; border-radius: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); cursor: pointer; }
+        .patient-name { font-size: 18px; font-weight: bold; color: #333; }
+        .patient-code { color: #0066cc; font-size: 14px; font-weight: bold; }
+        .patient-info { color: #666; font-size: 13px; margin-top: 5px; }
+        .allergy-badge { background: #ff4444; color: white; padding: 3px 8px; border-radius: 12px; font-size: 11px; margin-top: 5px; display: inline-block; }
+        .section-title { padding: 15px; font-size: 14px; color: #666; font-weight: bold; }
+        .detail-view { display: none; }
+        .detail-header { background: #0066cc; color: white; padding: 20px; }
+        .detail-header h2 { font-size: 20px; }
+        .detail-code { font-size: 14px; opacity: 0.8; }
+        .back-btn { background: none; border: none; color: white; font-size: 16px; cursor: pointer; margin-bottom: 10px; }
+        .detail-section { background: white; margin: 10px 15px; padding: 15px; border-radius: 10px; }
+        .detail-section h3 { color: #0066cc; font-size: 14px; margin-bottom: 10px; border-bottom: 1px solid #eee; padding-bottom: 5px; }
+        .detail-row { display: flex; justify-content: space-between; padding: 5px 0; font-size: 14px; }
+        .detail-label { color: #666; }
+        .detail-value { font-weight: bold; color: #333; }
+        .visit-card { background: #f8f9fa; padding: 12px; border-radius: 8px; margin-top: 10px; border-left: 4px solid #0066cc; }
+        .visit-date { font-size: 12px; color: #666; }
+        .visit-complaint { font-weight: bold; color: #333; margin: 5px 0; }
+        .visit-diagnosis { color: #0066cc; font-size: 13px; }
+        .nav-bar { position: fixed; bottom: 0; width: 100%; background: white; display: flex; border-top: 1px solid #ddd; }
+        .nav-item { flex: 1; padding: 12px; text-align: center; font-size: 12px; color: #666; cursor: pointer; }
+        .nav-item.active { color: #0066cc; font-weight: bold; }
+        .form-group { margin-bottom: 15px; }
+        .form-group label { display: block; font-size: 14px; color: #666; margin-bottom: 5px; }
+        .form-group input, .form-group select { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px; font-size: 14px; }
+        .submit-btn { width: 100%; background: #0066cc; color: white; padding: 15px; border: none; border-radius: 8px; font-size: 16px; cursor: pointer; margin-bottom: 80px; }
+        .success-msg { background: #4CAF50; color: white; padding: 15px; text-align: center; border-radius: 8px; margin: 10px 15px; display: none; }
+        .form-container { padding: 15px; }
+        .dashboard-card { background: white; margin: 10px 15px; padding: 20px; border-radius: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); display: flex; justify-content: space-between; align-items: center; }
+        .dashboard-number { font-size: 36px; font-weight: bold; color: #0066cc; }
+        .dashboard-label { font-size: 13px; color: #666; margin-top: 5px; }
+        .dashboard-icon { font-size: 36px; }
+        .warning-badge { background: #ff8800; color: white; padding: 3px 8px; border-radius: 12px; font-size: 11px; margin-top: 5px; display: inline-block; }
+    </style>
+</head>
+<body>
+
+<!-- DASHBOARD VIEW -->
+<div id="dashboard-view" style="display:none;">
+    <div class="header">
+        <h1>🏥 MEDITRACK</h1>
+        <p>Unified Patient Health Records</p>
+    </div>
+    <div class="section-title">OVERVIEW</div>
+    <div class="dashboard-card">
+        <div>
+            <div class="dashboard-number" id="dash-total-patients">0</div>
+            <div class="dashboard-label">Total Patients</div>
+        </div>
+        <div class="dashboard-icon">👥</div>
+    </div>
+    <div class="dashboard-card">
+        <div>
+            <div class="dashboard-number" id="dash-total-visits">0</div>
+            <div class="dashboard-label">Total Visits Recorded</div>
+        </div>
+        <div class="dashboard-icon">📋</div>
+    </div>
+    <div class="dashboard-card">
+        <div>
+            <div class="dashboard-number" id="dash-today-visits">0</div>
+            <div class="dashboard-label">Visits Today</div>
+        </div>
+        <div class="dashboard-icon">📅</div>
+    </div>
+    <div class="dashboard-card">
+        <div>
+            <div id="dash-last-patient" style="font-size:16px; font-weight:bold; color:#333;">None yet</div>
+            <div class="dashboard-label">Last Registered Patient</div>
+        </div>
+        <div class="dashboard-icon">🆕</div>
+    </div>
+    <div style="height: 80px;"></div>
+</div>
+
+<!-- PATIENTS LIST VIEW -->
+<div id="patients-view" style="display:none;">
+    <div class="header">
+        <h1>🏥 MEDITRACK</h1>
+        <p>Unified Patient Health Records</p>
+    </div>
+    <div class="search-box">
+        <input type="text" id="search-input" placeholder="Search by name, code or phone..." onkeyup="searchPatients()">
+    </div>
+    <div class="section-title">REGISTERED PATIENTS</div>
+    <div id="patients-list"></div>
+    <div style="height: 80px;"></div>
+</div>
+
+<!-- PATIENT DETAIL VIEW -->
+<div id="detail-view" style="display:none;">
+    <div class="detail-header">
+        <button class="back-btn" onclick="goBack()">← Back</button>
+        <h2 id="detail-name"></h2>
+        <div class="detail-code" id="detail-code"></div>
+    </div>
+    <div class="detail-section">
+        <h3>📋 PATIENT INFORMATION</h3>
+        <div class="detail-row">
+            <span class="detail-label">Phone</span>
+            <span class="detail-value" id="detail-phone"></span>
+        </div>
+        <div class="detail-row">
+            <span class="detail-label">Date of Birth</span>
+            <span class="detail-value" id="detail-dob"></span>
+        </div>
+        <div class="detail-row">
+            <span class="detail-label">Gender</span>
+            <span class="detail-value" id="detail-gender"></span>
+        </div>
+        <div class="detail-row">
+            <span class="detail-label">Blood Group</span>
+            <span class="detail-value" id="detail-blood"></span>
+        </div>
+        <div class="detail-row">
+            <span class="detail-label">Known Allergies</span>
+            <span class="detail-value" style="color: red;" id="detail-allergy"></span>
+        </div>
+        <div class="detail-row">
+            <span class="detail-label">Next of Kin</span>
+            <span class="detail-value" id="detail-kin"></span>
+        </div>
+        <div class="detail-row">
+            <span class="detail-label">Kin Phone</span>
+            <span class="detail-value" id="detail-kin-phone"></span>
+        </div>
+        <div style="margin-top: 10px; text-align: right;">
+            <button onclick="printPatientCard()" style="background: #0066cc; color: white; border: none; padding: 8px 15px; border-radius: 8px; cursor: pointer; font-size: 13px;">🖨️ Print Patient Card</button>
+        </div>
+    </div>
+    <div class="detail-section">
+        <h3>🏥 VISIT HISTORY</h3>
+        <div id="visit-history-list"></div>
+    </div>
+    <div style="height: 80px;"></div>
+</div>
+
+<!-- REGISTER NEW PATIENT VIEW -->
+<div id="register-view" style="display:none;">
+    <div class="header">
+        <h1>➕ Register Patient</h1>
+        <p>New Patient Registration</p>
+    </div>
+    <div class="success-msg" id="register-success-msg">✅ Patient Registered Successfully!</div>
+    <div class="form-container">
+        <div class="form-group">
+            <label>Full Name *</label>
+            <input type="text" id="reg-name" placeholder="Enter full name">
+        </div>
+        <div class="form-group">
+            <label>Phone Number *</label>
+            <input type="tel" id="reg-phone" placeholder="08012345678">
+        </div>
+        <div class="form-group">
+            <label>Date of Birth *</label>
+            <input type="date" id="reg-dob">
+        </div>
+        <div class="form-group">
+            <label>Gender *</label>
+            <select id="reg-gender">
+                <option value="">Select gender</option>
+                <option value="Male">Male</option>
+                <option value="Female">Female</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label>Blood Group</label>
+            <select id="reg-blood">
+                <option value="">Select blood group</option>
+                <option>A+</option>
+                <option>A-</option>
+                <option>B+</option>
+                <option>B-</option>
+                <option>AB+</option>
+                <option>AB-</option>
+                <option>O+</option>
+                <option>O-</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label>Known Allergies</label>
+            <input type="text" id="reg-allergy" placeholder="e.g. Penicillin (leave blank if none)">
+        </div>
+        <div class="form-group">
+            <label>Next of Kin Name</label>
+            <input type="text" id="reg-kin" placeholder="Enter next of kin name">
+        </div>
+        <div class="form-group">
+            <label>Next of Kin Phone</label>
+            <input type="tel" id="reg-kin-phone" placeholder="08012345678">
+        </div>
+        <button class="submit-btn" onclick="registerPatient()">REGISTER PATIENT</button>
+    </div>
+</div>
+
+<!-- RECORD VISIT VIEW -->
+<div id="visit-view" style="display:none;">
+    <div class="header">
+        <h1>🩺 Record Visit</h1>
+        <p>Record a new patient visit</p>
+    </div>
+    <div class="success-msg" id="visit-success-msg">✅ Visit Recorded Successfully!</div>
+    <div class="form-container">
+        <div class="form-group">
+            <label>Patient Code or Name *</label>
+            <input type="text" id="visit-patient-search" placeholder="Type NG-1 or patient name" onkeyup="findPatientForVisit()">
+            <div id="visit-patient-result" style="margin-top: 5px; font-weight: bold;"></div>
+        </div>
+        <div class="form-group">
+            <label>Facility Name *</label>
+            <input type="text" id="visit-facility" placeholder="Enter clinic or hospital name">
+        </div>
+        <div class="form-group">
+            <label>Chief Complaint *</label>
+            <input type="text" id="visit-complaint" placeholder="What is the patient complaining of?">
+        </div>
+        <div class="form-group">
+            <label>Diagnosis *</label>
+            <input type="text" id="visit-diagnosis" placeholder="Enter diagnosis">
+        </div>
+        <div class="form-group">
+            <label>Medications Prescribed</label>
+            <input type="text" id="visit-medications" placeholder="Enter medications and dosage">
+        </div>
+        <div class="form-group">
+            <label>Doctor's Notes</label>
+            <input type="text" id="visit-notes" placeholder="Additional clinical notes">
+        </div>
+        <div class="form-group">
+            <label>Follow Up Instructions</label>
+            <input type="text" id="visit-followup" placeholder="e.g. Return in 3 days">
+        </div>
+        <button class="submit-btn" onclick="recordVisit()">RECORD VISIT</button>
+    </div>
+</div>
+
+<!-- BOTTOM NAVIGATION -->
+<div class="nav-bar">
+    <div class="nav-item active" id="nav-dashboard" onclick="showView('dashboard')">🏠 Home</div>
+    <div class="nav-item" id="nav-patients" onclick="showView('patients')">👥 Patients</div>
+    <div class="nav-item" id="nav-register" onclick="showView('register')">➕ Register</div>
+    <div class="nav-item" id="nav-visit" onclick="showView('visit')">🩺 Visit</div>
+</div>
+
+<script>
+    let patients = [];
+    let nextId = 1;
+    let selectedPatientIndex = -1;
+    let currentPatientIndex = -1;
+
+    // DRUG INTERACTION WARNING LIST
+    const drugWarnings = {
+        'penicillin': ['amoxicillin', 'ampicillin', 'amoxil', 'augmentin', 'flucloxacillin'],
+        'aspirin': ['ibuprofen', 'diclofenac', 'naproxen', 'indomethacin'],
+        'sulfa': ['septrin', 'cotrimoxazole', 'trimethoprim'],
+        'codeine': ['tramadol', 'morphine', 'opioid'],
+        'ibuprofen': ['aspirin', 'diclofenac', 'naproxen']
+    };
+
+    function saveData() {
+        localStorage.setItem('meditrack_patients', JSON.stringify(patients));
+        localStorage.setItem('meditrack_nextid', nextId);
+    }
+
+    function loadData() {
+        const saved = localStorage.getItem('meditrack_patients');
+        const savedId = localStorage.getItem('meditrack_nextid');
+        if(saved) {
+            patients = JSON.parse(saved);
+        } else {
+            patients = [
+                {
+                    id: 1,
+                    code: "NG-1",
+                    name: "Emeka Okafor",
+                    phone: "08012345678",
+                    dob: "23/03/1985",
+                    gender: "Male",
+                    blood: "O+",
+                    allergy: "Penicillin",
+                    kin: "Ngozi Okafor",
+                    kinPhone: "08098765432",
+                    visits: [
+                        {
+                            date: "27/06/2026",
+                            facility: "Lagos City Clinic",
+                            complaint: "Severe headache and fever for 3 days",
+                            diagnosis: "Malaria",
+                            medications: "Artemether 80mg twice daily, Paracetamol 500mg",
+                            notes: "Patient appears weak. Temperature 38.5°C.",
+                            followup: "Return in 3 days if no improvement"
+                        }
+                    ]
+                }
+            ];
+            nextId = 2;
+            saveData();
+        }
+        if(savedId) {
+            nextId = parseInt(savedId);
+        }
+    }
+
+    function updateDashboard() {
+        const totalPatients = patients.length;
+        let totalVisits = 0;
+        let todayVisits = 0;
+        const today = new Date().toLocaleDateString('en-GB');
+
+        patients.forEach(p => {
+            if(p.visits) {
+                totalVisits += p.visits.length;
+                p.visits.forEach(v => {
+                    if(v.date === today) todayVisits++;
+                });
+            }
+        });
+
+        document.getElementById('dash-total-patients').textContent = totalPatients;
+        document.getElementById('dash-total-visits').textContent = totalVisits;
+        document.getElementById('dash-today-visits').textContent = todayVisits;
+        document.getElementById('dash-last-patient').textContent = patients.length > 0 ? patients[patients.length - 1].name + ' (' + patients[patients.length - 1].code + ')' : 'None yet';
+    }
+
+    function showView(view) {
+        document.getElementById('dashboard-view').style.display = 'none';
+        document.getElementById('patients-view').style.display = 'none';
+        document.getElementById('detail-view').style.display = 'none';
+        document.getElementById('register-view').style.display = 'none';
+        document.getElementById('visit-view').style.display = 'none';
+
+        document.getElementById('nav-dashboard').classList.remove('active');
+        document.getElementById('nav-patients').classList.remove('active');
+        document.getElementById('nav-register').classList.remove('active');
+        document.getElementById('nav-visit').classList.remove('active');
+
+        if(view === 'dashboard') {
+            document.getElementById('dashboard-view').style.display = 'block';
+            document.getElementById('nav-dashboard').classList.add('active');
+            updateDashboard();
+        } else if(view === 'patients') {
+            document.getElementById('patients-view').style.display = 'block';
+            document.getElementById('nav-patients').classList.add('active');
+            renderPatients();
+        } else if(view === 'register') {
+            document.getElementById('register-view').style.display = 'block';
+            document.getElementById('nav-register').classList.add('active');
+        } else if(view === 'visit') {
+            document.getElementById('visit-view').style.display = 'block';
+            document.getElementById('nav-visit').classList.add('active');
+        }
+    }
+
+    function renderPatients() {
+        const list = document.getElementById('patients-list');
+        list.innerHTML = '';
+        if(patients.length === 0) {
+            list.innerHTML = '<p style="text-align:center; color:#666; padding:30px;">No patients registered yet.</p>';
+            return;
+        }
+        patients.forEach((p, index) => {
+            list.innerHTML += `
+                <div class="patient-card" onclick="showPatient(${index})">
+                    <div class="patient-name">${p.name}</div>
+                    <div class="patient-code">${p.code}</div>
+                    <div class="patient-info">${p.gender} • ${p.blood || 'Unknown'} • DOB: ${p.dob}</div>
+                    ${p.allergy ? `<div class="allergy-badge">⚠️ Allergic to ${p.allergy}</div>` : ''}
+                </div>
+            `;
+        });
+    }
+
+    function showPatient(index) {
+        currentPatientIndex = index;
+        const p = patients[index];
+        document.getElementById('patients-view').style.display = 'none';
+        document.getElementById('detail-view').style.display = 'block';
+        document.getElementById('detail-name').textContent = p.name;
+        document.getElementById('detail-code').textContent = p.code;
+        document.getElementById('detail-phone').textContent = p.phone;
+        document.getElementById('detail-dob').textContent = p.dob;
+        document.getElementById('detail-gender').textContent = p.gender;
+        document.getElementById('detail-blood').textContent = p.blood || 'Not recorded';
+        document.getElementById('detail-allergy').textContent = p.allergy || 'None';
+        document.getElementById('detail-kin').textContent = p.kin || 'Not recorded';
+        document.getElementById('detail-kin-phone').textContent = p.kinPhone || 'Not recorded';
+
+        const visitList = document.getElementById('visit-history-list');
+        visitList.innerHTML = '';
+
+        if(p.visits && p.visits.length > 0) {
+            p.visits.slice().reverse().forEach(v => {
+                visitList.innerHTML += `
+                    <div class="visit-card">
+                        <div class="visit-date">${v.date} — ${v.facility}</div>
+                        <div class="visit-complaint">Complaint: ${v.complaint}</div>
+                        <div class="visit-diagnosis">Diagnosis: ${v.diagnosis}</div>
+                        ${v.medications ? `<div style="font-size:13px;margin-top:5px;color:#555;">💊 Medications: ${v.medications}</div>` : ''}
+                        ${v.notes ? `<div style="font-size:13px;color:#555;">📝 Notes: ${v.notes}</div>` : ''}
+                        ${v.followup ? `<div style="font-size:13px;color:#555;">📅 Follow up: ${v.followup}</div>` : ''}
+                    </div>
+                `;
+            });
+        } else {
+            visitList.innerHTML = '<p style="color:#666;font-size:14px;padding:10px 0;">No visits recorded yet.</p>';
+        }
+    }
+
+    function goBack() {
+        document.getElementById('detail-view').style.display = 'none';
+        document.getElementById('patients-view').style.display = 'block';
+        renderPatients();
+    }
+
+    function searchPatients() {
+        const query = document.getElementById('search-input').value.toLowerCase();
+        const list = document.getElementById('patients-list');
+        list.innerHTML = '';
+        const filtered = patients.filter(p =>
+            p.name.toLowerCase().includes(query) ||
+            p.code.toLowerCase().includes(query) ||
+            p.phone.includes(query)
+        );
+        if(filtered.length === 0) {
+            list.innerHTML = '<p style="text-align:center;color:#666;padding:20px;">No patients found.</p>';
+            return;
+        }
+        filtered.forEach((p) => {
+            const realIndex = patients.indexOf(p);
+            list.innerHTML += `
+                <div class="patient-card" onclick="showPatient(${realIndex})">
+                    <div class="patient-name">${p.name}</div>
+                    <div class="patient-code">${p.code}</div>
+                    <div class="patient-info">${p.gender} • ${p.blood || 'Unknown'} • DOB: ${p.dob}</div>
+                    ${p.allergy ? `<div class="allergy-badge">⚠️ Allergic to ${p.allergy}</div>` : ''}
+                </div>
+            `;
+        });
+    }
+
+    function findPatientForVisit() {
+        const query = document.getElementById('visit-patient-search').value.toLowerCase();
+        const result = document.getElementById('visit-patient-result');
+        if(query.length < 1) {
+            result.textContent = '';
+            selectedPatientIndex = -1;
+            return;
+        }
+        const found = patients.find(p =>
+            p.name.toLowerCase().includes(query) ||
+            p.code.toLowerCase().includes(query)
+        );
+        if(found) {
+            selectedPatientIndex = patients.indexOf(found);
+            result.innerHTML = '✅ Found: <strong>' + found.name + '</strong> (' + found.code + ')' +
+                (found.allergy ? ' <span style="color:red;">⚠️ Allergic to ' + found.allergy + '</span>' : '');
+            result.style.color = '#4CAF50';
+        } else {
+            selectedPatientIndex = -1;
+            result.textContent = '❌ Patient not found';
+            result.style.color = 'red';
+        }
+    }
+
+    function checkDrugInteraction(allergy, medications) {
+        if(!allergy || !medications) return null;
+        const allergyLower = allergy.toLowerCase();
+        const medsLower = medications.toLowerCase();
+        const warnings = drugWarnings[allergyLower];
+        if(warnings) {
+            for(let drug of warnings) {
+                if(medsLower.includes(drug)) {
+                    return '⚠️ WARNING: ' + medications + ' may interact with patient\'s known allergy to ' + allergy + '. Please verify before dispensing.';
+                }
+            }
+        }
+        return null;
+    }
+
+    function recordVisit() {
+        if(selectedPatientIndex === -1) {
+            alert('Please search and select a valid patient first');
+            return;
+        }
+        const facility = document.getElementById('visit-facility').value;
+        const complaint = document.getElementById('visit-complaint').value;
+        const diagnosis = document.getElementById('visit-diagnosis').value;
+        const medications = document.getElementById('visit-medications').value;
+        const notes = document.getElementById('visit-notes').value;
+        const followup = document.getElementById('visit-followup').value;
+
+        if(!facility || !complaint || !diagnosis) {
+            alert('Please fill in facility, complaint and diagnosis');
+            return;
+        }
+
+        const patient = patients[selectedPatientIndex];
+        const warning = checkDrugInteraction(patient.allergy, medications);
+        if(warning) {
+            const proceed = confirm(warning + '\n\nDo you still want to proceed?');
+            if(!proceed) return;
+        }
+
+        const today = new Date().toLocaleDateString('en-GB');
+        const newVisit = {
+            date: today,
+            facility: facility,
+            complaint: complaint,
+            diagnosis: diagnosis,
+            medications: medications,
+            notes: notes,
+            followup: followup
+        };
+
+        if(!patients[selectedPatientIndex].visits) {
+            patients[selectedPatientIndex].visits = [];
+        }
+        patients[selectedPatientIndex].visits.push(newVisit);
+        saveData();
+
+        document.getElementById('visit-success-msg').style.display = 'block';
+        document.getElementById('visit-patient-search').value = '';
+        document.getElementById('visit-patient-result').textContent = '';
+        document.getElementById('visit-facility').value = '';
+        document.getElementById('visit-complaint').value = '';
+        document.getElementById('visit-diagnosis').value = '';
+        document.getElementById('visit-medications').value = '';
+        document.getElementById('visit-notes').value = '';
+        document.getElementById('visit-followup').value = '';
+        selectedPatientIndex = -1;
+
+        setTimeout(() => {
+            document.getElementById('visit-success-msg').style.display = 'none';
+            showView('dashboard');
+        }, 2000);
+    }
+
+    function registerPatient() {
+        const name = document.getElementById('reg-name').value;
+        const phone = document.getElementById('reg-phone').value;
+        const dob = document.getElementById('reg-dob').value;
+        const gender = document.getElementById('reg-gender').value;
+        const blood = document.getElementById('reg-blood').value;
+        const allergy = document.getElementById('reg-allergy').value;
+        const kin = document.getElementById('reg-kin').value;
+        const kinPhone = document.getElementById('reg-kin-phone').value;
+
+        if(!name || !phone || !dob || !gender) {
+            alert('Please fill in all required fields marked with *');
+            return;
+        }
+
+        const existing = patients.find(p => p.phone === phone);
+        if(existing) {
+            alert('A patient with this phone number already exists: ' + existing.name + ' (' + existing.code + ')');
+            return;
+        }
+
+        const newPatient = {
+            id: nextId,
+            code: "NG-" + nextId,
+            name: name,
+            phone: phone,
+            dob: new Date(dob).toLocaleDateString('en-GB'),
+            gender: gender,
+            blood: blood,
+            allergy: allergy,
+            kin: kin,
+            kinPhone: kinPhone,
+            visits: []
+        };
+
+        patients.push(newPatient);
+        nextId++;
+        saveData();
+
+        document.getElementById('register-success-msg').style.display = 'block';
+        document.getElementById('reg-name').value = '';
+        document.getElementById('reg-phone').value = '';
+        document.getElementById('reg-dob').value = '';
+        document.getElementById('reg-gender').value = '';
+        document.getElementById('reg-blood').value = '';
+        document.getElementById('reg-allergy').value = '';
+        document.getElementById('reg-kin').value = '';
+        document.getElementById('reg-kin-phone').value = '';
+
+        setTimeout(() => {
+            document.getElementById('register-success-msg').style.display = 'none';
+            showView('patients');
+        }, 2000);
+    }
+
+    function printPatientCard() {
+        if(currentPatientIndex === -1) return;
+        const p = patients[currentPatientIndex];
+        const printWindow = window.open('', '_blank');
+        printWindow.document.write(`
+            <html>
+            <head>
+                <title>Patient Card - ${p.name}</title>
+                <style>
+                    body { font-family: Arial, sans-serif; padding: 20px; }
+                    .card { border: 2px solid #0066cc; border-radius: 10px; padding: 20px; max-width: 350px; margin: 0 auto; }
+                    .card-header { background: #0066cc; color: white; padding: 10px; border-radius: 8px; text-align: center; margin-bottom: 15px; }
+                    .card-title { font-size: 18px; font-weight: bold; }
+                    .card-code { font-size: 28px; font-weight: bold; color: #0066cc; text-align: center; margin: 10px 0; letter-spacing: 3px; }
+                    .card-info { font-size: 13px; margin: 5px 0; }
+                    .allergy-warning { background: #ff4444; color: white; padding: 8px; border-radius: 5px; text-align: center; margin-top: 10px; font-weight: bold; }
+                    .footer { text-align: center; font-size: 11px; color: #666; margin-top: 15px; }
+                </style>
+            </head>
+            <body>
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-title">🏥 MEDITRACK</div>
+                        <div style="font-size:11px;">Unified Patient Health Records</div>
+                    </div>
+                    <div class="card-code">${p.code}</div>
+                    <div class="card-info"><strong>Name:</strong> ${p.name}</div>
+                    <div class="card-info"><strong>Phone:</strong> ${p.phone}</div>
+                    <div class="card-info"><strong>DOB:</strong> ${p.dob}</div>
+                    <div class="card-info"><strong>Blood Group:</strong> ${p.blood || 'Not recorded'}</div>
+                    ${p.allergy ? `<div class="allergy-warning">⚠️ ALLERGIC TO: ${p.allergy.toUpperCase()}</div>` : ''}
+                    <div class="footer">Present this card at any MEDITRACK facility<br>for instant access to your medical history.</div>
+                </div>
+                <script>window.print();<\/script>
+            </body>
+            </html>
+        `);
+    }
+
+    loadData();
+    showView('dashboard');
+</script>
+
+</body>
+</html>
