@@ -18,7 +18,6 @@
         .patient-info { color: #666; font-size: 13px; margin-top: 5px; }
         .allergy-badge { background: #ff4444; color: white; padding: 3px 8px; border-radius: 12px; font-size: 11px; margin-top: 5px; display: inline-block; }
         .section-title { padding: 15px; font-size: 14px; color: #666; font-weight: bold; }
-        .detail-view { display: none; }
         .detail-header { background: #0066cc; color: white; padding: 20px; }
         .detail-header h2 { font-size: 20px; }
         .detail-code { font-size: 14px; opacity: 0.8; }
@@ -32,7 +31,7 @@
         .visit-date { font-size: 12px; color: #666; }
         .visit-complaint { font-weight: bold; color: #333; margin: 5px 0; }
         .visit-diagnosis { color: #0066cc; font-size: 13px; }
-        .nav-bar { position: fixed; bottom: 0; width: 100%; background: white; display: flex; border-top: 1px solid #ddd; }
+        .nav-bar { position: fixed; bottom: 0; width: 100%; background: white; display: flex; border-top: 1px solid #ddd; z-index: 100; }
         .nav-item { flex: 1; padding: 12px; text-align: center; font-size: 12px; color: #666; cursor: pointer; }
         .nav-item.active { color: #0066cc; font-weight: bold; }
         .form-group { margin-bottom: 15px; }
@@ -45,10 +44,14 @@
         .dashboard-number { font-size: 36px; font-weight: bold; color: #0066cc; }
         .dashboard-label { font-size: 13px; color: #666; margin-top: 5px; }
         .dashboard-icon { font-size: 36px; }
-        .warning-badge { background: #ff8800; color: white; padding: 3px 8px; border-radius: 12px; font-size: 11px; margin-top: 5px; display: inline-block; }
+        .loading { text-align: center; padding: 30px; color: #666; font-size: 16px; }
+        .status-bar { background: #e8f4fd; padding: 8px 15px; font-size: 12px; color: #0066cc; text-align: center; }
     </style>
 </head>
 <body>
+
+<!-- STATUS BAR -->
+<div id="status-bar" class="status-bar">🔄 Connecting to database...</div>
 
 <!-- DASHBOARD VIEW -->
 <div id="dashboard-view" style="display:none;">
@@ -80,7 +83,7 @@
     </div>
     <div class="dashboard-card">
         <div>
-            <div id="dash-last-patient" style="font-size:16px; font-weight:bold; color:#333;">None yet</div>
+            <div id="dash-last-patient" style="font-size:16px; font-weight:bold; color:#333;">Loading...</div>
             <div class="dashboard-label">Last Registered Patient</div>
         </div>
         <div class="dashboard-icon">🆕</div>
@@ -98,7 +101,7 @@
         <input type="text" id="search-input" placeholder="Search by name, code or phone..." onkeyup="searchPatients()">
     </div>
     <div class="section-title">REGISTERED PATIENTS</div>
-    <div id="patients-list"></div>
+    <div id="patients-list"><div class="loading">🔄 Loading patients...</div></div>
     <div style="height: 80px;"></div>
 </div>
 
@@ -145,7 +148,7 @@
     </div>
     <div class="detail-section">
         <h3>🏥 VISIT HISTORY</h3>
-        <div id="visit-history-list"></div>
+        <div id="visit-history-list"><div class="loading">🔄 Loading visits...</div></div>
     </div>
     <div style="height: 80px;"></div>
 </div>
@@ -257,62 +260,54 @@
     <div class="nav-item" id="nav-visit" onclick="showView('visit')">🩺 Visit</div>
 </div>
 
-<script>
-    let patients = [];
-    let nextId = 1;
-    let selectedPatientIndex = -1;
-    let currentPatientIndex = -1;
+<!-- FIREBASE -->
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-app.js";
+    import { getFirestore, collection, addDoc, getDocs, doc, updateDoc, query, orderBy, onSnapshot } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-firestore.js";
 
-    // DRUG INTERACTION WARNING LIST
+    const firebaseConfig = {
+        apiKey: "AIzaSyAmEgLdeC2T2C13LJ_5CDIPutq99Wa2Cn8",
+        authDomain: "meditrack-79735.firebaseapp.com",
+        projectId: "meditrack-79735",
+        storageBucket: "meditrack-79735.firebasestorage.app",
+        messagingSenderId: "168811439668",
+        appId: "1:168811439668:web:82146c58c3213f5b494c61"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
+    let patients = [];
+    let selectedPatientIndex = -1;
+    let currentPatientId = null;
+
     const drugWarnings = {
         'penicillin': ['amoxicillin', 'ampicillin', 'amoxil', 'augmentin', 'flucloxacillin'],
-        'aspirin': ['ibuprofen', 'diclofenac', 'naproxen', 'indomethacin'],
+        'aspirin': ['ibuprofen', 'diclofenac', 'naproxen'],
         'sulfa': ['septrin', 'cotrimoxazole', 'trimethoprim'],
-        'codeine': ['tramadol', 'morphine', 'opioid'],
+        'codeine': ['tramadol', 'morphine'],
         'ibuprofen': ['aspirin', 'diclofenac', 'naproxen']
     };
 
-    function saveData() {
-        localStorage.setItem('meditrack_patients', JSON.stringify(patients));
-        localStorage.setItem('meditrack_nextid', nextId);
+    function setStatus(message) {
+        document.getElementById('status-bar').textContent = message;
     }
 
-    function loadData() {
-        const saved = localStorage.getItem('meditrack_patients');
-        const savedId = localStorage.getItem('meditrack_nextid');
-        if(saved) {
-            patients = JSON.parse(saved);
-        } else {
-            patients = [
-                {
-                    id: 1,
-                    code: "NG-1",
-                    name: "Emeka Okafor",
-                    phone: "08012345678",
-                    dob: "23/03/1985",
-                    gender: "Male",
-                    blood: "O+",
-                    allergy: "Penicillin",
-                    kin: "Ngozi Okafor",
-                    kinPhone: "08098765432",
-                    visits: [
-                        {
-                            date: "27/06/2026",
-                            facility: "Lagos City Clinic",
-                            complaint: "Severe headache and fever for 3 days",
-                            diagnosis: "Malaria",
-                            medications: "Artemether 80mg twice daily, Paracetamol 500mg",
-                            notes: "Patient appears weak. Temperature 38.5°C.",
-                            followup: "Return in 3 days if no improvement"
-                        }
-                    ]
-                }
-            ];
-            nextId = 2;
-            saveData();
-        }
-        if(savedId) {
-            nextId = parseInt(savedId);
+    async function loadPatients() {
+        try {
+            setStatus('🔄 Loading patients...');
+            const q = query(collection(db, 'patients'), orderBy('createdAt', 'desc'));
+            onSnapshot(q, (snapshot) => {
+                patients = [];
+                snapshot.forEach((doc) => {
+                    patients.push({ id: doc.id, ...doc.data() });
+                });
+                setStatus('🟢 Connected — ' + patients.length + ' patients');
+                renderPatients();
+                updateDashboard();
+            });
+        } catch(error) {
+            setStatus('🔴 Connection error — ' + error.message);
         }
     }
 
@@ -334,10 +329,11 @@
         document.getElementById('dash-total-patients').textContent = totalPatients;
         document.getElementById('dash-total-visits').textContent = totalVisits;
         document.getElementById('dash-today-visits').textContent = todayVisits;
-        document.getElementById('dash-last-patient').textContent = patients.length > 0 ? patients[patients.length - 1].name + ' (' + patients[patients.length - 1].code + ')' : 'None yet';
+        document.getElementById('dash-last-patient').textContent = patients.length > 0 ?
+            patients[0].name + ' (' + patients[0].code + ')' : 'None yet';
     }
 
-    function showView(view) {
+    window.showView = function(view) {
         document.getElementById('dashboard-view').style.display = 'none';
         document.getElementById('patients-view').style.display = 'none';
         document.getElementById('detail-view').style.display = 'none';
@@ -368,14 +364,14 @@
 
     function renderPatients() {
         const list = document.getElementById('patients-list');
-        list.innerHTML = '';
         if(patients.length === 0) {
             list.innerHTML = '<p style="text-align:center; color:#666; padding:30px;">No patients registered yet.</p>';
             return;
         }
+        list.innerHTML = '';
         patients.forEach((p, index) => {
             list.innerHTML += `
-                <div class="patient-card" onclick="showPatient(${index})">
+                <div class="patient-card" onclick="showPatient('${p.id}')">
                     <div class="patient-name">${p.name}</div>
                     <div class="patient-code">${p.code}</div>
                     <div class="patient-info">${p.gender} • ${p.blood || 'Unknown'} • DOB: ${p.dob}</div>
@@ -385,9 +381,11 @@
         });
     }
 
-    function showPatient(index) {
-        currentPatientIndex = index;
-        const p = patients[index];
+    window.showPatient = function(patientId) {
+        const p = patients.find(p => p.id === patientId);
+        if(!p) return;
+        currentPatientId = patientId;
+
         document.getElementById('patients-view').style.display = 'none';
         document.getElementById('detail-view').style.display = 'block';
         document.getElementById('detail-name').textContent = p.name;
@@ -410,9 +408,9 @@
                         <div class="visit-date">${v.date} — ${v.facility}</div>
                         <div class="visit-complaint">Complaint: ${v.complaint}</div>
                         <div class="visit-diagnosis">Diagnosis: ${v.diagnosis}</div>
-                        ${v.medications ? `<div style="font-size:13px;margin-top:5px;color:#555;">💊 Medications: ${v.medications}</div>` : ''}
-                        ${v.notes ? `<div style="font-size:13px;color:#555;">📝 Notes: ${v.notes}</div>` : ''}
-                        ${v.followup ? `<div style="font-size:13px;color:#555;">📅 Follow up: ${v.followup}</div>` : ''}
+                        ${v.medications ? `<div style="font-size:13px;margin-top:5px;color:#555;">💊 ${v.medications}</div>` : ''}
+                        ${v.notes ? `<div style="font-size:13px;color:#555;">📝 ${v.notes}</div>` : ''}
+                        ${v.followup ? `<div style="font-size:13px;color:#555;">📅 ${v.followup}</div>` : ''}
                     </div>
                 `;
             });
@@ -421,13 +419,13 @@
         }
     }
 
-    function goBack() {
+    window.goBack = function() {
         document.getElementById('detail-view').style.display = 'none';
         document.getElementById('patients-view').style.display = 'block';
         renderPatients();
     }
 
-    function searchPatients() {
+    window.searchPatients = function() {
         const query = document.getElementById('search-input').value.toLowerCase();
         const list = document.getElementById('patients-list');
         list.innerHTML = '';
@@ -441,9 +439,8 @@
             return;
         }
         filtered.forEach((p) => {
-            const realIndex = patients.indexOf(p);
             list.innerHTML += `
-                <div class="patient-card" onclick="showPatient(${realIndex})">
+                <div class="patient-card" onclick="showPatient('${p.id}')">
                     <div class="patient-name">${p.name}</div>
                     <div class="patient-code">${p.code}</div>
                     <div class="patient-info">${p.gender} • ${p.blood || 'Unknown'} • DOB: ${p.dob}</div>
@@ -453,7 +450,7 @@
         });
     }
 
-    function findPatientForVisit() {
+    window.findPatientForVisit = function() {
         const query = document.getElementById('visit-patient-search').value.toLowerCase();
         const result = document.getElementById('visit-patient-result');
         if(query.length < 1) {
@@ -485,14 +482,14 @@
         if(warnings) {
             for(let drug of warnings) {
                 if(medsLower.includes(drug)) {
-                    return '⚠️ WARNING: ' + medications + ' may interact with patient\'s known allergy to ' + allergy + '. Please verify before dispensing.';
+                    return '⚠️ WARNING: ' + medications + ' may interact with patient allergy to ' + allergy;
                 }
             }
         }
         return null;
     }
 
-    function recordVisit() {
+    window.recordVisit = async function() {
         if(selectedPatientIndex === -1) {
             alert('Please search and select a valid patient first');
             return;
@@ -517,40 +514,37 @@
         }
 
         const today = new Date().toLocaleDateString('en-GB');
-        const newVisit = {
-            date: today,
-            facility: facility,
-            complaint: complaint,
-            diagnosis: diagnosis,
-            medications: medications,
-            notes: notes,
-            followup: followup
-        };
+        const newVisit = { date: today, facility, complaint, diagnosis, medications, notes, followup };
 
-        if(!patients[selectedPatientIndex].visits) {
-            patients[selectedPatientIndex].visits = [];
+        try {
+            setStatus('🔄 Saving visit...');
+            const patientRef = doc(db, 'patients', patient.id);
+            const updatedVisits = [...(patient.visits || []), newVisit];
+            await updateDoc(patientRef, { visits: updatedVisits });
+            setStatus('🟢 Visit saved successfully');
+
+            document.getElementById('visit-success-msg').style.display = 'block';
+            document.getElementById('visit-patient-search').value = '';
+            document.getElementById('visit-patient-result').textContent = '';
+            document.getElementById('visit-facility').value = '';
+            document.getElementById('visit-complaint').value = '';
+            document.getElementById('visit-diagnosis').value = '';
+            document.getElementById('visit-medications').value = '';
+            document.getElementById('visit-notes').value = '';
+            document.getElementById('visit-followup').value = '';
+            selectedPatientIndex = -1;
+
+            setTimeout(() => {
+                document.getElementById('visit-success-msg').style.display = 'none';
+                showView('dashboard');
+            }, 2000);
+        } catch(error) {
+            setStatus('🔴 Error saving visit: ' + error.message);
+            alert('Error saving visit. Please try again.');
         }
-        patients[selectedPatientIndex].visits.push(newVisit);
-        saveData();
-
-        document.getElementById('visit-success-msg').style.display = 'block';
-        document.getElementById('visit-patient-search').value = '';
-        document.getElementById('visit-patient-result').textContent = '';
-        document.getElementById('visit-facility').value = '';
-        document.getElementById('visit-complaint').value = '';
-        document.getElementById('visit-diagnosis').value = '';
-        document.getElementById('visit-medications').value = '';
-        document.getElementById('visit-notes').value = '';
-        document.getElementById('visit-followup').value = '';
-        selectedPatientIndex = -1;
-
-        setTimeout(() => {
-            document.getElementById('visit-success-msg').style.display = 'none';
-            showView('dashboard');
-        }, 2000);
     }
 
-    function registerPatient() {
+    window.registerPatient = async function() {
         const name = document.getElementById('reg-name').value;
         const phone = document.getElementById('reg-phone').value;
         const dob = document.getElementById('reg-dob').value;
@@ -567,47 +561,53 @@
 
         const existing = patients.find(p => p.phone === phone);
         if(existing) {
-            alert('A patient with this phone number already exists: ' + existing.name + ' (' + existing.code + ')');
+            alert('Patient with this phone already exists: ' + existing.name + ' (' + existing.code + ')');
             return;
         }
 
+        const nextId = patients.length + 1;
         const newPatient = {
-            id: nextId,
             code: "NG-" + nextId,
-            name: name,
-            phone: phone,
+            name,
+            phone,
             dob: new Date(dob).toLocaleDateString('en-GB'),
-            gender: gender,
-            blood: blood,
-            allergy: allergy,
-            kin: kin,
-            kinPhone: kinPhone,
-            visits: []
+            gender,
+            blood,
+            allergy,
+            kin,
+            kinPhone,
+            visits: [],
+            createdAt: new Date().toISOString()
         };
 
-        patients.push(newPatient);
-        nextId++;
-        saveData();
+        try {
+            setStatus('🔄 Registering patient...');
+            await addDoc(collection(db, 'patients'), newPatient);
+            setStatus('🟢 Patient registered successfully');
 
-        document.getElementById('register-success-msg').style.display = 'block';
-        document.getElementById('reg-name').value = '';
-        document.getElementById('reg-phone').value = '';
-        document.getElementById('reg-dob').value = '';
-        document.getElementById('reg-gender').value = '';
-        document.getElementById('reg-blood').value = '';
-        document.getElementById('reg-allergy').value = '';
-        document.getElementById('reg-kin').value = '';
-        document.getElementById('reg-kin-phone').value = '';
+            document.getElementById('register-success-msg').style.display = 'block';
+            document.getElementById('reg-name').value = '';
+            document.getElementById('reg-phone').value = '';
+            document.getElementById('reg-dob').value = '';
+            document.getElementById('reg-gender').value = '';
+            document.getElementById('reg-blood').value = '';
+            document.getElementById('reg-allergy').value = '';
+            document.getElementById('reg-kin').value = '';
+            document.getElementById('reg-kin-phone').value = '';
 
-        setTimeout(() => {
-            document.getElementById('register-success-msg').style.display = 'none';
-            showView('patients');
-        }, 2000);
+            setTimeout(() => {
+                document.getElementById('register-success-msg').style.display = 'none';
+                showView('patients');
+            }, 2000);
+        } catch(error) {
+            setStatus('🔴 Error registering patient: ' + error.message);
+            alert('Error registering patient. Please try again.');
+        }
     }
 
-    function printPatientCard() {
-        if(currentPatientIndex === -1) return;
-        const p = patients[currentPatientIndex];
+    window.printPatientCard = function() {
+        const p = patients.find(p => p.id === currentPatientId);
+        if(!p) return;
         const printWindow = window.open('', '_blank');
         printWindow.document.write(`
             <html>
@@ -617,7 +617,6 @@
                     body { font-family: Arial, sans-serif; padding: 20px; }
                     .card { border: 2px solid #0066cc; border-radius: 10px; padding: 20px; max-width: 350px; margin: 0 auto; }
                     .card-header { background: #0066cc; color: white; padding: 10px; border-radius: 8px; text-align: center; margin-bottom: 15px; }
-                    .card-title { font-size: 18px; font-weight: bold; }
                     .card-code { font-size: 28px; font-weight: bold; color: #0066cc; text-align: center; margin: 10px 0; letter-spacing: 3px; }
                     .card-info { font-size: 13px; margin: 5px 0; }
                     .allergy-warning { background: #ff4444; color: white; padding: 8px; border-radius: 5px; text-align: center; margin-top: 10px; font-weight: bold; }
@@ -627,7 +626,7 @@
             <body>
                 <div class="card">
                     <div class="card-header">
-                        <div class="card-title">🏥 MEDITRACK</div>
+                        <div style="font-size:18px; font-weight:bold;">🏥 MEDITRACK</div>
                         <div style="font-size:11px;">Unified Patient Health Records</div>
                     </div>
                     <div class="card-code">${p.code}</div>
@@ -644,7 +643,7 @@
         `);
     }
 
-    loadData();
+    loadPatients();
     showView('dashboard');
 </script>
 
