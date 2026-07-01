@@ -1,0 +1,774 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MEDITRACK — My Health Records</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: Arial, sans-serif; background: #f0f7f4; min-height: 100vh; }
+
+        /* WELCOME SCREEN */
+        .welcome-screen { min-height: 100vh; background: linear-gradient(135deg, #00aa55 0%, #007a3d 100%); display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 30px; }
+        .welcome-logo { font-size: 60px; margin-bottom: 10px; }
+        .welcome-title { color: white; font-size: 28px; font-weight: bold; margin-bottom: 5px; }
+        .welcome-subtitle { color: rgba(255,255,255,0.8); font-size: 14px; margin-bottom: 40px; text-align: center; }
+        .welcome-card { background: white; border-radius: 20px; padding: 25px; width: 100%; max-width: 400px; box-shadow: 0 10px 40px rgba(0,0,0,0.2); }
+        .welcome-card h2 { color: #00aa55; font-size: 18px; margin-bottom: 20px; text-align: center; }
+        .welcome-input { width: 100%; padding: 15px; border: 2px solid #e0e0e0; border-radius: 12px; font-size: 18px; text-align: center; margin-bottom: 15px; outline: none; transition: border-color 0.3s; }
+        .welcome-input:focus { border-color: #00aa55; }
+        .welcome-btn { width: 100%; background: #00aa55; color: white; border: none; padding: 16px; border-radius: 12px; font-size: 18px; font-weight: bold; cursor: pointer; margin-bottom: 15px; }
+        .welcome-btn:disabled { background: #aaa; }
+        .welcome-divider { text-align: center; color: #999; font-size: 13px; margin: 10px 0; }
+        .welcome-note { text-align: center; color: #999; font-size: 12px; margin-top: 15px; line-height: 1.5; }
+        .error-msg { background: #fff0f0; border: 1px solid #ff4444; color: #ff4444; padding: 12px; border-radius: 8px; text-align: center; font-size: 14px; margin-top: 10px; display: none; }
+
+        /* MAIN APP */
+        .app-container { display: none; max-width: 500px; margin: 0 auto; }
+        .app-header { background: linear-gradient(135deg, #00aa55 0%, #007a3d 100%); color: white; padding: 20px; }
+        .app-header-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px; }
+        .app-header h1 { font-size: 14px; opacity: 0.8; }
+        .app-header-name { font-size: 22px; font-weight: bold; }
+        .app-header-code { font-size: 14px; opacity: 0.9; background: rgba(255,255,255,0.2); padding: 4px 12px; border-radius: 20px; display: inline-block; margin-top: 5px; }
+        .logout-btn { background: rgba(255,255,255,0.2); border: none; color: white; padding: 6px 12px; border-radius: 8px; cursor: pointer; font-size: 12px; }
+
+        /* HEALTH CARD */
+        .health-card { background: white; margin: 15px; border-radius: 15px; padding: 20px; box-shadow: 0 4px 15px rgba(0,170,85,0.15); border: 2px solid #00aa55; }
+        .health-card-title { font-size: 12px; color: #00aa55; font-weight: bold; margin-bottom: 15px; text-align: center; letter-spacing: 1px; }
+        .qr-container { background: #f8f8f8; border-radius: 12px; padding: 20px; text-align: center; margin-bottom: 15px; }
+        .qr-code-display { font-size: 36px; font-weight: bold; color: #00aa55; letter-spacing: 5px; margin-bottom: 5px; }
+        .qr-subtitle { font-size: 11px; color: #999; }
+        .vital-strip { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 15px; }
+        .vital-box { border-radius: 10px; padding: 12px; text-align: center; }
+        .vital-box.blood { background: #fff0f0; border: 1px solid #ffcccc; }
+        .vital-box.allergy { background: #fff8e1; border: 1px solid #ffcc02; }
+        .vital-box.safe { background: #f0fff4; border: 1px solid #00cc66; }
+        .vital-label { font-size: 11px; color: #666; margin-bottom: 3px; }
+        .vital-value { font-size: 20px; font-weight: bold; }
+        .vital-value.blood-color { color: #cc0000; }
+        .vital-value.allergy-color { color: #cc6600; }
+        .vital-value.safe-color { color: #00aa55; font-size: 14px; }
+        .card-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        .card-action-btn { padding: 12px; border: none; border-radius: 10px; font-size: 13px; font-weight: bold; cursor: pointer; }
+        .btn-emergency { background: #ff4444; color: white; }
+        .btn-share { background: #25D366; color: white; }
+        .btn-full { grid-column: 1 / -1; background: #0066cc; color: white; }
+
+        /* VISIT HISTORY */
+        .section-header { padding: 15px 15px 5px; }
+        .section-header h2 { font-size: 16px; color: #333; font-weight: bold; }
+        .section-header p { font-size: 12px; color: #999; margin-top: 2px; }
+        .visit-item { background: white; margin: 8px 15px; border-radius: 12px; padding: 15px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); border-left: 4px solid #00aa55; }
+        .visit-item.pending { border-left-color: #ff8800; }
+        .visit-meta { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+        .visit-date { font-size: 12px; color: #666; }
+        .visit-facility { font-size: 12px; color: #00aa55; font-weight: bold; }
+        .visit-condition { font-size: 16px; font-weight: bold; color: #333; margin-bottom: 5px; }
+        .visit-treatment { font-size: 13px; color: #555; margin-bottom: 5px; }
+        .visit-followup { font-size: 12px; color: #0066cc; background: #e8f4fd; padding: 5px 10px; border-radius: 6px; display: inline-block; margin-top: 5px; }
+        .pending-notice { font-size: 12px; color: #ff8800; font-weight: bold; background: #fff8f0; padding: 5px 10px; border-radius: 6px; display: inline-block; }
+        .no-visits { text-align: center; padding: 40px 20px; color: #999; }
+        .no-visits .icon { font-size: 48px; margin-bottom: 10px; }
+
+        /* MEDICATIONS */
+        .med-card { background: white; margin: 8px 15px; border-radius: 12px; padding: 15px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); display: flex; align-items: center; gap: 15px; }
+        .med-icon { font-size: 30px; }
+        .med-name { font-size: 16px; font-weight: bold; color: #333; }
+        .med-dose { font-size: 13px; color: #666; margin-top: 3px; }
+        .med-source { font-size: 11px; color: #999; margin-top: 3px; }
+        .no-meds { text-align: center; padding: 40px 20px; color: #999; }
+
+        /* EMERGENCY SCREEN */
+        .emergency-screen { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #cc0000; z-index: 500; flex-direction: column; justify-content: center; align-items: center; padding: 30px; text-align: center; }
+        .emergency-icon { font-size: 60px; margin-bottom: 15px; animation: pulse 1s infinite; }
+        @keyframes pulse { 0%,100%{transform:scale(1);} 50%{transform:scale(1.1);} }
+        .emergency-title { color: white; font-size: 22px; font-weight: bold; margin-bottom: 5px; }
+        .emergency-subtitle { color: rgba(255,255,255,0.8); font-size: 13px; margin-bottom: 30px; }
+        .emergency-name { color: white; font-size: 28px; font-weight: bold; margin-bottom: 5px; }
+        .emergency-code { color: rgba(255,255,255,0.8); font-size: 16px; margin-bottom: 25px; }
+        .emergency-allergy-box { background: white; border-radius: 15px; padding: 20px; width: 100%; max-width: 350px; margin-bottom: 15px; }
+        .emergency-allergy-label { font-size: 12px; color: #cc0000; font-weight: bold; margin-bottom:5px; }
+        .emergency-allergy-value { font-size: 28px; font-weight: bold; color: #cc0000; }
+        .emergency-safe-box { background: rgba(255,255,255,0.2); border: 2px solid white; border-radius: 15px; padding: 15px; width: 100%; max-width: 350px; margin-bottom: 15px; }
+        .emergency-safe-value { color: white; font-size: 20px; font-weight: bold; }
+        .emergency-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; width: 100%; max-width: 350px; margin-bottom: 15px; }
+        .emergency-grid-item { background: rgba(255,255,255,0.2); border-radius: 10px; padding: 12px; text-align: center; }
+        .emergency-grid-label { color: rgba(255,255,255,0.7); font-size: 11px; margin-bottom: 3px; }
+        .emergency-grid-value { color: white; font-size: 22px; font-weight: bold; }
+        .emergency-contact-box { background: rgba(255,255,255,0.15); border-radius: 15px; padding: 15px; width: 100%; max-width: 350px; margin-bottom: 20px; }
+        .emergency-contact-label { color: rgba(255,255,255,0.7); font-size: 12px; font-weight: bold; margin-bottom: 5px; }
+        .emergency-contact-name { color: white; font-size: 18px; font-weight: bold; margin-bottom: 8px; }
+        .call-btn { display: block; background: white; color: #cc0000; padding: 12px; border-radius: 10px; text-decoration: none; font-weight: bold; font-size: 16px; }
+        .close-emergency-btn { background: rgba(255,255,255,0.2); border: 2px solid white; color: white; padding: 12px 30px; border-radius: 10px; font-size: 16px; cursor: pointer; margin-top: 10px; }
+
+        /* NAVIGATION */
+        .nav-bar { position: fixed; bottom: 0; width: 100%; max-width: 500px; background: white; display: flex; border-top: 1px solid #e0e0e0; z-index: 100; box-shadow: 0 -4px 15px rgba(0,0,0,0.08); }
+        .nav-item { flex: 1; padding: 10px 4px; text-align: center; font-size: 10px; color: #999; cursor: pointer; }
+        .nav-item.active { color: #00aa55; font-weight: bold; }
+        .nav-icon { font-size: 22px; display: block; margin-bottom: 2px; }
+
+        /* CONTENT VIEWS */
+        .content-view { display: none; padding-bottom: 80px; }
+        .content-view.active { display: block; }
+
+        /* SHARE MODAL */
+        .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 300; justify-content: center; align-items: flex-end; }
+        .modal-overlay.active { display: flex; }
+        .modal-box { background: white; border-radius: 20px 20px 0 0; padding: 25px; width: 100%; max-width: 500px; }
+        .modal-title { font-size: 18px; font-weight: bold; color: #333; margin-bottom: 5px; }
+        .modal-subtitle { font-size: 13px; color: #999; margin-bottom: 20px; }
+        .share-text-box { background: #f8f8f8; border-radius: 10px; padding: 15px; font-size: 12px; color: #333; white-space: pre-wrap; max-height: 200px; overflow-y: auto; margin-bottom: 15px; line-height: 1.6; }
+        .share-option { display: flex; align-items: center; gap: 15px; padding: 12px; border-radius: 10px; cursor: pointer; margin-bottom: 8px; }
+        .share-option:active { background: #f0f0f0; }
+        .share-option-icon { font-size: 28px; }
+        .share-option-text { font-size: 15px; font-weight: bold; color: #333; }
+        .share-option-sub { font-size: 12px; color: #999; }
+        .modal-close { width: 100%; background: #f0f0f0; border: none; padding: 12px; border-radius: 10px; font-size: 15px; cursor: pointer; margin-top: 5px; color: #333; }
+
+        /* LOADING */
+        .loading-screen { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: linear-gradient(135deg, #00aa55 0%, #007a3d 100%); z-index: 400; justify-content: center; align-items: center; flex-direction: column; }
+        .loading-screen.active { display: flex; }
+        .loading-spinner { width: 50px; height: 50px; border: 4px solid rgba(255,255,255,0.3); border-top: 4px solid white; border-radius: 50%; animation: spin 1s linear infinite; margin-bottom: 20px; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .loading-text { color: white; font-size: 16px; }
+
+        /* LAB RESULT IN VISIT */
+        .lab-result-box { background: #e8f5e9; border-radius: 8px; padding: 10px; margin-top: 8px; }
+        .lab-result-label { font-size: 11px; color: #2e7d32; font-weight: bold; }
+        .lab-result-value { font-size: 15px; font-weight: bold; color: #1b5e20; margin-top: 3px; }
+    </style>
+</head>
+<body>
+
+<!-- LOADING SCREEN -->
+<div class="loading-screen" id="loading-screen">
+    <div class="loading-spinner"></div>
+    <div class="loading-text">Finding your records...</div>
+</div>
+
+<!-- WELCOME SCREEN -->
+<div class="welcome-screen" id="welcome-screen">
+    <div class="welcome-logo">🏥</div>
+    <div class="welcome-title">MEDITRACK</div>
+    <div class="welcome-subtitle">Your Personal Health Records</div>
+    <div class="welcome-card">
+        <h2>Find My Health Records</h2>
+        <input type="tel" class="welcome-input" id="search-phone" placeholder="📱 Phone number" maxlength="15">
+        <div class="welcome-divider">— or —</div>
+        <input type="text" class="welcome-input" id="search-code" placeholder="🆔 Patient code (e.g. NG-1)" style="text-transform:uppercase;">
+        <button class="welcome-btn" onclick="findMyRecords()" id="find-btn">Find My Records →</button>
+        <div class="error-msg" id="error-msg">No records found. Please check your phone number or patient code and try again.</div>
+        <div class="welcome-note">
+            Your health records are private and secure.<br>
+            Only you can access them with your phone number or patient code.<br><br>
+            <strong>Don't have a code yet?</strong><br>
+            Visit any MEDITRACK clinic to get registered.
+        </div>
+    </div>
+</div>
+
+<!-- MAIN APP -->
+<div class="app-container" id="app-container">
+
+    <!-- HEADER -->
+    <div class="app-header">
+        <div class="app-header-top">
+            <div>
+                <div class="app-header h1">🏥 MEDITRACK</div>
+                <div class="app-header-name" id="patient-display-name"></div>
+                <div class="app-header-code" id="patient-display-code"></div>
+            </div>
+            <button class="logout-btn" onclick="logout()">← Exit</button>
+        </div>
+    </div>
+
+    <!-- HOME VIEW -->
+    <div class="content-view active" id="home-view">
+        <!-- HEALTH CARD -->
+        <div class="health-card" style="margin-top:15px;">
+            <div class="health-card-title">MY HEALTH CARD</div>
+            <div class="qr-container">
+                <div class="qr-code-display" id="card-code"></div>
+                <div class="qr-subtitle">Show this code at any MEDITRACK clinic</div>
+            </div>
+            <div class="vital-strip">
+                <div class="vital-box blood">
+                    <div class="vital-label">🩸 BLOOD GROUP</div>
+                    <div class="vital-value blood-color" id="card-blood">—</div>
+                </div>
+                <div id="allergy-vital-box" class="vital-box allergy">
+                    <div class="vital-label">⚠️ ALLERGY</div>
+                    <div class="vital-value allergy-color" id="card-allergy">None</div>
+                </div>
+            </div>
+            <div class="card-actions">
+                <button class="card-action-btn btn-emergency" onclick="showEmergency()">🚨 Emergency Card</button>
+                <button class="card-action-btn btn-share" onclick="showShareModal()">📤 Share Records</button>
+                <button class="card-action-btn btn-full card-action-btn" onclick="switchTab('visits')" style="background:#0066cc;color:white;">📋 View My Full History</button>
+            </div>
+        </div>
+
+        <!-- QUICK INFO -->
+        <div class="section-header">
+            <h2>Quick Summary</h2>
+            <p>Your most recent health information</p>
+        </div>
+        <div id="quick-summary"></div>
+    </div>
+
+    <!-- VISITS VIEW -->
+    <div class="content-view" id="visits-view">
+        <div class="section-header" style="padding-top:20px;">
+            <h2>My Health History</h2>
+            <p id="visits-count">Loading...</p>
+        </div>
+        <div id="visits-list"></div>
+    </div>
+
+    <!-- MEDICATIONS VIEW -->
+    <div class="content-view" id="medications-view">
+        <div class="section-header" style="padding-top:20px;">
+            <h2>My Medications</h2>
+            <p>From your most recent visit</p>
+        </div>
+        <div id="medications-list"></div>
+    </div>
+
+    <!-- PROFILE VIEW -->
+    <div class="content-view" id="profile-view">
+        <div class="section-header" style="padding-top:20px;">
+            <h2>My Profile</h2>
+            <p>Your personal health information</p>
+        </div>
+        <div style="background:white;margin:8px 15px;border-radius:12px;padding:20px;box-shadow:0 2px 8px rgba(0,0,0,0.06);">
+            <div style="text-align:center;margin-bottom:20px;">
+                <div style="width:80px;height:80px;background:#00aa55;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:36px;margin:0 auto 10px;">👤</div>
+                <div style="font-size:20px;font-weight:bold;color:#333;" id="profile-name"></div>
+                <div style="font-size:14px;color:#00aa55;font-weight:bold;" id="profile-code"></div>
+            </div>
+            <div style="border-top:1px solid #eee;padding-top:15px;">
+                <div style="display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid #f5f5f5;">
+                    <span style="color:#666;font-size:14px;">Phone Number</span>
+                    <span style="font-weight:bold;color:#333;font-size:14px;" id="profile-phone"></span>
+                </div>
+                <div style="display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid #f5f5f5;">
+                    <span style="color:#666;font-size:14px;">Date of Birth</span>
+                    <span style="font-weight:bold;color:#333;font-size:14px;" id="profile-dob"></span>
+                </div>
+                <div style="display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid #f5f5f5;">
+                    <span style="color:#666;font-size:14px;">Gender</span>
+                    <span style="font-weight:bold;color:#333;font-size:14px;" id="profile-gender"></span>
+                </div>
+                <div style="display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid #f5f5f5;">
+                    <span style="color:#666;font-size:14px;">Blood Group</span>
+                    <span style="font-weight:bold;color:#cc0000;font-size:14px;" id="profile-blood"></span>
+                </div>
+                <div style="display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid #f5f5f5;">
+                    <span style="color:#666;font-size:14px;">Known Allergies</span>
+                    <span style="font-weight:bold;color:#cc6600;font-size:14px;" id="profile-allergy"></span>
+                </div>
+                <div style="display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid #f5f5f5;">
+                    <span style="color:#666;font-size:14px;">Registered At</span>
+                    <span style="font-weight:bold;color:#333;font-size:14px;" id="profile-hospital"></span>
+                </div>
+                <div style="padding:10px 0;">
+                    <div style="color:#666;font-size:14px;margin-bottom:5px;">Emergency Contact</div>
+                    <div style="font-weight:bold;color:#333;font-size:14px;" id="profile-kin"></div>
+                    <div style="color:#00aa55;font-size:14px;" id="profile-kin-phone"></div>
+                </div>
+            </div>
+        </div>
+        <div style="margin:10px 15px 80px;">
+            <button onclick="logout()" style="width:100%;background:#f0f0f0;border:none;padding:15px;border-radius:10px;font-size:15px;cursor:pointer;color:#666;">← Exit My Records</button>
+        </div>
+    </div>
+
+    <!-- BOTTOM NAVIGATION -->
+    <div class="nav-bar">
+        <div class="nav-item active" id="nav-home" onclick="switchTab('home')">
+            <span class="nav-icon">🏠</span>
+            <span>Home</span>
+        </div>
+        <div class="nav-item" id="nav-visits" onclick="switchTab('visits')">
+            <span class="nav-icon">📋</span>
+            <span>My Visits</span>
+        </div>
+        <div class="nav-item" id="nav-medications" onclick="switchTab('medications')">
+            <span class="nav-icon">💊</span>
+            <span>Medications</span>
+        </div>
+        <div class="nav-item" id="nav-profile" onclick="switchTab('profile')">
+            <span class="nav-icon">👤</span>
+            <span>My Profile</span>
+        </div>
+    </div>
+</div>
+
+<!-- EMERGENCY SCREEN -->
+<div class="emergency-screen" id="emergency-screen">
+    <div class="emergency-icon">🚨</div>
+    <div class="emergency-title">EMERGENCY INFORMATION</div>
+    <div class="emergency-subtitle">Show this screen to any doctor or nurse</div>
+    <div class="emergency-name" id="emg-name"></div>
+    <div class="emergency-code" id="emg-code"></div>
+
+    <div id="emg-allergy-section"></div>
+
+    <div class="emergency-grid">
+        <div class="emergency-grid-item">
+            <div class="emergency-grid-label">BLOOD GROUP</div>
+            <div class="emergency-grid-value" id="emg-blood">—</div>
+        </div>
+        <div class="emergency-grid-item">
+            <div class="emergency-grid-label">GENDER</div>
+            <div class="emergency-grid-value" id="emg-gender">—</div>
+        </div>
+    </div>
+
+    <div class="emergency-contact-box" id="emg-contact-section"></div>
+
+    <button class="close-emergency-btn" onclick="hideEmergency()">✕ Close Emergency Card</button>
+</div>
+
+<!-- SHARE MODAL -->
+<div class="modal-overlay" id="share-modal">
+    <div class="modal-box">
+        <div class="modal-title">📤 Share My Records</div>
+        <div class="modal-subtitle">Share your health summary with any doctor</div>
+        <div class="share-text-box" id="share-text-content"></div>
+        <div class="share-option" onclick="shareWhatsApp()">
+            <div class="share-option-icon">💬</div>
+            <div>
+                <div class="share-option-text">Share on WhatsApp</div>
+                <div class="share-option-sub">Send to your doctor directly</div>
+            </div>
+        </div>
+        <div class="share-option" onclick="copyShareText()">
+            <div class="share-option-icon">📋</div>
+            <div>
+                <div class="share-option-text">Copy Text</div>
+                <div class="share-option-sub">Paste anywhere</div>
+            </div>
+        </div>
+        <div class="share-option" onclick="printShareText()">
+            <div class="share-option-icon">🖨️</div>
+            <div>
+                <div class="share-option-text">Print Summary</div>
+                <div class="share-option-sub">For paper records</div>
+            </div>
+        </div>
+        <button class="modal-close" onclick="closeShareModal()">Close</button>
+    </div>
+</div>
+
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-app.js";
+    import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-firestore.js";
+
+    const firebaseConfig = {
+        apiKey: "AIzaSyAmEgLdeC2T2C13LJ_5CDIPutq99Wa2Cn8",
+        authDomain: "meditrack-79735.firebaseapp.com",
+        projectId: "meditrack-79735",
+        storageBucket: "meditrack-79735.firebasestorage.app",
+        messagingSenderId: "168811439668",
+        appId: "1:168811439668:web:82146c58c3213f5b494c61"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
+    let currentPatient = null;
+    let shareTextContent = '';
+
+    // FIND PATIENT
+    window.findMyRecords = async function() {
+        const phone = document.getElementById('search-phone').value.trim();
+        const code = document.getElementById('search-code').value.trim().toUpperCase();
+
+        if(!phone && !code) {
+            showError('Please enter your phone number or patient code');
+            return;
+        }
+
+        showLoading(true);
+        document.getElementById('error-msg').style.display = 'none';
+
+        try {
+            const snapshot = await getDocs(collection(db, 'patients'));
+            let found = null;
+
+            snapshot.forEach(doc => {
+                const data = { id: doc.id, ...doc.data() };
+                if(phone && data.phone === phone) found = data;
+                if(code && data.code === code) found = data;
+            });
+
+            showLoading(false);
+
+            if(!found) {
+                showError('No records found. Please check your details and try again.');
+                return;
+            }
+
+            currentPatient = found;
+            cacheEmergencyData(found);
+            loadPatientApp(found);
+
+        } catch(error) {
+            showLoading(false);
+            showError('Connection error. Please check your internet and try again.');
+        }
+    }
+
+    function cacheEmergencyData(patient) {
+        const emergencyData = {
+            name: patient.name,
+            code: patient.code,
+            blood: patient.blood,
+            gender: patient.gender,
+            allergy: patient.allergy,
+            kin: patient.kin,
+            kinPhone: patient.kinPhone,
+            dob: patient.dob
+        };
+        localStorage.setItem('meditrack_emergency_' + patient.code, JSON.stringify(emergencyData));
+    }
+
+    function loadPatientApp(patient) {
+        document.getElementById('welcome-screen').style.display = 'none';
+        document.getElementById('app-container').style.display = 'block';
+
+        document.getElementById('patient-display-name').textContent = patient.name;
+        document.getElementById('patient-display-code').textContent = patient.code;
+        document.getElementById('card-code').textContent = patient.code;
+        document.getElementById('card-blood').textContent = patient.blood || '?';
+
+        if(patient.allergy) {
+            document.getElementById('card-allergy').textContent = patient.allergy;
+            document.getElementById('allergy-vital-box').className = 'vital-box allergy';
+        } else {
+            document.getElementById('card-allergy').textContent = 'None';
+            document.getElementById('allergy-vital-box').className = 'vital-box safe';
+            document.getElementById('card-allergy').className = 'vital-value safe-color';
+            document.getElementById('card-allergy').textContent = '✅ None';
+        }
+
+        document.getElementById('profile-name').textContent = patient.name;
+        document.getElementById('profile-code').textContent = patient.code;
+        document.getElementById('profile-phone').textContent = patient.phone;
+        document.getElementById('profile-dob').textContent = patient.dob || 'Not recorded';
+        document.getElementById('profile-gender').textContent = patient.gender || 'Not recorded';
+        document.getElementById('profile-blood').textContent = patient.blood || 'Not recorded';
+        document.getElementById('profile-allergy').textContent = patient.allergy || 'None';
+        document.getElementById('profile-hospital').textContent = patient.registeredAtHospital || 'Not recorded';
+        document.getElementById('profile-kin').textContent = patient.kin || 'Not recorded';
+        document.getElementById('profile-kin-phone').textContent = patient.kinPhone || '';
+
+        loadQuickSummary(patient);
+        loadVisits(patient);
+        loadMedications(patient);
+        generateShareText(patient);
+    }
+
+    function loadQuickSummary(patient) {
+        const summary = document.getElementById('quick-summary');
+        const lastVisit = patient.visits && patient.visits.length > 0 ?
+            patient.visits[patient.visits.length - 1] : null;
+
+        if(!lastVisit) {
+            summary.innerHTML = `
+                <div style="background:white;margin:8px 15px;border-radius:12px;padding:20px;text-align:center;color:#999;box-shadow:0 2px 8px rgba(0,0,0,0.06);">
+                    <div style="font-size:40px;margin-bottom:10px;">🏥</div>
+                    <p>No visits recorded yet.</p>
+                    <p style="font-size:12px;margin-top:5px;">Visit a MEDITRACK clinic to start your health record.</p>
+                </div>`;
+            return;
+        }
+
+        summary.innerHTML = `
+            <div style="background:white;margin:8px 15px;border-radius:12px;padding:15px;box-shadow:0 2px 8px rgba(0,0,0,0.06);">
+                <div style="font-size:12px;color:#00aa55;font-weight:bold;margin-bottom:8px;">MOST RECENT VISIT</div>
+                <div style="font-size:14px;color:#666;margin-bottom:5px;">📅 ${lastVisit.date} — ${lastVisit.hospitalName || 'Unknown'}</div>
+                ${lastVisit.status === 'pending-doctor' ?
+                    '<div style="background:#fff8f0;color:#ff8800;padding:8px;border-radius:8px;font-size:13px;font-weight:bold;">⏳ Your visit is being reviewed by the doctor</div>' :
+                    `${lastVisit.diagnosis ? `<div style="font-size:16px;font-weight:bold;color:#333;margin:5px 0;">You were treated for: ${simplifyDiagnosis(lastVisit.diagnosis)}</div>` : ''}
+                    ${lastVisit.medications ? `<div style="font-size:13px;color:#555;margin-top:5px;">💊 Medications prescribed</div>` : ''}
+                    ${lastVisit.followup ? `<div style="font-size:12px;color:#0066cc;background:#e8f4fd;padding:6px 10px;border-radius:6px;margin-top:8px;display:inline-block;">📅 ${lastVisit.followup}</div>` : ''}`
+                }
+                ${lastVisit.labResult ? `
+                <div class="lab-result-box">
+                    <div class="lab-result-label">🔬 Lab Result — ${lastVisit.labResult.testType}</div>
+                    <div class="lab-result-value">${lastVisit.labResult.result}</div>
+                </div>` : ''}
+            </div>`;
+    }
+
+    function simplifyDiagnosis(diagnosis) {
+        const simplifications = {
+            'malaria': 'Malaria',
+            'typhoid': 'Typhoid Fever',
+            'pneumonia': 'Chest Infection',
+            'hypertension': 'High Blood Pressure',
+            'diabetes': 'Diabetes',
+            'anaemia': 'Anaemia',
+            'anemia': 'Anaemia',
+            'gastroenteritis': 'Stomach Infection',
+            'urinary tract infection': 'Urinary Infection',
+            'uti': 'Urinary Infection'
+        };
+        const lower = diagnosis.toLowerCase();
+        for(let key in simplifications) {
+            if(lower.includes(key)) return simplifications[key];
+        }
+        return diagnosis;
+    }
+
+    function loadVisits(patient) {
+        const list = document.getElementById('visits-list');
+        const countEl = document.getElementById('visits-count');
+
+        if(!patient.visits || patient.visits.length === 0) {
+            countEl.textContent = 'No visits recorded yet';
+            list.innerHTML = `
+                <div class="no-visits">
+                    <div class="icon">🏥</div>
+                    <p>No visits recorded yet</p>
+                    <p style="font-size:12px;margin-top:5px;">Visit a MEDITRACK clinic to start your health record</p>
+                </div>`;
+            return;
+        }
+
+        const visits = patient.visits.slice().reverse();
+        countEl.textContent = visits.length + ' visit' + (visits.length > 1 ? 's' : '') + ' recorded';
+        list.innerHTML = '';
+
+        visits.forEach((v, i) => {
+            const isPending = v.status === 'pending-doctor';
+            list.innerHTML += `
+                <div class="visit-item ${isPending ? 'pending' : ''}">
+                    <div class="visit-meta">
+                        <div class="visit-date">📅 ${v.date}</div>
+                        <div class="visit-facility">🏥 ${v.hospitalName || 'Unknown'}</div>
+                    </div>
+                    ${isPending ? `
+                        <div class="pending-notice">⏳ Being reviewed by doctor</div>
+                        ${v.nurseName ? `<div style="font-size:12px;color:#666;margin-top:5px;">Seen by: ${v.nurseName}</div>` : ''}
+                        ${v.vitals ? `<div style="font-size:12px;color:#555;margin-top:5px;">🌡️ Temperature: ${v.vitals.temperature || '-'}°C</div>` : ''}
+                    ` : `
+                        ${v.doctorName ? `<div style="font-size:12px;color:#666;margin-bottom:5px;">👨‍⚕️ Dr. ${v.doctorName}</div>` : ''}
+                        ${v.diagnosis ? `<div class="visit-condition">You were treated for: ${simplifyDiagnosis(v.diagnosis)}</div>` : ''}
+                        ${v.medications ? `<div class="visit-treatment">💊 Medications were prescribed for you</div>` : ''}
+                        ${v.followup ? `<div class="visit-followup">📅 ${v.followup}</div>` : ''}
+                        ${v.labResult ? `
+                        <div class="lab-result-box">
+                            <div class="lab-result-label">🔬 Lab Result — ${v.labResult.testType}</div>
+                            <div class="lab-result-value">${v.labResult.result}</div>
+                        </div>` : ''}
+                    `}
+                </div>`;
+        });
+    }
+
+    function loadMedications(patient) {
+        const list = document.getElementById('medications-list');
+
+        if(!patient.visits || patient.visits.length === 0) {
+            list.innerHTML = `<div class="no-meds"><div style="font-size:48px;margin-bottom:10px;">💊</div><p style="color:#999;">No medications recorded yet</p></div>`;
+            return;
+        }
+
+        const completedVisits = patient.visits.filter(v => v.status !== 'pending-doctor' && v.medications);
+
+        if(completedVisits.length === 0) {
+            list.innerHTML = `<div class="no-meds"><div style="font-size:48px;margin-bottom:10px;">💊</div><p style="color:#999;">No medications recorded yet</p></div>`;
+            return;
+        }
+
+        const lastVisitWithMeds = completedVisits[completedVisits.length - 1];
+        const meds = lastVisitWithMeds.medications.split(',').map(m => m.trim()).filter(m => m);
+
+        list.innerHTML = `
+            <div style="background:#fff8e1;border:1px solid #ffc107;border-radius:10px;padding:12px;margin:8px 15px;">
+                <div style="font-size:12px;color:#f57f17;font-weight:bold;">From your last visit: ${lastVisitWithMeds.date}</div>
+            </div>`;
+
+        meds.forEach(med => {
+            const parts = med.split(' ');
+            const name = parts.slice(0, 2).join(' ');
+            const dose = parts.slice(2).join(' ');
+            list.innerHTML += `
+                <div class="med-card">
+                    <div class="med-icon">💊</div>
+                    <div>
+                        <div class="med-name">${name}</div>
+                        ${dose ? `<div class="med-dose">${dose}</div>` : ''}
+                        <div class="med-source">Prescribed ${lastVisitWithMeds.date}</div>
+                    </div>
+                </div>`;
+        });
+
+        list.innerHTML += `
+            <div style="background:#f0fff4;border:1px solid #00cc66;border-radius:10px;padding:12px;margin:8px 15px 80px;">
+                <div style="font-size:12px;color:#00aa55;font-weight:bold;">⚠️ Important</div>
+                <div style="font-size:12px;color:#333;margin-top:3px;">Always take medications as prescribed by your doctor. Do not stop medication without consulting your doctor.</div>
+            </div>`;
+    }
+
+    function generateShareText(patient) {
+        const today = new Date().toLocaleDateString('en-GB');
+        let text = `━━━━━━━━━━━━━━━━━━━\n`;
+        text += `🏥 MEDITRACK HEALTH SUMMARY\n`;
+        text += `━━━━━━━━━━━━━━━━━━━\n\n`;
+        text += `👤 ${patient.name}\n`;
+        text += `🆔 Patient Code: ${patient.code}\n`;
+        text += `📱 Phone: ${patient.phone}\n`;
+        text += `🎂 DOB: ${patient.dob || 'Not recorded'}\n`;
+        text += `⚧ Gender: ${patient.gender || 'Not recorded'}\n`;
+        text += `🩸 Blood Group: ${patient.blood || 'Not recorded'}\n`;
+        text += patient.allergy ? `⚠️ ALLERGY: ${patient.allergy.toUpperCase()}\n` : `✅ No Known Allergies\n`;
+        text += `\n📋 VISIT HISTORY\n──────────────\n`;
+
+        if(patient.visits && patient.visits.length > 0) {
+            patient.visits.slice().reverse().forEach((v, i) => {
+                text += `\n📅 ${v.date} — ${v.hospitalName || 'Unknown'}\n`;
+                if(v.status === 'pending-doctor') {
+                    text += `Status: Awaiting doctor review\n`;
+                } else {
+                    if(v.doctorName) text += `Doctor: Dr. ${v.doctorName}\n`;
+                    if(v.diagnosis) text += `Diagnosis: ${v.diagnosis}\n`;
+                    if(v.medications) text += `Medications: ${v.medications}\n`;
+                    if(v.followup) text += `Follow-up: ${v.followup}\n`;
+                    if(v.labResult) text += `Lab Result (${v.labResult.testType}): ${v.labResult.result}\n`;
+                }
+                text += `─────────────────\n`;
+            });
+        } else {
+            text += `No visits recorded yet.\n`;
+        }
+
+        text += `\nGenerated: ${today}\n`;
+        text += `━━━━━━━━━━━━━━━━━━━\n`;
+        text += `MEDITRACK — Unified Patient Health Records Nigeria`;
+
+        shareTextContent = text;
+        document.getElementById('share-text-content').textContent = text;
+    }
+
+    // EMERGENCY SCREEN
+    window.showEmergency = function() {
+        if(!currentPatient) return;
+        const p = currentPatient;
+
+        document.getElementById('emg-name').textContent = p.name;
+        document.getElementById('emg-code').textContent = p.code;
+        document.getElementById('emg-blood').textContent = p.blood || '?';
+        document.getElementById('emg-gender').textContent = p.gender || '?';
+
+        const allergySection = document.getElementById('emg-allergy-section');
+        if(p.allergy) {
+            allergySection.innerHTML = `
+                <div class="emergency-allergy-box">
+                    <div class="emergency-allergy-label">⚠️ DO NOT GIVE THIS PATIENT</div>
+                    <div class="emergency-allergy-value">${p.allergy.toUpperCase()}</div>
+                    <div style="font-size:12px;color:#cc0000;margin-top:5px;">Known Allergy</div>
+                </div>`;
+        } else {
+            allergySection.innerHTML = `
+                <div class="emergency-safe-box">
+                    <div class="emergency-safe-value">✅ No Known Allergies</div>
+                </div>`;
+        }
+
+        const contactSection = document.getElementById('emg-contact-section');
+        if(p.kin) {
+            contactSection.innerHTML = `
+                <div class="emergency-contact-label">📞 EMERGENCY CONTACT</div>
+                <div class="emergency-contact-name">${p.kin}</div>
+                <a href="tel:${p.kinPhone}" class="call-btn">📞 Call ${p.kinPhone}</a>`;
+        } else {
+            contactSection.innerHTML = `<div style="color:rgba(255,255,255,0.7);font-size:14px;">No emergency contact recorded</div>`;
+        }
+
+        document.getElementById('emergency-screen').style.display = 'flex';
+        if(window.screen && window.screen.orientation) {
+            try { screen.orientation.lock('portrait'); } catch(e) {}
+        }
+    }
+
+    window.hideEmergency = function() {
+        document.getElementById('emergency-screen').style.display = 'none';
+    }
+
+    // SHARE MODAL
+    window.showShareModal = function() {
+        document.getElementById('share-modal').classList.add('active');
+    }
+
+    window.closeShareModal = function() {
+        document.getElementById('share-modal').classList.remove('active');
+    }
+
+    window.shareWhatsApp = function() {
+        const text = encodeURIComponent(shareTextContent);
+        window.open('https://wa.me/?text=' + text, '_blank');
+        closeShareModal();
+    }
+
+    window.copyShareText = function() {
+        navigator.clipboard.writeText(shareTextContent).then(() => {
+            alert('✅ Copied! You can now paste and share.');
+        }).catch(() => {
+            alert('Please manually select and copy the text above.');
+        });
+        closeShareModal();
+    }
+
+    window.printShareText = function() {
+        const w = window.open('', '_blank');
+        w.document.write(`<html><head><title>My Health Records</title><style>body{font-family:monospace;padding:20px;white-space:pre-wrap;font-size:13px;}</style></head><body>${shareTextContent}<script>window.print();<\/script></body></html>`);
+        closeShareModal();
+    }
+
+    // NAVIGATION
+    window.switchTab = function(tab) {
+        ['home','visits','medications','profile'].forEach(t => {
+            document.getElementById(t + '-view').classList.remove('active');
+            document.getElementById('nav-' + t).classList.remove('active');
+        });
+        document.getElementById(tab + '-view').classList.add('active');
+        document.getElementById('nav-' + tab).classList.add('active');
+        window.scrollTo(0, 0);
+    }
+
+    window.logout = function() {
+        currentPatient = null;
+        document.getElementById('app-container').style.display = 'none';
+        document.getElementById('welcome-screen').style.display = 'flex';
+        document.getElementById('search-phone').value = '';
+        document.getElementById('search-code').value = '';
+        document.getElementById('error-msg').style.display = 'none';
+        switchTab('home');
+    }
+
+    function showLoading(show) {
+        document.getElementById('loading-screen').classList.toggle('active', show);
+    }
+
+    function showError(msg) {
+        const err = document.getElementById('error-msg');
+        err.textContent = msg;
+        err.style.display = 'block';
+    }
+
+    // KEYBOARD ENTER SUPPORT
+    document.getElementById('search-phone').addEventListener('keypress', e => { if(e.key === 'Enter') findMyRecords(); });
+    document.getElementById('search-code').addEventListener('keypress', e => { if(e.key === 'Enter') findMyRecords(); });
+
+    // CLOSE SHARE MODAL ON OUTSIDE CLICK
+    document.getElementById('share-modal').addEventListener('click', function(e) {
+        if(e.target === this) closeShareModal();
+    });
+</script>
+
+</body>
+</html>
