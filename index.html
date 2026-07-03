@@ -12,7 +12,6 @@
         .auth-title { color: white; font-size: 26px; font-weight: bold; margin-bottom: 5px; }
         .auth-subtitle { color: rgba(255,255,255,0.8); font-size: 13px; margin-bottom: 25px; text-align: center; }
         .auth-card { background: white; border-radius: 20px; padding: 25px; width: 100%; max-width: 400px; }
-        .auth-card h2 { color: #0066cc; font-size: 18px; margin-bottom: 20px; }
         .auth-tabs { display: flex; background: #f0f4f8; border-radius: 10px; padding: 4px; margin-bottom: 20px; }
         .auth-tab { flex: 1; padding: 8px; text-align: center; border-radius: 8px; cursor: pointer; font-size: 13px; color: #666; }
         .auth-tab.active { background: white; color: #0066cc; font-weight: bold; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
@@ -29,26 +28,25 @@
         .search-box input { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px; font-size: 16px; }
         .patient-card { background: white; margin: 10px 15px; padding: 15px; border-radius: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); cursor: pointer; }
         .patient-name { font-size: 18px; font-weight: bold; color: #333; }
-        .patient-code { color: #0066cc; font-size: 14px; font-weight: bold; }
+        .patient-code { color: #0066cc; font-size: 14px; font-weight: bold; font-family: monospace; }
         .patient-info { color: #666; font-size: 13px; margin-top: 5px; }
         .allergy-badge { background: #ff4444; color: white; padding: 3px 8px; border-radius: 12px; font-size: 11px; margin-top: 5px; display: inline-block; }
         .section-title { padding: 15px; font-size: 14px; color: #666; font-weight: bold; }
         .detail-header { background: #0066cc; color: white; padding: 20px; }
-        .detail-header h2 { font-size: 20px; }
         .back-btn { background: none; border: none; color: white; font-size: 16px; cursor: pointer; margin-bottom: 10px; }
         .detail-section { background: white; margin: 10px 15px; padding: 15px; border-radius: 10px; }
         .detail-section h3 { color: #0066cc; font-size: 14px; margin-bottom: 10px; border-bottom: 1px solid #eee; padding-bottom: 5px; }
-        .detail-row { display: flex; justify-content: space-between; padding: 5px 0; font-size: 14px; }
+        .detail-row { display: flex; justify-content: space-between; padding: 5px 0; font-size: 14px; flex-wrap: wrap; gap: 5px; }
         .detail-label { color: #666; }
-        .detail-value { font-weight: bold; color: #333; }
+        .detail-value { font-weight: bold; color: #333; text-align: right; }
         .visit-card { background: #f8f9fa; padding: 12px; border-radius: 8px; margin-top: 10px; border-left: 4px solid #0066cc; }
         .visit-card.pending { border-left-color: #ff8800; background: #fff8f0; }
         .visit-card.admitted { border-left-color: #ff4444; background: #fff0f0; }
         .visit-card.discharged { border-left-color: #4CAF50; background: #f0fff4; }
         .nav-bar { position: fixed; bottom: 0; width: 100%; background: white; display: flex; border-top: 1px solid #ddd; z-index: 100; }
-        .nav-item { flex: 1; padding: 8px 4px; text-align: center; font-size: 11px; color: #666; cursor: pointer; position: relative; }
+        .nav-item { flex: 1; padding: 8px 4px; text-align: center; font-size: 10px; color: #666; cursor: pointer; position: relative; }
         .nav-item.active { color: #0066cc; font-weight: bold; }
-        .nav-badge { position: absolute; top: 4px; right: 50%; transform: translateX(8px); background: #ff4444; color: white; border-radius: 10px; font-size: 10px; padding: 1px 5px; min-width: 16px; text-align: center; }
+        .nav-badge { position: absolute; top: 3px; right: 50%; transform: translateX(10px); background: #ff4444; color: white; border-radius: 10px; font-size: 9px; padding: 1px 4px; min-width: 14px; text-align: center; }
         .form-group { margin-bottom: 15px; }
         .form-group label { display: block; font-size: 14px; color: #666; margin-bottom: 5px; }
         .form-group input, .form-group select, .form-group textarea { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px; font-size: 14px; }
@@ -60,7 +58,7 @@
         .dashboard-number { font-size: 32px; font-weight: bold; color: #0066cc; }
         .dashboard-label { font-size: 12px; color: #666; margin-top: 3px; }
         .dashboard-icon { font-size: 32px; }
-        .loading { text-align: center; padding: 30px; color: #666; font-size: 16px; }
+        .loading { text-align: center; padding: 30px; color: #666; }
         .status-bar { background: #e8f4fd; padding: 8px 15px; font-size: 12px; color: #0066cc; text-align: center; display: none; }
         .empty-search { text-align: center; padding: 40px 20px; color: #999; }
         .empty-search .icon { font-size: 48px; margin-bottom: 10px; }
@@ -76,7 +74,7 @@
         .section-header { background: #0066cc; color: white; padding: 15px 20px; }
         .section-header h2 { font-size: 18px; }
         .tab-bar { display: flex; background: white; border-bottom: 2px solid #eee; overflow-x: auto; }
-        .tab-item { flex: 1; padding: 12px 8px; text-align: center; font-size: 12px; cursor: pointer; color: #666; white-space: nowrap; min-width: 80px; }
+        .tab-item { flex: 1; padding: 12px 8px; text-align: center; font-size: 12px; cursor: pointer; color: #666; white-space: nowrap; min-width: 70px; }
         .tab-item.active { color: #0066cc; font-weight: bold; border-bottom: 2px solid #0066cc; }
         .action-btn { width: 100%; padding: 12px; border: none; border-radius: 8px; font-size: 14px; cursor: pointer; margin-bottom: 8px; color: white; }
         .share-box { background: #f8f9fa; border: 1px solid #ddd; border-radius: 10px; padding: 15px; margin: 10px 15px; font-size: 13px; color: #333; line-height: 1.6; white-space: pre-wrap; word-break: break-word; }
@@ -108,27 +106,37 @@
         .lab-full-card { background: white; margin: 10px 15px; border-radius: 12px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
         .lab-card-header { background: #009688; color: white; padding: 12px 15px; }
         .lab-card-body { padding: 15px; }
-        .action-row { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 10px; }
         .btn-small { padding: 8px 12px; border: none; border-radius: 8px; cursor: pointer; font-size: 12px; font-weight: bold; color: white; }
         .btn-dispense { background: #9c27b0; }
         .btn-flag { background: #ff8800; }
-        .btn-cost { background: #0066cc; }
         .btn-result { background: #009688; }
-        .btn-update { background: #4CAF50; }
         .dispensed-badge { background: #e8f5e9; color: #4CAF50; padding: 4px 10px; border-radius: 12px; font-size: 12px; font-weight: bold; display: inline-block; }
         .pharmacist-note { background: #f3e5f5; border-left: 3px solid #9c27b0; padding: 10px; border-radius: 0 8px 8px 0; margin-top: 8px; font-size: 13px; color: #4a148c; }
-        .referral-inbox-card { background: white; margin: 10px 15px; border-radius: 10px; padding: 15px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); border-left: 4px solid #0066cc; }
         .pending-visit-card { background: white; margin: 10px 15px; padding: 15px; border-radius: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); border-left: 4px solid #ff8800; cursor: pointer; }
         .flag-card { background: #fff8e1; border: 1px solid #ffc107; border-radius: 8px; padding: 10px; margin-top: 8px; }
+        .referral-inbox-card { background: white; margin: 10px 15px; border-radius: 10px; padding: 15px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); border-left: 4px solid #0066cc; }
+        .inventory-card { background: white; margin: 8px 15px; border-radius: 10px; padding: 15px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); display: flex; justify-content: space-between; align-items: center; }
+        .inventory-low { border-left: 4px solid #ff4444; }
+        .inventory-ok { border-left: 4px solid #4CAF50; }
+        .inventory-name { font-weight: bold; color: #333; font-size: 15px; }
+        .inventory-qty { font-size: 24px; font-weight: bold; }
+        .inventory-qty.low { color: #ff4444; }
+        .inventory-qty.ok { color: #4CAF50; }
+        .sms-notice { background: #e8f4fd; border: 1px solid #0066cc; border-radius: 8px; padding: 10px; font-size: 12px; color: #0066cc; margin-top: 8px; }
+        .offline-notice { background: #fff3e0; border: 1px solid #ff8800; border-radius: 8px; padding: 8px 12px; font-size: 12px; color: #ff8800; text-align: center; display: none; }
+        .code-preview { background: #e8f4fd; border: 1px solid #0066cc; border-radius: 8px; padding: 10px; font-family: monospace; font-size: 16px; font-weight: bold; color: #0066cc; text-align: center; margin-bottom: 10px; }
     </style>
 </head>
 <body>
+
+<!-- OFFLINE NOTICE -->
+<div class="offline-notice" id="offline-notice">📵 You are offline — showing cached data. New registrations will sync when connection returns.</div>
 
 <!-- AUTH OVERLAY -->
 <div id="auth-overlay" class="auth-overlay">
     <div class="auth-logo">🏥</div>
     <div class="auth-title">MEDITRACK</div>
-    <div class="auth-subtitle">Unified Patient Health Records</div>
+    <div class="auth-subtitle">Unified Patient Health Records — Nigeria</div>
     <div class="auth-card">
         <div class="auth-tabs">
             <div class="auth-tab active" id="tab-login" onclick="switchAuthTab('login')">Staff Login</div>
@@ -137,7 +145,7 @@
         <div id="login-form">
             <div class="form-group">
                 <label style="font-size:13px;color:#666;display:block;margin-bottom:5px;">Hospital Code</label>
-                <input type="text" class="auth-input" id="login-hospital-code" placeholder="e.g. HOS-LAG-X7K2" style="text-transform:uppercase;">
+                <input type="text" class="auth-input" id="login-hospital-code" placeholder="e.g. HOS-LAG-LCC-001" style="text-transform:uppercase;font-family:monospace;">
             </div>
             <div class="form-group">
                 <label style="font-size:13px;color:#666;display:block;margin-bottom:5px;">Your Access Key</label>
@@ -150,8 +158,32 @@
         <div id="register-form" style="display:none;">
             <div class="form-group">
                 <label style="font-size:13px;color:#666;display:block;margin-bottom:5px;">Hospital / Clinic Name *</label>
-                <input type="text" class="auth-input" id="reg-hospital-name" placeholder="e.g. Lagos City Clinic">
+                <input type="text" class="auth-input" id="reg-hospital-name" placeholder="e.g. Lagos City Clinic" oninput="updateHospitalCodePreview()">
             </div>
+            <div class="form-group">
+                <label style="font-size:13px;color:#666;display:block;margin-bottom:5px;">Hospital Abbreviation * (3-4 letters)</label>
+                <input type="text" class="auth-input" id="reg-hospital-abbrev" placeholder="e.g. LCC" maxlength="4" style="text-transform:uppercase;" oninput="updateHospitalCodePreview()">
+            </div>
+            <div class="form-group">
+                <label style="font-size:13px;color:#666;display:block;margin-bottom:5px;">State *</label>
+                <select class="auth-input" id="reg-hospital-state" onchange="updateHospitalCodePreview()">
+                    <option value="">Select state</option>
+                    <option value="AB">Abia</option><option value="AD">Adamawa</option><option value="AK">Akwa Ibom</option>
+                    <option value="AN">Anambra</option><option value="BA">Bauchi</option><option value="BY">Bayelsa</option>
+                    <option value="BE">Benue</option><option value="BO">Borno</option><option value="CR">Cross River</option>
+                    <option value="DE">Delta</option><option value="EB">Ebonyi</option><option value="ED">Edo</option>
+                    <option value="EK">Ekiti</option><option value="EN">Enugu</option><option value="FC">FCT Abuja</option>
+                    <option value="GO">Gombe</option><option value="IM">Imo</option><option value="JI">Jigawa</option>
+                    <option value="KD">Kaduna</option><option value="KN">Kano</option><option value="KT">Katsina</option>
+                    <option value="KE">Kebbi</option><option value="KO">Kogi</option><option value="KW">Kwara</option>
+                    <option value="LA">Lagos</option><option value="NA">Nasarawa</option><option value="NI">Niger</option>
+                    <option value="OG">Ogun</option><option value="ON">Ondo</option><option value="OS">Osun</option>
+                    <option value="OY">Oyo</option><option value="PL">Plateau</option><option value="RI">Rivers</option>
+                    <option value="SO">Sokoto</option><option value="TA">Taraba</option><option value="YO">Yobe</option>
+                    <option value="ZA">Zamfara</option>
+                </select>
+            </div>
+            <div id="hospital-code-preview" style="display:none;" class="code-preview">HOS-??-???-001</div>
             <div class="form-group">
                 <label style="font-size:13px;color:#666;display:block;margin-bottom:5px;">Admin Name *</label>
                 <input type="text" class="auth-input" id="reg-admin-name" placeholder="Your full name">
@@ -166,7 +198,7 @@
             </div>
             <button class="auth-btn" onclick="registerHospital()">Register Hospital →</button>
             <div class="auth-error" id="register-error"></div>
-            <div class="auth-note">You will receive a Hospital Code and Admin Key after registration.</div>
+            <div class="auth-note">After registration you receive a Hospital Code and Admin Key.</div>
         </div>
     </div>
 </div>
@@ -177,10 +209,10 @@
     <div style="color:white;font-size:22px;font-weight:bold;margin-bottom:10px;">Hospital Registered!</div>
     <div style="background:white;border-radius:15px;padding:25px;width:100%;max-width:400px;text-align:center;">
         <div style="font-size:13px;color:#666;margin-bottom:5px;">Your Hospital Code</div>
-        <div style="font-size:26px;font-weight:bold;color:#0066cc;letter-spacing:3px;margin-bottom:15px;" id="success-hospital-code"></div>
+        <div style="font-size:22px;font-weight:bold;color:#0066cc;font-family:monospace;letter-spacing:2px;margin-bottom:15px;" id="success-hospital-code"></div>
         <div style="font-size:13px;color:#666;margin-bottom:5px;">Your Admin Access Key</div>
         <div style="font-size:18px;font-weight:bold;color:#00aa55;font-family:monospace;background:#f0fff4;padding:10px;border-radius:8px;margin-bottom:15px;" id="success-admin-key"></div>
-        <div style="font-size:12px;color:#ff4444;margin-bottom:20px;">⚠️ Save these credentials safely.</div>
+        <div style="font-size:12px;color:#ff4444;margin-bottom:20px;">⚠️ Save these credentials safely. Share the Hospital Code with your staff.</div>
         <button onclick="proceedToAdmin()" style="width:100%;background:#0066cc;color:white;border:none;padding:14px;border-radius:10px;font-size:16px;cursor:pointer;font-weight:bold;">Proceed to Admin Panel →</button>
     </div>
 </div>
@@ -196,12 +228,13 @@
             <button class="logout-btn" onclick="logoutStaff()">Logout</button>
         </div>
     </div>
-    <div class="section-title">YOUR HOSPITAL OVERVIEW</div>
+    <div class="section-title" id="dash-hospital-title">YOUR HOSPITAL OVERVIEW</div>
     <div class="dashboard-card"><div><div class="dashboard-number" id="dash-patients">0</div><div class="dashboard-label">Patients Registered</div></div><div class="dashboard-icon">👥</div></div>
     <div class="dashboard-card"><div><div class="dashboard-number" id="dash-today">0</div><div class="dashboard-label">Visits Today</div></div><div class="dashboard-icon">📅</div></div>
     <div class="dashboard-card"><div><div class="dashboard-number" id="dash-pending">0</div><div class="dashboard-label">Pending Doctor Reviews</div></div><div class="dashboard-icon">⏳</div></div>
     <div class="dashboard-card"><div><div class="dashboard-number" id="dash-lab">0</div><div class="dashboard-label">Lab Results Ready</div></div><div class="dashboard-icon">🔬</div></div>
     <div class="dashboard-card" id="dash-flags-card" style="display:none;"><div><div class="dashboard-number" id="dash-flags">0</div><div class="dashboard-label">Pharmacy Flags</div></div><div class="dashboard-icon">⚠️</div></div>
+    <div class="dashboard-card" id="dash-inventory-card" style="display:none;"><div><div class="dashboard-number" id="dash-low-stock">0</div><div class="dashboard-label">Low Stock Alerts</div></div><div class="dashboard-icon">📦</div></div>
     <div class="dashboard-card" id="dash-revenue-card" style="display:none;"><div><div class="dashboard-number" id="dash-revenue">₦0</div><div class="dashboard-label">Today's Revenue</div></div><div class="dashboard-icon">💰</div></div>
     <div style="height:80px;"></div>
 </div>
@@ -213,7 +246,7 @@
         <input type="text" id="search-input" placeholder="🔍 Search by name, code or phone..." onkeyup="searchPatients()">
         <button onclick="showView('emergency')" style="width:100%;background:#ff4444;color:white;border:none;padding:14px;border-radius:8px;font-size:16px;font-weight:bold;margin-top:10px;cursor:pointer;">🚨 EMERGENCY ACCESS</button>
     </div>
-    <div id="patients-list"><div class="empty-search"><div class="icon">🔍</div><p>Search for a patient</p></div></div>
+    <div id="patients-list"><div class="empty-search"><div class="icon">🔍</div><p>Search for a patient by name, code or phone</p></div></div>
     <div style="height:80px;"></div>
 </div>
 
@@ -225,7 +258,7 @@
         <button onclick="showView('patients')" style="background:rgba(255,255,255,0.2);border:none;color:white;padding:6px 15px;border-radius:8px;cursor:pointer;margin-top:10px;font-size:13px;">← Back</button>
     </div>
     <div style="padding:15px;">
-        <input type="text" id="emergency-search" placeholder="Patient code (NG-1) or phone number..." style="width:100%;padding:15px;border:2px solid #ff4444;border-radius:8px;font-size:18px;text-align:center;margin-bottom:15px;" onkeyup="searchEmergency()">
+        <input type="text" id="emergency-search" placeholder="Patient code or phone number..." style="width:100%;padding:15px;border:2px solid #ff4444;border-radius:8px;font-size:18px;text-align:center;margin-bottom:15px;" onkeyup="searchEmergency()">
         <div id="emergency-result"></div>
     </div>
     <div style="height:80px;"></div>
@@ -236,7 +269,7 @@
     <div class="detail-header">
         <button class="back-btn" onclick="goBack()">← Back</button>
         <h2 id="detail-name"></h2>
-        <div style="font-size:14px;opacity:0.8;" id="detail-code"></div>
+        <div style="font-size:14px;opacity:0.8;font-family:monospace;" id="detail-code"></div>
     </div>
     <div class="detail-section">
         <h3>📋 PATIENT INFORMATION</h3>
@@ -245,7 +278,9 @@
         <div class="detail-row"><span class="detail-label">Gender</span><span class="detail-value" id="detail-gender"></span></div>
         <div class="detail-row"><span class="detail-label">Blood Group</span><span class="detail-value" id="detail-blood"></span></div>
         <div class="detail-row"><span class="detail-label">Allergies</span><span class="detail-value" style="color:red;" id="detail-allergy"></span></div>
+        <div class="detail-row"><span class="detail-label">HMO / Insurance</span><span class="detail-value" id="detail-hmo"></span></div>
         <div class="detail-row"><span class="detail-label">Registered At</span><span class="detail-value" id="detail-hospital"></span></div>
+        <div class="detail-row"><span class="detail-label">State</span><span class="detail-value" id="detail-state"></span></div>
         <div class="detail-row"><span class="detail-label">Next of Kin</span><span class="detail-value" id="detail-kin"></span></div>
         <div class="detail-row"><span class="detail-label">Kin Phone</span><span class="detail-value" id="detail-kin-phone"></span></div>
         <div style="margin-top:15px;display:grid;grid-template-columns:1fr 1fr;gap:8px;">
@@ -275,7 +310,7 @@
     <div class="form-container">
         <div class="form-group"><label>Referring Doctor *</label><input type="text" id="referral-doctor" placeholder="Doctor name"></div>
         <div class="form-group"><label>Referring To *</label><input type="text" id="referral-to" placeholder="Hospital or specialist name"></div>
-        <div class="form-group"><label>Reason *</label><textarea id="referral-reason" placeholder="Clinical reason for referral..."></textarea></div>
+        <div class="form-group"><label>Reason *</label><textarea id="referral-reason" placeholder="Clinical reason..."></textarea></div>
         <div class="form-group"><label>Urgency</label><select id="referral-urgency"><option value="routine">Routine</option><option value="urgent">🔴 Urgent</option><option value="emergency">🚨 Emergency</option></select></div>
         <div class="form-group"><label>Additional Notes</label><textarea id="referral-notes" placeholder="Additional notes..."></textarea></div>
         <button onclick="generateReferralLetter()" class="submit-btn">GENERATE REFERRAL LETTER</button>
@@ -296,14 +331,18 @@
 <!-- REGISTER PATIENT -->
 <div id="register-view" style="display:none;">
     <div class="section-header"><h2>📋 Register New Patient</h2></div>
-    <div class="success-msg" id="register-success-msg">✅ Patient Registered Successfully!</div>
+    <div class="success-msg" id="register-success-msg">✅ Patient Registered! SMS sent with their code.</div>
     <div class="form-container">
+        <div style="background:#e8f4fd;border:1px solid #0066cc;border-radius:8px;padding:10px;margin-bottom:15px;font-size:13px;color:#0066cc;">
+            Patient code will be: <span id="next-code-preview" style="font-weight:bold;font-family:monospace;"></span>
+        </div>
         <div class="form-group"><label>Full Name *</label><input type="text" id="reg-name" placeholder="Enter full name"></div>
-        <div class="form-group"><label>Phone Number *</label><input type="tel" id="reg-phone" placeholder="08012345678"></div>
+        <div class="form-group"><label>Phone Number *</label><input type="tel" id="reg-phone" placeholder="08012345678" oninput="updateNextCodePreview()"></div>
         <div class="form-group"><label>Date of Birth *</label><input type="date" id="reg-dob"></div>
         <div class="form-group"><label>Gender *</label><select id="reg-gender"><option value="">Select gender</option><option value="Male">Male</option><option value="Female">Female</option></select></div>
         <div class="form-group"><label>Blood Group</label><select id="reg-blood"><option value="">Select blood group</option><option>A+</option><option>A-</option><option>B+</option><option>B-</option><option>AB+</option><option>AB-</option><option>O+</option><option>O-</option></select></div>
         <div class="form-group"><label>Known Allergies</label><input type="text" id="reg-allergy" placeholder="e.g. Penicillin (leave blank if none)"></div>
+        <div class="form-group"><label>HMO / Insurance Number</label><input type="text" id="reg-hmo" placeholder="HMO number (optional)"></div>
         <div class="form-group"><label>Next of Kin Name</label><input type="text" id="reg-kin" placeholder="Next of kin name"></div>
         <div class="form-group"><label>Next of Kin Phone</label><input type="tel" id="reg-kin-phone" placeholder="08012345678"></div>
         <div class="form-group"><label>Consultation Fee (₦)</label><input type="number" id="reg-consultation-fee" placeholder="Enter consultation fee"></div>
@@ -311,12 +350,59 @@
     </div>
 </div>
 
-<!-- NURSE VITALS -->
+<!-- NURSE VIEW — Redesigned with clear returning patient flow -->
 <div id="nurse-view" style="display:none;">
     <div class="section-header"><h2>🩺 Nurse Assessment</h2></div>
-    <div class="success-msg" id="nurse-success-msg">✅ Vitals Recorded</div>
-    <div class="form-container">
-        <div class="form-group"><label>Patient Code or Name *</label><input type="text" id="nurse-patient-search" placeholder="Type NG-1 or patient name" onkeyup="findPatientForNurse()"><div id="nurse-patient-result" style="margin-top:5px;font-weight:bold;"></div></div>
+    <div class="tab-bar">
+        <div id="nurse-tab-returning" class="tab-item active" onclick="switchNurseTab('returning')">🔄 Returning Patient</div>
+        <div id="nurse-tab-new" class="tab-item" onclick="switchNurseTab('new')">✨ New Assessment</div>
+    </div>
+
+    <!-- RETURNING PATIENT TAB -->
+    <div id="nurse-returning-section" style="padding:15px;">
+        <div style="background:#e8f4fd;border:1px solid #0066cc;border-radius:8px;padding:12px;margin-bottom:15px;font-size:13px;color:#0066cc;">
+            For patients who have visited before. Search by code or phone to start a new visit.
+        </div>
+        <div class="form-group">
+            <label>Search Returning Patient *</label>
+            <input type="text" id="returning-search" placeholder="Type patient code (NG-LA-LCC-0001) or phone" onkeyup="searchReturningPatient()">
+            <div id="returning-result" style="margin-top:8px;"></div>
+        </div>
+        <div id="returning-patient-form" style="display:none;">
+            <div style="background:#f0fff4;border:1px solid #4CAF50;border-radius:8px;padding:12px;margin-bottom:15px;">
+                <div style="font-weight:bold;color:#333;font-size:16px;" id="returning-patient-name"></div>
+                <div style="color:#0066cc;font-family:monospace;font-size:14px;" id="returning-patient-code"></div>
+                <div style="color:#666;font-size:13px;margin-top:3px;" id="returning-patient-info"></div>
+                <div id="returning-allergy-warning" style="display:none;background:#fff0f0;border:1px solid #ff4444;border-radius:6px;padding:8px;margin-top:8px;color:#ff4444;font-weight:bold;font-size:13px;"></div>
+            </div>
+            <div class="form-group"><label>Attending Nurse *</label><input type="text" id="returning-nurse-name" placeholder="Your name"></div>
+            <div style="background:#f0f4f8;padding:15px;border-radius:10px;margin-bottom:15px;">
+                <div style="font-weight:bold;color:#0066cc;margin-bottom:10px;">📊 VITALS</div>
+                <div class="vitals-grid">
+                    <div class="form-group"><label>Temperature (°C)</label><input type="number" id="ret-temp" placeholder="37.0" step="0.1"></div>
+                    <div class="form-group"><label>Pulse (bpm)</label><input type="number" id="ret-pulse" placeholder="72"></div>
+                    <div class="form-group"><label>Blood Pressure</label><input type="text" id="ret-bp" placeholder="120/80"></div>
+                    <div class="form-group"><label>Weight (kg)</label><input type="number" id="ret-weight" placeholder="70"></div>
+                </div>
+                <div class="form-group"><label>Respiratory Rate</label><input type="number" id="ret-rr" placeholder="16"></div>
+                <div class="form-group"><label>O2 Saturation (%)</label><input type="number" id="ret-spo2" placeholder="98"></div>
+            </div>
+            <div class="form-group"><label>Initial Observation</label><input type="text" id="ret-notes" placeholder="Any initial observations"></div>
+            <button class="submit-btn" onclick="submitReturningVitals()">SUBMIT FOR DOCTOR REVIEW</button>
+        </div>
+    </div>
+
+    <!-- NEW ASSESSMENT TAB (for first-time visits after registration) -->
+    <div id="nurse-new-section" style="display:none;padding:15px;">
+        <div style="background:#e8f4fd;border:1px solid #0066cc;border-radius:8px;padding:12px;margin-bottom:15px;font-size:13px;color:#0066cc;">
+            For newly registered patients visiting the doctor for the first time today.
+        </div>
+        <div class="success-msg" id="nurse-success-msg">✅ Vitals Recorded — Waiting for Doctor</div>
+        <div class="form-group">
+            <label>Search Patient *</label>
+            <input type="text" id="nurse-patient-search" placeholder="Type patient code or name" onkeyup="findPatientForNurse()">
+            <div id="nurse-patient-result" style="margin-top:5px;font-weight:bold;"></div>
+        </div>
         <div class="form-group"><label>Attending Nurse *</label><input type="text" id="nurse-name" placeholder="Your name"></div>
         <div class="form-group"><label>Hospital *</label><input type="text" id="nurse-hospital" placeholder="Hospital name"></div>
         <div style="background:#f0f4f8;padding:15px;border-radius:10px;margin-bottom:15px;">
@@ -328,7 +414,7 @@
                 <div class="form-group"><label>Weight (kg)</label><input type="number" id="vitals-weight" placeholder="70"></div>
             </div>
             <div class="form-group"><label>Respiratory Rate</label><input type="number" id="vitals-rr" placeholder="16"></div>
-            <div class="form-group"><label>Oxygen Saturation (%)</label><input type="number" id="vitals-spo2" placeholder="98"></div>
+            <div class="form-group"><label>O2 Saturation (%)</label><input type="number" id="vitals-spo2" placeholder="98"></div>
         </div>
         <div class="form-group"><label>Nurse Notes</label><input type="text" id="nurse-notes" placeholder="Initial observations"></div>
         <button class="submit-btn" onclick="submitVitals()">SUBMIT FOR DOCTOR REVIEW</button>
@@ -356,23 +442,23 @@
     <div class="detail-header">
         <button class="back-btn" onclick="showView('doctor')">← Back</button>
         <h2 id="consult-patient-name"></h2>
-        <div style="font-size:13px;opacity:0.8;" id="consult-patient-code"></div>
+        <div style="font-size:13px;opacity:0.8;font-family:monospace;" id="consult-patient-code"></div>
     </div>
-    <div class="detail-section"><h3>📊 VITALS</h3><div id="consult-vitals"></div></div>
+    <div class="detail-section"><h3>📊 VITALS (Recorded by Nurse)</h3><div id="consult-vitals"></div></div>
     <div class="success-msg" id="doctor-success-msg">✅ Consultation Completed</div>
     <div class="form-container">
         <div class="form-group"><label>Doctor's Name *</label><input type="text" id="doctor-name" placeholder="Your name"></div>
         <div class="form-group"><label>Chief Complaint *</label><input type="text" id="doctor-complaint" placeholder="Main complaint"></div>
         <div class="form-group"><label>Diagnosis *</label><input type="text" id="doctor-diagnosis" placeholder="Diagnosis"></div>
-        <div class="form-group"><label>Medications Prescribed</label><input type="text" id="doctor-medications" placeholder="Medications and dosage"></div>
+        <div class="form-group"><label>Medications Prescribed</label><input type="text" id="doctor-medications" placeholder="Medications and dosage" oninput="checkDrugWarningLive()"><div id="drug-warning-live" style="display:none;background:#fff3e0;border:1px solid #ff8800;border-radius:6px;padding:8px;margin-top:5px;font-size:12px;color:#e65100;"></div></div>
         <div class="form-group"><label>Doctor's Notes</label><input type="text" id="doctor-notes" placeholder="Clinical notes"></div>
         <div class="form-group"><label>Follow Up Instructions</label><input type="text" id="doctor-followup" placeholder="e.g. Return in 3 days"></div>
-        <div class="form-group"><label>Patient Status *</label><select id="patient-status"><option value="discharged">✅ Discharged</option><option value="admitted">🔴 Admitted</option><option value="inprogress">🔵 Awaiting Results</option></select></div>
-        <div class="form-group"><label>Send To Pharmacy?</label><select id="doctor-send-pharmacy"><option value="yes">Yes</option><option value="no">No</option></select></div>
+        <div class="form-group"><label>Patient Status *</label><select id="patient-status"><option value="discharged">✅ Discharged — Treatment Complete</option><option value="admitted">🔴 Admitted — Keeping Patient</option><option value="inprogress">🔵 Awaiting Results</option></select></div>
+        <div class="form-group"><label>Send To Pharmacy?</label><select id="doctor-send-pharmacy"><option value="yes">Yes — Send Prescription</option><option value="no">No</option></select></div>
         <div class="form-group"><label>Request Lab Tests?</label><select id="doctor-request-lab" onchange="toggleLabFields()"><option value="no">No</option><option value="yes">Yes</option></select></div>
         <div id="lab-request-fields" style="display:none;">
             <div class="form-group">
-                <label>Select Tests</label>
+                <label>Select Tests (tick all that apply)</label>
                 <div id="lab-tests-checkboxes" style="background:#f8f9fa;padding:12px;border-radius:8px;">
                     <label style="display:flex;align-items:center;gap:8px;padding:5px 0;font-size:14px;"><input type="checkbox" value="Malaria Parasite Test"> Malaria Parasite Test</label>
                     <label style="display:flex;align-items:center;gap:8px;padding:5px 0;font-size:14px;"><input type="checkbox" value="Full Blood Count"> Full Blood Count</label>
@@ -384,6 +470,8 @@
                     <label style="display:flex;align-items:center;gap:8px;padding:5px 0;font-size:14px;"><input type="checkbox" value="Blood Glucose"> Blood Glucose</label>
                     <label style="display:flex;align-items:center;gap:8px;padding:5px 0;font-size:14px;"><input type="checkbox" value="Urinalysis"> Urinalysis</label>
                     <label style="display:flex;align-items:center;gap:8px;padding:5px 0;font-size:14px;"><input type="checkbox" value="Blood Culture"> Blood Culture</label>
+                    <label style="display:flex;align-items:center;gap:8px;padding:5px 0;font-size:14px;"><input type="checkbox" value="Hepatitis B"> Hepatitis B</label>
+                    <label style="display:flex;align-items:center;gap:8px;padding:5px 0;font-size:14px;"><input type="checkbox" value="Stool Analysis"> Stool Analysis</label>
                 </div>
             </div>
             <div class="form-group"><label>Clinical Reason</label><input type="text" id="lab-reason" placeholder="Why are these tests needed?"></div>
@@ -398,16 +486,16 @@
     <div class="detail-header">
         <button class="back-btn" onclick="showView('doctor')">← Back</button>
         <h2 id="post-result-patient-name"></h2>
-        <div style="font-size:13px;opacity:0.8;" id="post-result-patient-code"></div>
+        <div style="font-size:13px;opacity:0.8;font-family:monospace;" id="post-result-patient-code"></div>
     </div>
-    <div class="detail-section"><h3>🔬 LAB RESULT</h3><div id="post-result-lab-info"></div></div>
+    <div class="detail-section"><h3>🔬 LAB RESULT RECEIVED</h3><div id="post-result-lab-info"></div></div>
     <div class="success-msg" id="post-result-success">✅ Treatment Updated</div>
     <div class="form-container">
-        <div style="background:#e8f4fd;padding:12px;border-radius:8px;margin-bottom:15px;font-size:13px;color:#0066cc;">Update treatment based on this lab result.</div>
-        <div class="form-group"><label>Updated Diagnosis</label><input type="text" id="post-diagnosis" placeholder="Updated diagnosis"></div>
-        <div class="form-group"><label>Additional Medications</label><input type="text" id="post-medications" placeholder="Additional medications"></div>
-        <div class="form-group"><label>Updated Instructions</label><input type="text" id="post-notes" placeholder="Updated notes"></div>
-        <div class="form-group"><label>Patient Status *</label><select id="post-status"><option value="discharged">✅ Discharged</option><option value="admitted">🔴 Admitted</option><option value="inprogress">🔵 Still In Progress</option></select></div>
+        <div style="background:#e8f4fd;padding:12px;border-radius:8px;margin-bottom:15px;font-size:13px;color:#0066cc;">Update the patient's treatment based on this result.</div>
+        <div class="form-group"><label>Updated Diagnosis</label><input type="text" id="post-diagnosis" placeholder="Updated diagnosis if changed"></div>
+        <div class="form-group"><label>Additional Medications</label><input type="text" id="post-medications" placeholder="Any additional medications"></div>
+        <div class="form-group"><label>Updated Instructions</label><input type="text" id="post-notes" placeholder="Updated notes or instructions"></div>
+        <div class="form-group"><label>Patient Status *</label><select id="post-status"><option value="discharged">✅ Discharged — Treatment Complete</option><option value="admitted">🔴 Admitted</option><option value="inprogress">🔵 Still In Progress</option></select></div>
         <div class="form-group"><label>Send Updated Prescription To Pharmacy?</label><select id="post-send-pharmacy"><option value="no">No</option><option value="yes">Yes</option></select></div>
         <button class="submit-btn" onclick="submitPostResult()">UPDATE TREATMENT</button>
     </div>
@@ -419,10 +507,12 @@
     <div class="tab-bar">
         <div id="pharm-tab-pending" class="tab-item active" onclick="switchPharmacyTab('pending')">📋 Pending</div>
         <div id="pharm-tab-dispensed" class="tab-item" onclick="switchPharmacyTab('dispensed')">✅ Dispensed</div>
-        <div id="pharm-tab-costs" class="tab-item" onclick="switchPharmacyTab('costs')">💰 Drug Costs</div>
+        <div id="pharm-tab-inventory" class="tab-item" onclick="switchPharmacyTab('inventory')">📦 Inventory</div>
+        <div id="pharm-tab-costs" class="tab-item" onclick="switchPharmacyTab('costs')">💰 Revenue</div>
     </div>
     <div id="pharmacy-pending-list"></div>
     <div id="pharmacy-dispensed-list" style="display:none;"></div>
+    <div id="pharmacy-inventory-section" style="display:none;"></div>
     <div id="pharmacy-costs-section" style="display:none;"></div>
     <div style="height:80px;"></div>
 </div>
@@ -433,7 +523,7 @@
     <div class="tab-bar">
         <div id="lab-tab-pending" class="tab-item active" onclick="switchLabTab('pending')">🔬 Pending</div>
         <div id="lab-tab-completed" class="tab-item" onclick="switchLabTab('completed')">✅ Completed</div>
-        <div id="lab-tab-costs" class="tab-item" onclick="switchLabTab('costs')">💰 Test Costs</div>
+        <div id="lab-tab-costs" class="tab-item" onclick="switchLabTab('costs')">💰 Revenue</div>
     </div>
     <div id="lab-pending-list"></div>
     <div id="lab-completed-list" style="display:none;"></div>
@@ -448,11 +538,13 @@
         <div id="analytics-tab-daily" class="tab-item active" onclick="switchAnalyticsTab('daily')">📅 Daily</div>
         <div id="analytics-tab-conditions" class="tab-item" onclick="switchAnalyticsTab('conditions')">🩺 Conditions</div>
         <div id="analytics-tab-staff" class="tab-item" onclick="switchAnalyticsTab('staff')">👨‍⚕️ Staff</div>
+        <div id="analytics-tab-state" class="tab-item" onclick="switchAnalyticsTab('state')">🗺️ By State</div>
         <div id="analytics-tab-finance" class="tab-item" onclick="switchAnalyticsTab('finance')">💰 Finance</div>
     </div>
     <div id="analytics-daily"></div>
     <div id="analytics-conditions" style="display:none;"></div>
     <div id="analytics-staff" style="display:none;"></div>
+    <div id="analytics-state" style="display:none;"></div>
     <div id="analytics-finance" style="display:none;"></div>
     <div style="height:80px;"></div>
 </div>
@@ -464,14 +556,15 @@
     <div class="admin-panel">
         <h3>🏥 Hospital Information</h3>
         <div class="detail-row"><span class="detail-label">Hospital Name</span><span class="detail-value" id="admin-hospital-name"></span></div>
-        <div class="detail-row"><span class="detail-label">Hospital Code</span><span class="detail-value" style="color:#0066cc;font-family:monospace;" id="admin-hospital-code"></span></div>
+        <div class="detail-row"><span class="detail-label">Hospital Code</span><span class="detail-value" style="color:#0066cc;font-family:monospace;font-size:13px;" id="admin-hospital-code"></span></div>
+        <div class="detail-row"><span class="detail-label">State</span><span class="detail-value" id="admin-hospital-state"></span></div>
         <div class="detail-row"><span class="detail-label">Total Staff</span><span class="detail-value" id="admin-staff-count"></span></div>
     </div>
     <div class="admin-panel">
         <h3>➕ Add Staff Member</h3>
         <div class="form-group"><label>Staff Name *</label><input type="text" id="new-staff-name" placeholder="Full name"></div>
         <div class="form-group"><label>Role *</label><select id="new-staff-role"><option value="">Select role</option><option value="receptionist">Receptionist</option><option value="nurse">Nurse</option><option value="doctor">Doctor</option><option value="pharmacist">Pharmacist</option><option value="lab">Lab Technician</option></select></div>
-        <div class="form-group"><label>Access Key *</label><input type="text" id="new-staff-key" placeholder="Create an access key"></div>
+        <div class="form-group"><label>Access Key *</label><input type="text" id="new-staff-key" placeholder="Create an access key for this person"></div>
         <button onclick="addStaffMember()" style="background:#0066cc;color:white;border:none;padding:12px;border-radius:8px;cursor:pointer;font-size:14px;width:100%;">Add Staff Member</button>
     </div>
     <div class="admin-panel"><h3>👥 Current Staff</h3><div id="staff-list"><div class="loading">Loading...</div></div></div>
@@ -480,25 +573,25 @@
 
 <!-- NAV BAR -->
 <div class="nav-bar" id="nav-bar" style="display:none;">
-    <div class="nav-item active" id="nav-dashboard" onclick="showView('dashboard')">🏠<br>Home</div>
-    <div class="nav-item" id="nav-patients" onclick="showView('patients')">🔍<br>Search</div>
-    <div class="nav-item" id="nav-register" onclick="showView('register')">📋<br>Register</div>
-    <div class="nav-item" id="nav-nurse" onclick="showView('nurse')">🩺<br>Nurse</div>
-    <div class="nav-item" id="nav-more" onclick="toggleMore()">⚙️<br>More<span class="nav-badge" id="more-badge" style="display:none;">!</span></div>
+    <div class="nav-item active" id="nav-dashboard" onclick="showView('dashboard')">🏠<br><span style="font-size:9px;">Home</span></div>
+    <div class="nav-item" id="nav-patients" onclick="showView('patients')">🔍<br><span style="font-size:9px;">Search</span></div>
+    <div class="nav-item" id="nav-register" onclick="showView('register')">📋<br><span style="font-size:9px;">Register</span></div>
+    <div class="nav-item" id="nav-nurse" onclick="showView('nurse')">🩺<br><span style="font-size:9px;">Nurse</span></div>
+    <div class="nav-item" id="nav-more" onclick="toggleMore()">⚙️<br><span style="font-size:9px;">More</span><span class="nav-badge" id="more-badge" style="display:none;"></span></div>
 </div>
 
 <!-- MORE MENU -->
 <div id="more-menu" style="display:none;position:fixed;bottom:65px;right:0;background:white;border:1px solid #ddd;border-radius:10px 0 0 10px;padding:8px;z-index:200;box-shadow:-2px -2px 10px rgba(0,0,0,0.1);min-width:160px;">
-    <div onclick="showView('doctor');toggleMore();" style="padding:10px 15px;cursor:pointer;font-size:14px;display:flex;align-items:center;gap:8px;">👨‍⚕️ Doctor</div>
-    <div onclick="showView('pharmacy');toggleMore();" style="padding:10px 15px;cursor:pointer;font-size:14px;display:flex;align-items:center;gap:8px;">💊 Pharmacy</div>
-    <div onclick="showView('lab');toggleMore();" style="padding:10px 15px;cursor:pointer;font-size:14px;display:flex;align-items:center;gap:8px;">🔬 Lab</div>
-    <div onclick="showView('analytics');toggleMore();" style="padding:10px 15px;cursor:pointer;font-size:14px;display:flex;align-items:center;gap:8px;">📊 Analytics</div>
-    <div id="admin-menu-item" onclick="showView('admin');toggleMore();" style="padding:10px 15px;cursor:pointer;font-size:14px;display:flex;align-items:center;gap:8px;display:none;">⚙️ Admin</div>
+    <div onclick="showView('doctor');toggleMore();" style="padding:10px 15px;cursor:pointer;font-size:14px;">👨‍⚕️ Doctor</div>
+    <div onclick="showView('pharmacy');toggleMore();" style="padding:10px 15px;cursor:pointer;font-size:14px;">💊 Pharmacy</div>
+    <div onclick="showView('lab');toggleMore();" style="padding:10px 15px;cursor:pointer;font-size:14px;">🔬 Lab</div>
+    <div onclick="showView('analytics');toggleMore();" style="padding:10px 15px;cursor:pointer;font-size:14px;">📊 Analytics</div>
+    <div id="admin-menu-item" onclick="showView('admin');toggleMore();" style="padding:10px 15px;cursor:pointer;font-size:14px;display:none;">⚙️ Admin</div>
 </div>
 
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-app.js";
-    import { getFirestore, collection, addDoc, doc, updateDoc, orderBy, onSnapshot, query, getDocs, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-firestore.js";
+    import { getFirestore, collection, addDoc, doc, updateDoc, orderBy, onSnapshot, query, getDocs, setDoc, getDoc, increment, runTransaction } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-firestore.js";
 
     const firebaseConfig = {
         apiKey: "AIzaSyAmEgLdeC2T2C13LJ_5CDIPutq99Wa2Cn8",
@@ -512,12 +605,42 @@
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
 
-    let patients = [], prescriptions = [], labRequests = [], pharmacyFlags = [], referrals = [], financialRecords = [];
-    let currentHospital = null, currentUser = null;
-    let selectedPatientForNurse = null, selectedVisitForDoctor = null, selectedLabResultForUpdate = null;
-    let currentPatientId = null, currentSharePatientId = null, currentReferralPatientId = null;
+    // State abbreviation to full name map
+    const stateNames = { AB:'Abia', AD:'Adamawa', AK:'Akwa Ibom', AN:'Anambra', BA:'Bauchi', BY:'Bayelsa', BE:'Benue', BO:'Borno', CR:'Cross River', DE:'Delta', EB:'Ebonyi', ED:'Edo', EK:'Ekiti', EN:'Enugu', FC:'FCT Abuja', GO:'Gombe', IM:'Imo', JI:'Jigawa', KD:'Kaduna', KN:'Kano', KT:'Katsina', KE:'Kebbi', KO:'Kogi', KW:'Kwara', LA:'Lagos', NA:'Nasarawa', NI:'Niger', OG:'Ogun', ON:'Ondo', OS:'Osun', OY:'Oyo', PL:'Plateau', RI:'Rivers', SO:'Sokoto', TA:'Taraba', YO:'Yobe', ZA:'Zamfara' };
 
-    // ROLE PERMISSIONS — each role sees specific nav items and views
+    // Expanded drug interaction database
+    const drugWarnings = {
+        'penicillin': ['amoxicillin','ampicillin','amoxil','augmentin','flucloxacillin','cloxacillin','oxacillin'],
+        'aspirin': ['ibuprofen','diclofenac','naproxen','indomethacin','piroxicam','meloxicam'],
+        'sulfa': ['septrin','cotrimoxazole','trimethoprim','sulfamethoxazole','dapsone'],
+        'codeine': ['tramadol','morphine','oxycodone','fentanyl','pethidine','pentazocine'],
+        'ibuprofen': ['aspirin','diclofenac','naproxen','indomethacin'],
+        'metformin': ['alcohol','contrast dye'],
+        'warfarin': ['aspirin','ibuprofen','naproxen','diclofenac'],
+        'digoxin': ['amiodarone','clarithromycin','erythromycin'],
+        'clopidogrel': ['omeprazole','esomeprazole'],
+        'simvastatin': ['erythromycin','clarithromycin','itraconazole','ketoconazole'],
+        'metronidazole': ['alcohol','warfarin'],
+        'ciprofloxacin': ['antacids','iron','calcium'],
+        'tetracycline': ['antacids','iron','calcium','milk'],
+        'lithium': ['ibuprofen','naproxen','diclofenac'],
+        'paracetamol': ['alcohol'],
+        'amlodipine': ['simvastatin'],
+        'rifampicin': ['contraceptives','warfarin','antiretrovirals']
+    };
+
+    let patients = [], prescriptions = [], labRequests = [], pharmacyFlags = [], referrals = [], financialRecords = [], inventory = [];
+    let currentHospital = null, currentUser = null;
+    let selectedPatientForNurse = null, selectedReturningPatient = null, selectedVisitForDoctor = null, selectedLabResultForUpdate = null;
+    let currentPatientId = null, currentSharePatientId = null, currentReferralPatientId = null;
+    let consultingPatientAllergy = '';
+    let isOnline = navigator.onLine;
+
+    // OFFLINE DETECTION
+    window.addEventListener('online', () => { isOnline = true; document.getElementById('offline-notice').style.display = 'none'; setStatus('🟢 Back online — syncing...'); });
+    window.addEventListener('offline', () => { isOnline = false; document.getElementById('offline-notice').style.display = 'block'; setStatus('📵 Offline — using cached data'); });
+
+    // ROLE PERMISSIONS
     const rolePermissions = {
         admin: { views: ['dashboard','patients','register','nurse','doctor','doctor-form','post-result','pharmacy','lab','analytics','admin','emergency','detail','share','referral','referral-preview'], nav: ['dashboard','patients','register','nurse','more'] },
         receptionist: { views: ['dashboard','patients','register','emergency','detail','share'], nav: ['dashboard','patients','register'] },
@@ -527,21 +650,34 @@
         lab: { views: ['dashboard','lab','patients','emergency','detail'], nav: ['dashboard','patients','more'] }
     };
 
-    const drugWarnings = {
-        'penicillin': ['amoxicillin','ampicillin','amoxil','augmentin','flucloxacillin'],
-        'aspirin': ['ibuprofen','diclofenac','naproxen'],
-        'sulfa': ['septrin','cotrimoxazole','trimethoprim'],
-        'codeine': ['tramadol','morphine'],
-        'ibuprofen': ['aspirin','diclofenac','naproxen']
-    };
+    function setStatus(msg) { const bar = document.getElementById('status-bar'); bar.style.display = 'block'; bar.textContent = msg; }
 
-    function setStatus(msg) {
-        const bar = document.getElementById('status-bar');
-        bar.style.display = 'block';
-        bar.textContent = msg;
+    // CACHE MANAGEMENT
+    function saveToCache(key, data) { try { localStorage.setItem('meditrack_' + key, JSON.stringify(data)); } catch(e) {} }
+    function loadFromCache(key) { try { const d = localStorage.getItem('meditrack_' + key); return d ? JSON.parse(d) : null; } catch(e) { return null; } }
+
+    // HOSPITAL CODE PREVIEW
+    window.updateHospitalCodePreview = function() {
+        const name = document.getElementById('reg-hospital-name').value;
+        const abbrev = document.getElementById('reg-hospital-abbrev').value.toUpperCase().replace(/[^A-Z]/g,'').substr(0,4);
+        const state = document.getElementById('reg-hospital-state').value;
+        const preview = document.getElementById('hospital-code-preview');
+        if(state && abbrev) {
+            preview.style.display = 'block';
+            preview.textContent = `HOS-${state}-${abbrev}-001 (preview)`;
+        } else {
+            preview.style.display = 'none';
+        }
     }
 
-    // AUTH TAB
+    // PATIENT CODE PREVIEW
+    window.updateNextCodePreview = function() {
+        if(!currentHospital) return;
+        const el = document.getElementById('next-code-preview');
+        if(el) el.textContent = `NG-${currentHospital.state}-${currentHospital.abbrev}-????`;
+    }
+
+    // AUTH
     window.switchAuthTab = function(tab) {
         document.getElementById('login-form').style.display = tab === 'login' ? 'block' : 'none';
         document.getElementById('register-form').style.display = tab === 'register' ? 'block' : 'none';
@@ -552,32 +688,47 @@
     // REGISTER HOSPITAL
     window.registerHospital = async function() {
         const name = document.getElementById('reg-hospital-name').value.trim();
+        const abbrev = document.getElementById('reg-hospital-abbrev').value.toUpperCase().replace(/[^A-Z]/g,'').substr(0,4);
+        const state = document.getElementById('reg-hospital-state').value;
         const adminName = document.getElementById('reg-admin-name').value.trim();
         const password = document.getElementById('reg-admin-password').value;
         const confirm = document.getElementById('reg-admin-confirm').value;
         const errEl = document.getElementById('register-error');
         errEl.style.display = 'none';
 
-        if(!name || !adminName || !password || !confirm) { errEl.textContent = 'Please fill all fields'; errEl.style.display = 'block'; return; }
+        if(!name || !abbrev || !state || !adminName || !password || !confirm) { errEl.textContent = 'Please fill all fields'; errEl.style.display = 'block'; return; }
+        if(abbrev.length < 2) { errEl.textContent = 'Abbreviation must be 2-4 letters'; errEl.style.display = 'block'; return; }
         if(password !== confirm) { errEl.textContent = 'Passwords do not match'; errEl.style.display = 'block'; return; }
         if(password.length < 6) { errEl.textContent = 'Password must be at least 6 characters'; errEl.style.display = 'block'; return; }
 
-        const hospitalCode = 'HOS-' + name.substr(0,3).toUpperCase().replace(/\s/g,'') + '-' + Math.random().toString(36).substr(2,4).toUpperCase();
+        // Generate hospital code with sequential number
+        let hospitalNumber = 1;
+        try {
+            const counterRef = doc(db, 'counters', `hospitals_${state}`);
+            await runTransaction(db, async (transaction) => {
+                const counterDoc = await transaction.get(counterRef);
+                hospitalNumber = counterDoc.exists() ? (counterDoc.data().count + 1) : 1;
+                transaction.set(counterRef, { count: hospitalNumber }, { merge: true });
+            });
+        } catch(e) { hospitalNumber = Math.floor(Math.random() * 900) + 100; }
+
+        const hospitalCode = `HOS-${state}-${abbrev}-${String(hospitalNumber).padStart(3,'0')}`;
         const adminKey = 'ADM-' + Math.random().toString(36).substr(2,8).toUpperCase();
 
         try {
             await setDoc(doc(db, 'hospitals', hospitalCode), {
-                name, code: hospitalCode, createdAt: new Date().toISOString(),
+                name, code: hospitalCode, state, stateAbbrev: state, stateName: stateNames[state] || state,
+                abbrev, createdAt: new Date().toISOString(),
+                patientCounter: 0,
                 staff: [{ name: adminName, role: 'admin', key: adminKey, addedAt: new Date().toISOString() }]
             });
             document.getElementById('success-hospital-code').textContent = hospitalCode;
             document.getElementById('success-admin-key').textContent = adminKey;
             document.getElementById('auth-overlay').style.display = 'none';
-            const overlay = document.getElementById('reg-success-overlay');
-            overlay.style.display = 'flex';
-            currentHospital = { name, code: hospitalCode };
+            document.getElementById('reg-success-overlay').style.display = 'flex';
+            currentHospital = { name, code: hospitalCode, state, abbrev, stateName: stateNames[state] || state };
             currentUser = { name: adminName, role: 'admin', key: adminKey };
-        } catch(e) { errEl.textContent = 'Error: ' + e.message; errEl.style.display = 'block'; }
+        } catch(e) { errEl.textContent = 'Registration failed: ' + e.message; errEl.style.display = 'block'; }
     }
 
     window.proceedToAdmin = function() {
@@ -594,51 +745,69 @@
 
         if(!hospitalCode || !accessKey) { errEl.textContent = 'Please enter hospital code and access key'; errEl.style.display = 'block'; return; }
 
+        // Try cache first if offline
+        if(!isOnline) {
+            const cached = loadFromCache('hospital_' + hospitalCode);
+            if(cached) {
+                const staffMember = cached.staff?.find(s => s.key === accessKey);
+                if(staffMember) {
+                    currentHospital = { name: cached.name, code: hospitalCode, state: cached.state, abbrev: cached.abbrev, stateName: cached.stateName };
+                    currentUser = staffMember;
+                    document.getElementById('auth-overlay').style.display = 'none';
+                    patients = loadFromCache('patients_' + hospitalCode) || [];
+                    initializeMainApp();
+                    setStatus('📵 Offline mode — cached data loaded');
+                    return;
+                }
+            }
+            errEl.textContent = 'Cannot login offline without prior cache. Connect to internet first.';
+            errEl.style.display = 'block';
+            return;
+        }
+
         try {
             const hospitalDoc = await getDoc(doc(db, 'hospitals', hospitalCode));
-            if(!hospitalDoc.exists()) { errEl.textContent = 'Hospital not found'; errEl.style.display = 'block'; return; }
+            if(!hospitalDoc.exists()) { errEl.textContent = 'Hospital not found. Check your hospital code.'; errEl.style.display = 'block'; return; }
             const hospitalData = hospitalDoc.data();
-            const staffMember = hospitalData.staff.find(s => s.key === accessKey);
-            if(!staffMember) { errEl.textContent = 'Invalid access key'; errEl.style.display = 'block'; return; }
-            currentHospital = { name: hospitalData.name, code: hospitalCode };
+            const staffMember = hospitalData.staff?.find(s => s.key === accessKey);
+            if(!staffMember) { errEl.textContent = 'Invalid access key. Contact your administrator.'; errEl.style.display = 'block'; return; }
+            currentHospital = { name: hospitalData.name, code: hospitalCode, state: hospitalData.state, abbrev: hospitalData.abbrev, stateName: hospitalData.stateName || stateNames[hospitalData.state] || hospitalData.state, patientCounter: hospitalData.patientCounter || 0 };
             currentUser = staffMember;
+            saveToCache('hospital_' + hospitalCode, hospitalData);
             document.getElementById('auth-overlay').style.display = 'none';
             initializeMainApp();
         } catch(e) { errEl.textContent = 'Login failed: ' + e.message; errEl.style.display = 'block'; }
     }
 
     function initializeMainApp() {
-        setStatus('🔄 Loading...');
         document.getElementById('status-bar').style.display = 'block';
         document.getElementById('nav-bar').style.display = 'flex';
-        document.getElementById('header-user-info').textContent = currentUser.name + ' • ' + currentUser.role + ' • ' + currentHospital.name;
-        document.getElementById('search-user-info').textContent = currentUser.name + ' • ' + currentHospital.name;
+        document.getElementById('header-user-info').textContent = `${currentUser.name} • ${currentUser.role} • ${currentHospital.name}`;
+        document.getElementById('search-user-info').textContent = `${currentUser.name} • ${currentHospital.name}`;
         document.getElementById('nurse-hospital').value = currentHospital.name;
         document.getElementById('nurse-name').value = currentUser.name;
+        document.getElementById('returning-nurse-name').value = currentUser.name;
 
-        // Role-based nav visibility
         const perm = rolePermissions[currentUser.role] || rolePermissions.admin;
         ['dashboard','patients','register','nurse','more'].forEach(n => {
             const el = document.getElementById('nav-' + n);
             if(el) el.style.display = perm.nav.includes(n) ? 'flex' : 'none';
         });
-
         if(currentUser.role === 'admin') document.getElementById('admin-menu-item').style.display = 'flex';
 
+        updateNextCodePreview();
         loadAllData();
-        // Navigate to default view based on role
+
         const defaultViews = { receptionist: 'patients', nurse: 'nurse', doctor: 'doctor', pharmacist: 'pharmacy', lab: 'lab', admin: 'dashboard' };
         showView(defaultViews[currentUser.role] || 'dashboard');
     }
 
     window.logoutStaff = function() {
         currentHospital = null; currentUser = null;
-        patients = []; prescriptions = []; labRequests = []; pharmacyFlags = []; referrals = []; financialRecords = [];
+        patients = []; prescriptions = []; labRequests = []; pharmacyFlags = []; referrals = []; financialRecords = []; inventory = [];
         document.getElementById('nav-bar').style.display = 'none';
         document.getElementById('status-bar').style.display = 'none';
-        ['dashboard','patients','emergency','detail','share','referral','referral-preview','register','nurse','doctor','doctor-form','post-result','pharmacy','lab','analytics','admin'].forEach(v => {
-            const el = document.getElementById(v + '-view'); if(el) el.style.display = 'none';
-        });
+        ['dashboard','patients','emergency','detail','share','referral','referral-preview','register','nurse','doctor','doctor-form','post-result','pharmacy','lab','analytics','admin'].forEach(v => { const el = document.getElementById(v+'-view'); if(el) el.style.display = 'none'; });
         document.getElementById('login-hospital-code').value = '';
         document.getElementById('login-access-key').value = '';
         document.getElementById('login-error').style.display = 'none';
@@ -647,56 +816,77 @@
 
     // LOAD ALL DATA
     function loadAllData() {
+        setStatus('🔄 Loading...');
         onSnapshot(query(collection(db, 'patients'), orderBy('createdAt','desc')), snap => {
             patients = []; snap.forEach(d => patients.push({ id: d.id, ...d.data() }));
+            saveToCache('patients_' + currentHospital.code, patients);
             setStatus('🟢 ' + currentHospital.name + ' — Connected');
             updateDashboard();
         });
-        onSnapshot(collection(db, 'prescriptions'), snap => {
-            prescriptions = []; snap.forEach(d => prescriptions.push({ id: d.id, ...d.data() }));
-            updateDashboard(); renderPharmacyPending();
-        });
-        onSnapshot(collection(db, 'labRequests'), snap => {
-            labRequests = []; snap.forEach(d => labRequests.push({ id: d.id, ...d.data() }));
-            updateDashboard(); renderLabPending();
-        });
-        onSnapshot(collection(db, 'pharmacyFlags'), snap => {
-            pharmacyFlags = []; snap.forEach(d => pharmacyFlags.push({ id: d.id, ...d.data() }));
-            updateDashboard();
-        });
-        onSnapshot(collection(db, 'referrals'), snap => {
-            referrals = []; snap.forEach(d => referrals.push({ id: d.id, ...d.data() }));
-            updateDashboard();
-        });
-        onSnapshot(collection(db, 'financialRecords'), snap => {
-            financialRecords = []; snap.forEach(d => financialRecords.push({ id: d.id, ...d.data() }));
-            updateDashboard();
-        });
+        onSnapshot(collection(db, 'prescriptions'), snap => { prescriptions = []; snap.forEach(d => prescriptions.push({ id: d.id, ...d.data() })); updateDashboard(); renderPharmacyPending(); });
+        onSnapshot(collection(db, 'labRequests'), snap => { labRequests = []; snap.forEach(d => labRequests.push({ id: d.id, ...d.data() })); updateDashboard(); });
+        onSnapshot(collection(db, 'pharmacyFlags'), snap => { pharmacyFlags = []; snap.forEach(d => pharmacyFlags.push({ id: d.id, ...d.data() })); updateDashboard(); });
+        onSnapshot(collection(db, 'referrals'), snap => { referrals = []; snap.forEach(d => referrals.push({ id: d.id, ...d.data() })); });
+        onSnapshot(collection(db, 'financialRecords'), snap => { financialRecords = []; snap.forEach(d => financialRecords.push({ id: d.id, ...d.data() })); updateDashboard(); });
+        onSnapshot(query(collection(db, 'inventory'), orderBy('name')), snap => { inventory = []; snap.forEach(d => inventory.push({ id: d.id, ...d.data() })); updateDashboard(); });
+    }
+
+    // GENERATE PATIENT CODE — Global counter per state
+    async function generatePatientCode() {
+        const stateCode = currentHospital.state;
+        const hospAbbrev = currentHospital.abbrev;
+        let patientNumber = 1;
+        try {
+            const counterRef = doc(db, 'counters', `patients_${stateCode}`);
+            await runTransaction(db, async (transaction) => {
+                const counterDoc = await transaction.get(counterRef);
+                patientNumber = counterDoc.exists() ? (counterDoc.data().count + 1) : 1;
+                transaction.set(counterRef, { count: patientNumber }, { merge: true });
+            });
+        } catch(e) { patientNumber = Date.now() % 100000; }
+        return `NG-${stateCode}-${hospAbbrev}-${String(patientNumber).padStart(4,'0')}`;
+    }
+
+    // SMS FRAMEWORK
+    async function sendSMS(phone, message) {
+        // SMS framework ready for Termii/Arkesel integration
+        // Replace the URL and API key when ready
+        console.log(`SMS to ${phone}: ${message}`);
+        // Uncomment and configure when Termii account is ready:
+        // try {
+        //   await fetch('https://api.ng.termii.com/api/sms/send', {
+        //     method: 'POST',
+        //     headers: { 'Content-Type': 'application/json' },
+        //     body: JSON.stringify({ to: phone, from: 'MEDITRACK', sms: message, type: 'plain', api_key: 'YOUR_API_KEY', channel: 'generic' })
+        //   });
+        // } catch(e) { console.log('SMS failed:', e); }
+        return true;
     }
 
     // DASHBOARD
     function updateDashboard() {
         if(!currentHospital) return;
+        document.getElementById('dash-hospital-title').textContent = `${currentHospital.name} — ${currentHospital.stateName}`;
         const hp = patients.filter(p => p.registeredAtHospital === currentHospital.name);
         document.getElementById('dash-patients').textContent = hp.length;
-
         const today = new Date().toLocaleDateString('en-GB');
         let todayCount = 0, pendingCount = 0;
         patients.forEach(p => { if(p.visits) p.visits.forEach(v => { if(v.hospitalName === currentHospital.name) { if(v.date === today) todayCount++; if(v.status === 'pending-doctor') pendingCount++; } }); });
         document.getElementById('dash-today').textContent = todayCount;
         document.getElementById('dash-pending').textContent = pendingCount;
-
         const labReady = labRequests.filter(l => l.status === 'completed' && l.hospitalName === currentHospital.name).length;
         document.getElementById('dash-lab').textContent = labReady;
-
         const flags = pharmacyFlags.filter(f => f.status === 'pending' && f.hospitalName === currentHospital.name).length;
         document.getElementById('dash-flags').textContent = flags;
         document.getElementById('dash-flags-card').style.display = flags > 0 ? 'flex' : 'none';
         document.getElementById('more-badge').style.display = (flags > 0 || labReady > 0) ? 'block' : 'none';
-
+        document.getElementById('more-badge').textContent = flags + labReady;
+        const lowStock = inventory.filter(i => i.hospitalCode === currentHospital.code && i.quantity <= i.reorderLevel).length;
+        document.getElementById('dash-low-stock').textContent = lowStock;
+        document.getElementById('dash-inventory-card').style.display = lowStock > 0 ? 'flex' : 'none';
         if(['admin'].includes(currentUser?.role)) {
-            const todayRevenue = financialRecords.filter(r => r.hospitalCode === currentHospital.code && r.date === today).reduce((sum, r) => sum + (r.amount || 0), 0);
-            document.getElementById('dash-revenue').textContent = '₦' + todayRevenue.toLocaleString();
+            const todayRev = financialRecords.filter(r => r.hospitalCode === currentHospital.code && r.date === today).reduce((s,r) => s + (r.amount||0), 0);
+            document.getElementById('dash-revenue').textContent = '₦' + todayRev.toLocaleString();
             document.getElementById('dash-revenue-card').style.display = 'flex';
         }
     }
@@ -704,21 +894,15 @@
     // NAVIGATION — ROLE RESTRICTED
     window.showView = function(view) {
         const perm = rolePermissions[currentUser?.role] || rolePermissions.admin;
-        if(currentUser && !perm.views.includes(view)) {
-            alert('You do not have permission to access this section.');
-            return;
-        }
-
+        if(currentUser && !perm.views.includes(view)) { alert('You do not have permission to access this section.'); return; }
         const allViews = ['dashboard','patients','emergency','detail','share','referral','referral-preview','register','nurse','doctor','doctor-form','post-result','pharmacy','lab','analytics','admin'];
-        allViews.forEach(v => { const el = document.getElementById(v + '-view'); if(el) el.style.display = 'none'; });
-        ['dashboard','patients','register','nurse','more'].forEach(n => { const el = document.getElementById('nav-' + n); if(el) el.classList.remove('active'); });
-
-        const el = document.getElementById(view + '-view');
+        allViews.forEach(v => { const el = document.getElementById(v+'-view'); if(el) el.style.display = 'none'; });
+        ['dashboard','patients','register','nurse','more'].forEach(n => { const el = document.getElementById('nav-'+n); if(el) el.classList.remove('active'); });
+        const el = document.getElementById(view+'-view');
         if(el) el.style.display = 'block';
-
         if(view === 'dashboard') { document.getElementById('nav-dashboard')?.classList.add('active'); updateDashboard(); }
         else if(view === 'patients') { document.getElementById('nav-patients')?.classList.add('active'); }
-        else if(view === 'register') { document.getElementById('nav-register')?.classList.add('active'); }
+        else if(view === 'register') { document.getElementById('nav-register')?.classList.add('active'); updateNextCodePreview(); }
         else if(view === 'nurse') { document.getElementById('nav-nurse')?.classList.add('active'); }
         else if(view === 'doctor') { document.getElementById('nav-more')?.classList.add('active'); renderPendingVisits(); }
         else if(view === 'pharmacy') { document.getElementById('nav-more')?.classList.add('active'); renderPharmacyPending(); }
@@ -727,37 +911,19 @@
         else if(view === 'admin') { document.getElementById('nav-more')?.classList.add('active'); renderAdminPanel(); }
     }
 
-    window.toggleMore = function() {
-        const menu = document.getElementById('more-menu');
-        menu.style.display = menu.style.display === 'none' ? 'block' : 'none';
-    }
-
-    window.toggleLabFields = function() {
-        document.getElementById('lab-request-fields').style.display = document.getElementById('doctor-request-lab').value === 'yes' ? 'block' : 'none';
-    }
-
-    document.addEventListener('click', e => {
-        const menu = document.getElementById('more-menu');
-        const btn = document.getElementById('nav-more');
-        if(menu && btn && !menu.contains(e.target) && !btn.contains(e.target)) menu.style.display = 'none';
-    });
+    window.toggleMore = function() { const m = document.getElementById('more-menu'); m.style.display = m.style.display === 'none' ? 'block' : 'none'; }
+    window.toggleLabFields = function() { document.getElementById('lab-request-fields').style.display = document.getElementById('doctor-request-lab').value === 'yes' ? 'block' : 'none'; }
+    document.addEventListener('click', e => { const m = document.getElementById('more-menu'); const b = document.getElementById('nav-more'); if(m && b && !m.contains(e.target) && !b.contains(e.target)) m.style.display = 'none'; });
 
     // SEARCH
     window.searchPatients = function() {
         const q = document.getElementById('search-input').value.toLowerCase().trim();
         const list = document.getElementById('patients-list');
-        if(q.length < 1) { list.innerHTML = '<div class="empty-search"><div class="icon">🔍</div><p>Search for a patient</p></div>'; return; }
-        const filtered = patients.filter(p => p.name.toLowerCase().includes(q) || p.code.toLowerCase().includes(q) || p.phone.includes(q));
+        if(q.length < 1) { list.innerHTML = '<div class="empty-search"><div class="icon">🔍</div><p>Search by name, code or phone</p></div>'; return; }
+        const filtered = patients.filter(p => p.name.toLowerCase().includes(q) || p.code.toLowerCase().includes(q) || p.phone.includes(q) || (p.hmo && p.hmo.toLowerCase().includes(q)));
         if(!filtered.length) { list.innerHTML = '<p style="text-align:center;color:#666;padding:20px;">No patients found.</p>'; return; }
         list.innerHTML = '';
-        filtered.forEach(p => {
-            list.innerHTML += `<div class="patient-card" onclick="showPatient('${p.id}')">
-                <div class="patient-name">${p.name}</div>
-                <div class="patient-code">${p.code}</div>
-                <div class="patient-info">${p.gender} • ${p.blood || 'Unknown'} • DOB: ${p.dob}</div>
-                ${p.allergy ? `<div class="allergy-badge">⚠️ Allergic to ${p.allergy}</div>` : ''}
-            </div>`;
-        });
+        filtered.forEach(p => { list.innerHTML += `<div class="patient-card" onclick="showPatient('${p.id}')"><div class="patient-name">${p.name}</div><div class="patient-code">${p.code}</div><div class="patient-info">${p.gender} • ${p.blood||'Unknown'} • ${p.registeredAtHospital}</div>${p.allergy ? `<div class="allergy-badge">⚠️ ${p.allergy}</div>` : ''}${p.hmo ? `<div style="font-size:11px;color:#0066cc;margin-top:3px;">🏥 HMO: ${p.hmo}</div>` : ''}</div>`; });
     }
 
     // EMERGENCY
@@ -769,12 +935,12 @@
         if(!found) { result.innerHTML = '<div style="text-align:center;padding:20px;color:#999;"><div style="font-size:40px;">❌</div><p>No patient found</p></div>'; return; }
         const last = found.visits?.length ? found.visits[found.visits.length-1] : null;
         result.innerHTML = `<div style="background:white;border-radius:15px;overflow:hidden;border:2px solid #ff4444;">
-            <div style="background:#ff4444;color:white;padding:15px;text-align:center;"><div style="font-size:22px;font-weight:bold;">${found.name}</div><div>${found.code}</div></div>
+            <div style="background:#ff4444;color:white;padding:15px;text-align:center;"><div style="font-size:20px;font-weight:bold;">${found.name}</div><div style="font-family:monospace;font-size:14px;opacity:0.9;">${found.code}</div></div>
             <div style="padding:15px;">
-                ${found.allergy ? `<div style="background:#fff0f0;border:2px solid #ff4444;border-radius:10px;padding:12px;margin-bottom:12px;text-align:center;"><div style="color:#ff4444;font-size:12px;font-weight:bold;">⚠️ DO NOT ADMINISTER</div><div style="font-size:24px;font-weight:bold;color:#ff4444;">${found.allergy.toUpperCase()}</div></div>` : '<div style="background:#f0fff0;border:2px solid #4CAF50;border-radius:10px;padding:10px;margin-bottom:12px;text-align:center;color:#4CAF50;font-weight:bold;">✅ No Known Allergies</div>'}
+                ${found.allergy ? `<div style="background:#fff0f0;border:2px solid #ff4444;border-radius:10px;padding:12px;margin-bottom:12px;text-align:center;"><div style="color:#ff4444;font-size:12px;font-weight:bold;">⚠️ DO NOT ADMINISTER</div><div style="font-size:22px;font-weight:bold;color:#ff4444;">${found.allergy.toUpperCase()}</div></div>` : '<div style="background:#f0fff0;border:2px solid #4CAF50;border-radius:10px;padding:10px;margin-bottom:12px;text-align:center;color:#4CAF50;font-weight:bold;">✅ No Known Allergies</div>'}
                 <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px;">
-                    <div style="background:#e8f4fd;border-radius:10px;padding:12px;text-align:center;"><div style="font-size:11px;color:#666;">BLOOD GROUP</div><div style="font-size:26px;font-weight:bold;color:#0066cc;">${found.blood || '?'}</div></div>
-                    <div style="background:#f8f9fa;border-radius:10px;padding:12px;text-align:center;"><div style="font-size:11px;color:#666;">GENDER</div><div style="font-size:20px;font-weight:bold;">${found.gender || '?'}</div></div>
+                    <div style="background:#e8f4fd;border-radius:10px;padding:12px;text-align:center;"><div style="font-size:11px;color:#666;">BLOOD GROUP</div><div style="font-size:26px;font-weight:bold;color:#0066cc;">${found.blood||'?'}</div></div>
+                    <div style="background:#f8f9fa;border-radius:10px;padding:12px;text-align:center;"><div style="font-size:11px;color:#666;">GENDER</div><div style="font-size:20px;font-weight:bold;">${found.gender||'?'}</div></div>
                 </div>
                 ${last?.medications ? `<div style="background:#fff8e1;border:1px solid #ffc107;border-radius:10px;padding:10px;margin-bottom:10px;"><div style="font-size:12px;color:#f57f17;font-weight:bold;">💊 CURRENT MEDICATIONS</div><div style="font-size:14px;">${last.medications}</div></div>` : ''}
                 ${found.kin ? `<div style="background:#f3e5f5;border-radius:10px;padding:12px;margin-bottom:10px;"><div style="font-size:12px;color:#9c27b0;font-weight:bold;">📞 EMERGENCY CONTACT</div><div style="font-weight:bold;">${found.kin}</div><a href="tel:${found.kinPhone}" style="display:block;background:#9c27b0;color:white;text-align:center;padding:10px;border-radius:8px;margin-top:8px;text-decoration:none;font-weight:bold;">📞 Call ${found.kinPhone}</a></div>` : ''}
@@ -785,19 +951,17 @@
     }
 
     window.printEmergencyCard = function(patientId) {
-        const p = patients.find(p => p.id === patientId);
-        if(!p) return;
+        const p = patients.find(p => p.id === patientId); if(!p) return;
         const last = p.visits?.length ? p.visits[p.visits.length-1] : null;
         const w = window.open('','_blank');
-        w.document.write(`<html><head><title>Emergency Card</title><style>body{font-family:Arial,sans-serif;padding:20px;}.card{border:3px solid #ff4444;border-radius:15px;padding:20px;max-width:400px;margin:0 auto;}</style></head><body><div class="card"><div style="background:#ff4444;color:white;padding:15px;border-radius:10px;text-align:center;margin-bottom:15px;"><h1 style="font-size:18px;margin:0;">🚨 MEDITRACK EMERGENCY CARD</h1></div><div style="font-size:22px;font-weight:bold;text-align:center;margin:10px 0;">${p.name}</div><div style="text-align:center;color:#ff4444;font-size:18px;font-weight:bold;margin-bottom:15px;">${p.code}</div>${p.allergy ? `<div style="background:#fff0f0;border:3px solid #ff4444;border-radius:10px;padding:15px;text-align:center;margin-bottom:15px;"><div style="color:#ff4444;font-weight:bold;font-size:12px;">⚠️ KNOWN ALLERGY — DO NOT ADMINISTER</div><div style="font-size:22px;font-weight:bold;color:#ff4444;margin-top:5px;">${p.allergy.toUpperCase()}</div></div>` : '<div style="background:#f0fff0;border:2px solid #4CAF50;border-radius:10px;padding:12px;text-align:center;margin-bottom:15px;color:#4CAF50;font-weight:bold;">✅ NO KNOWN ALLERGIES</div>'}<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:15px;"><div style="background:#f8f9fa;border-radius:8px;padding:10px;text-align:center;"><div style="font-size:11px;color:#666;">BLOOD GROUP</div><div style="font-size:22px;font-weight:bold;">${p.blood || '?'}</div></div><div style="background:#f8f9fa;border-radius:8px;padding:10px;text-align:center;"><div style="font-size:11px;color:#666;">GENDER</div><div style="font-size:18px;font-weight:bold;">${p.gender || '?'}</div></div></div>${p.kin ? `<div style="background:#f3e5f5;border-radius:10px;padding:12px;margin-bottom:15px;"><div style="color:#9c27b0;font-weight:bold;font-size:12px;">📞 EMERGENCY CONTACT</div><div style="font-weight:bold;">${p.kin} — ${p.kinPhone}</div></div>` : ''}${last?.medications ? `<div style="background:#fff8e1;border:1px solid #ffc107;border-radius:10px;padding:12px;"><div style="font-weight:bold;font-size:12px;">💊 CURRENT MEDICATIONS</div><div style="font-size:14px;margin-top:5px;">${last.medications}</div></div>` : ''}<div style="text-align:center;font-size:11px;color:#666;margin-top:15px;">MEDITRACK — Unified Patient Health Records Nigeria</div></div><script>window.print();<\/script></body></html>`);
+        w.document.write(`<html><head><title>Emergency Card</title><style>body{font-family:Arial,sans-serif;padding:20px;}.card{border:3px solid #ff4444;border-radius:15px;padding:20px;max-width:400px;margin:0 auto;}</style></head><body><div class="card"><div style="background:#ff4444;color:white;padding:15px;border-radius:10px;text-align:center;margin-bottom:15px;"><h1 style="font-size:18px;margin:0;">🚨 MEDITRACK EMERGENCY CARD</h1></div><div style="font-size:22px;font-weight:bold;text-align:center;margin:10px 0;">${p.name}</div><div style="text-align:center;color:#ff4444;font-size:16px;font-weight:bold;font-family:monospace;margin-bottom:15px;">${p.code}</div>${p.allergy ? `<div style="background:#fff0f0;border:3px solid #ff4444;border-radius:10px;padding:15px;text-align:center;margin-bottom:15px;"><div style="color:#ff4444;font-weight:bold;font-size:12px;">⚠️ KNOWN ALLERGY — DO NOT ADMINISTER</div><div style="font-size:22px;font-weight:bold;color:#ff4444;margin-top:5px;">${p.allergy.toUpperCase()}</div></div>` : '<div style="background:#f0fff0;border:2px solid #4CAF50;border-radius:10px;padding:12px;text-align:center;margin-bottom:15px;color:#4CAF50;font-weight:bold;">✅ NO KNOWN ALLERGIES</div>'}<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:15px;"><div style="background:#f8f9fa;border-radius:8px;padding:10px;text-align:center;"><div style="font-size:11px;color:#666;">BLOOD GROUP</div><div style="font-size:22px;font-weight:bold;">${p.blood||'?'}</div></div><div style="background:#f8f9fa;border-radius:8px;padding:10px;text-align:center;"><div style="font-size:11px;color:#666;">GENDER</div><div style="font-size:18px;font-weight:bold;">${p.gender||'?'}</div></div></div>${p.kin ? `<div style="background:#f3e5f5;border-radius:10px;padding:12px;margin-bottom:15px;"><div style="color:#9c27b0;font-weight:bold;font-size:12px;">📞 EMERGENCY CONTACT</div><div style="font-weight:bold;font-size:15px;">${p.kin} — ${p.kinPhone}</div></div>` : ''}${last?.medications ? `<div style="background:#fff8e1;border:1px solid #ffc107;border-radius:10px;padding:12px;"><div style="font-weight:bold;font-size:12px;">💊 CURRENT MEDICATIONS</div><div style="font-size:14px;margin-top:5px;">${last.medications}</div></div>` : ''}<div style="text-align:center;font-size:11px;color:#666;margin-top:15px;">MEDITRACK — Unified Patient Health Records Nigeria</div></div><script>window.print();<\/script></body></html>`);
     }
 
-    // SHOW PATIENT
+    // SHOW PATIENT — Cleaned up visit display
     window.showPatient = function(patientId) {
-        const p = patients.find(p => p.id === patientId);
-        if(!p) return;
+        const p = patients.find(p => p.id === patientId); if(!p) return;
         currentPatientId = currentSharePatientId = currentReferralPatientId = patientId;
-        ['patients','emergency'].forEach(v => { const el = document.getElementById(v + '-view'); if(el) el.style.display = 'none'; });
+        ['patients','emergency'].forEach(v => { const el = document.getElementById(v+'-view'); if(el) el.style.display = 'none'; });
         document.getElementById('detail-view').style.display = 'block';
         document.getElementById('detail-name').textContent = p.name;
         document.getElementById('detail-code').textContent = p.code;
@@ -806,7 +970,9 @@
         document.getElementById('detail-gender').textContent = p.gender;
         document.getElementById('detail-blood').textContent = p.blood || 'Not recorded';
         document.getElementById('detail-allergy').textContent = p.allergy || 'None';
+        document.getElementById('detail-hmo').textContent = p.hmo || 'None';
         document.getElementById('detail-hospital').textContent = p.registeredAtHospital || 'Not recorded';
+        document.getElementById('detail-state').textContent = p.stateName || 'Not recorded';
         document.getElementById('detail-kin').textContent = p.kin || 'Not recorded';
         document.getElementById('detail-kin-phone').textContent = p.kinPhone || 'Not recorded';
 
@@ -814,26 +980,31 @@
         visitList.innerHTML = '';
         if(p.visits?.length) {
             p.visits.slice().reverse().forEach(v => {
-                const cls = v.status === 'pending-doctor' ? 'pending' : v.patientStatus === 'admitted' ? 'admitted' : v.patientStatus === 'discharged' ? 'discharged' : '';
+                const isComplete = v.status === 'completed' && (v.patientStatus === 'discharged' || v.patientStatus === 'admitted');
+                const isPending = v.status === 'pending-doctor';
+                const cls = isPending ? 'pending' : v.patientStatus === 'admitted' ? 'admitted' : isComplete ? 'discharged' : '';
+
+                // CLEAN CONSOLIDATED VISIT DISPLAY
                 visitList.innerHTML += `<div class="visit-card ${cls}">
-                    <div style="font-size:12px;color:#666;">${v.date} — ${v.hospitalName || 'Unknown'}</div>
-                    ${getStatusBadge(v)}
-                    ${v.nurseName ? `<div style="font-size:12px;color:#666;margin-top:4px;">👩‍⚕️ ${v.nurseName}</div>` : ''}
-                    ${v.vitals ? `<div style="font-size:12px;color:#555;margin-top:4px;">🌡️ ${v.vitals.temperature||'-'}°C &nbsp; ❤️ ${v.vitals.pulse||'-'} bpm &nbsp; 🩺 ${v.vitals.bp||'-'}</div>` : ''}
-                    ${v.doctorName ? `<div style="font-size:12px;color:#666;">👨‍⚕️ Dr. ${v.doctorName}</div>` : ''}
-                    ${v.complaint ? `<div style="font-weight:bold;color:#333;margin:4px 0;font-size:14px;">Complaint: ${v.complaint}</div>` : ''}
-                    ${v.diagnosis ? `<div style="color:#0066cc;font-size:13px;">Diagnosis: ${v.diagnosis}</div>` : ''}
-                    ${v.medications ? `<div style="font-size:13px;margin-top:4px;color:#555;">💊 ${v.medications}</div>` : ''}
-                    ${v.notes ? `<div style="font-size:13px;color:#555;">📝 ${v.notes}</div>` : ''}
-                    ${v.followup ? `<div style="font-size:13px;color:#555;">📅 ${v.followup}</div>` : ''}
-                    ${v.pharmacistNote ? `<div class="pharmacist-note">💊 Pharmacist note: ${v.pharmacistNote}</div>` : ''}
-                    ${v.labResult ? `<div style="background:#e8f5e9;padding:8px;border-radius:6px;margin-top:5px;"><div style="font-size:11px;color:#666;">🔬 ${v.labResult.testType}</div><div style="font-size:14px;font-weight:bold;color:#2e7d32;">${v.labResult.result}</div></div>` : ''}
-                    ${v.consultationFee ? `<div style="font-size:12px;color:#0066cc;margin-top:4px;">💰 Consultation: ₦${v.consultationFee?.toLocaleString() || 0}</div>` : ''}
+                    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+                        <div style="font-size:12px;color:#666;">📅 ${v.date} — ${v.hospitalName||'Unknown'}</div>
+                        ${getStatusBadge(v)}
+                    </div>
+                    ${v.nurseName ? `<div style="font-size:12px;color:#666;margin-bottom:3px;">👩‍⚕️ Nurse: ${v.nurseName}</div>` : ''}
+                    ${v.vitals ? `<div style="font-size:12px;color:#555;background:#f0f4f8;padding:6px;border-radius:6px;margin-bottom:6px;">🌡️ ${v.vitals.temperature||'-'}°C &nbsp; ❤️ ${v.vitals.pulse||'-'} bpm &nbsp; 🩺 ${v.vitals.bp||'-'} &nbsp; ⚖️ ${v.vitals.weight||'-'}kg</div>` : ''}
+                    ${!isPending ? `
+                        ${v.doctorName ? `<div style="font-size:12px;color:#666;margin-bottom:3px;">👨‍⚕️ Dr. ${v.doctorName}</div>` : ''}
+                        ${v.complaint ? `<div style="font-weight:bold;color:#333;margin:4px 0;font-size:14px;">💬 ${v.complaint}</div>` : ''}
+                        ${v.diagnosis ? `<div style="color:#0066cc;font-size:13px;font-weight:bold;margin-bottom:4px;">🔍 Diagnosis: ${v.diagnosis}</div>` : ''}
+                        ${v.postDiagnosis && v.postDiagnosis !== v.diagnosis ? `<div style="color:#00aa55;font-size:13px;font-weight:bold;margin-bottom:4px;">🔄 Updated: ${v.postDiagnosis}</div>` : ''}
+                        ${v.medications ? `<div style="font-size:13px;color:#555;margin-bottom:4px;">💊 ${v.medications}</div>` : ''}
+                        ${v.labResult ? `<div style="background:#e8f5e9;padding:8px;border-radius:6px;margin-bottom:4px;"><div style="font-size:11px;color:#2e7d32;font-weight:bold;">🔬 ${v.labResult.testType}</div><div style="font-size:14px;font-weight:bold;color:#1b5e20;">${v.labResult.result}</div></div>` : ''}
+                        ${v.pharmacistNote ? `<div style="background:#f3e5f5;border-left:3px solid #9c27b0;padding:8px;border-radius:0 6px 6px 0;margin-bottom:4px;font-size:12px;color:#4a148c;">💊 Pharmacist: ${v.pharmacistNote}</div>` : ''}
+                        ${v.followup ? `<div style="font-size:12px;color:#0066cc;background:#e8f4fd;padding:5px 8px;border-radius:6px;display:inline-block;">📅 ${v.followup}</div>` : ''}
+                    ` : '<div style="font-size:13px;color:#ff8800;margin-top:5px;">Awaiting doctor review...</div>'}
                 </div>`;
             });
-        } else {
-            visitList.innerHTML = '<p style="color:#666;font-size:14px;padding:10px 0;">No visits recorded yet.</p>';
-        }
+        } else { visitList.innerHTML = '<p style="color:#666;font-size:14px;padding:10px 0;">No visits recorded yet.</p>'; }
     }
 
     function getStatusBadge(v) {
@@ -851,15 +1022,15 @@
 
     // SHARE
     window.sharePatientHistory = function() {
-        const p = patients.find(p => p.id === currentSharePatientId);
-        if(!p) return;
+        const p = patients.find(p => p.id === currentSharePatientId); if(!p) return;
         const today = new Date().toLocaleDateString('en-GB');
         let s = `━━━━━━━━━━━━━━━━━━━\n🏥 MEDITRACK HEALTH SUMMARY\n━━━━━━━━━━━━━━━━━━━\n\n`;
-        s += `👤 ${p.name}\n🆔 ${p.code}\n📱 ${p.phone}\n🎂 DOB: ${p.dob||'-'}\n⚧ ${p.gender||'-'}\n🩸 Blood: ${p.blood||'-'}\n`;
+        s += `👤 ${p.name}\n🆔 ${p.code}\n📱 ${p.phone}\n🎂 DOB: ${p.dob||'-'}\n⚧ ${p.gender||'-'}\n🩸 Blood: ${p.blood||'-'}\n🗺️ State: ${p.stateName||'-'}\n`;
+        if(p.hmo) s += `🏥 HMO: ${p.hmo}\n`;
         s += p.allergy ? `⚠️ ALLERGY: ${p.allergy.toUpperCase()}\n` : `✅ No Known Allergies\n`;
         s += `\n📋 VISIT HISTORY\n──────────────\n`;
-        if(p.visits?.length) { p.visits.slice().reverse().forEach(v => { s += `\n📅 ${v.date} — ${v.hospitalName||'Unknown'}\n`; if(v.doctorName) s += `Dr. ${v.doctorName}\n`; if(v.diagnosis) s += `Diagnosis: ${v.diagnosis}\n`; if(v.medications) s += `Medications: ${v.medications}\n`; if(v.followup) s += `Follow-up: ${v.followup}\n`; if(v.labResult) s += `Lab (${v.labResult.testType}): ${v.labResult.result}\n`; if(v.pharmacistNote) s += `Pharmacist Note: ${v.pharmacistNote}\n`; s += `─────────────\n`; }); }
-        else s += `No visits recorded yet.\n`;
+        if(p.visits?.length) { p.visits.slice().reverse().forEach(v => { s += `\n📅 ${v.date} — ${v.hospitalName||'Unknown'}\n`; if(v.doctorName) s += `Dr. ${v.doctorName}\n`; if(v.diagnosis) s += `Diagnosis: ${v.diagnosis}\n`; if(v.medications) s += `Medications: ${v.medications}\n`; if(v.labResult) s += `Lab (${v.labResult.testType}): ${v.labResult.result}\n`; if(v.pharmacistNote) s += `Pharmacist: ${v.pharmacistNote}\n`; if(v.followup) s += `Follow-up: ${v.followup}\n`; s += `─────────────\n`; }); }
+        else s += `No visits yet.\n`;
         s += `\nGenerated: ${today}\nMEDITRACK — Unified Patient Health Records Nigeria`;
         document.getElementById('share-content').textContent = s;
         document.getElementById('detail-view').style.display = 'none';
@@ -870,15 +1041,10 @@
     window.printShareContent = function() { const c = document.getElementById('share-content').textContent; const w = window.open('','_blank'); w.document.write(`<html><head><title>Patient Summary</title><style>body{font-family:monospace;padding:20px;white-space:pre-wrap;font-size:14px;}</style></head><body>${c}<script>window.print();<\/script></body></html>`); }
 
     // REFERRAL
-    window.generateReferral = function() {
-        document.getElementById('referral-doctor').value = currentUser.name || '';
-        document.getElementById('detail-view').style.display = 'none';
-        document.getElementById('referral-view').style.display = 'block';
-    }
+    window.generateReferral = function() { document.getElementById('referral-doctor').value = currentUser.name || ''; document.getElementById('detail-view').style.display = 'none'; document.getElementById('referral-view').style.display = 'block'; }
 
     window.generateReferralLetter = async function() {
-        const p = patients.find(p => p.id === currentReferralPatientId);
-        if(!p) return;
+        const p = patients.find(p => p.id === currentReferralPatientId); if(!p) return;
         const doctor = document.getElementById('referral-doctor').value;
         const to = document.getElementById('referral-to').value;
         const reason = document.getElementById('referral-reason').value;
@@ -888,31 +1054,8 @@
         const today = new Date().toLocaleDateString('en-GB');
         const last = p.visits?.length ? p.visits[p.visits.length-1] : null;
         const urgencyText = urgency === 'urgent' ? '🔴 URGENT' : urgency === 'emergency' ? '🚨 EMERGENCY' : 'Routine';
-
-        try {
-            await addDoc(collection(db, 'referrals'), {
-                patientId: p.id, patientCode: p.code, patientName: p.name,
-                fromHospital: currentHospital.name, fromHospitalCode: currentHospital.code,
-                toHospital: to, doctorName: doctor, reason, urgency, notes,
-                date: today, status: 'sent', createdAt: new Date().toISOString()
-            });
-        } catch(e) { console.error('Referral save error:', e); }
-
-        const letter = `<div style="text-align:right;font-size:13px;color:#666;margin-bottom:15px;">Date: ${today}</div>
-        <div style="font-size:18px;font-weight:bold;color:#0066cc;text-align:center;margin-bottom:5px;">🏥 MEDITRACK</div>
-        <div style="text-align:center;font-size:12px;color:#666;margin-bottom:15px;">Unified Patient Health Records Nigeria</div>
-        <div style="background:#f8f9fa;padding:10px;border-radius:8px;margin-bottom:12px;font-size:13px;"><strong>FROM:</strong> ${currentHospital.name}<br><strong>TO:</strong> ${to}<br><strong>RE:</strong> Referral — ${urgencyText}</div>
-        <p style="font-size:14px;margin-bottom:12px;">Dear Colleague,</p>
-        <div style="background:#e8f4fd;border:1px solid #0066cc;border-radius:10px;padding:15px;margin-bottom:12px;">
-            <div style="font-weight:bold;font-size:15px;margin-bottom:8px;">PATIENT DETAILS</div>
-            <div style="font-size:14px;line-height:1.8;"><strong>Name:</strong> ${p.name}<br><strong>Code:</strong> ${p.code}<br><strong>Phone:</strong> ${p.phone}<br><strong>DOB:</strong> ${p.dob}<br><strong>Gender:</strong> ${p.gender}<br><strong>Blood:</strong> ${p.blood||'Unknown'}<br>${p.allergy ? `<strong style="color:red;">⚠️ ALLERGY:</strong> <span style="color:red;font-weight:bold;">${p.allergy.toUpperCase()}</span>` : '<strong style="color:green;">✅ No Known Allergies</strong>'}</div>
-        </div>
-        ${last ? `<div style="background:#f8f9fa;border-radius:10px;padding:12px;margin-bottom:12px;font-size:13px;">${last.diagnosis ? `<strong>Last Diagnosis:</strong> ${last.diagnosis}<br>` : ''}${last.medications ? `<strong>Current Medications:</strong> ${last.medications}` : ''}</div>` : ''}
-        <div style="background:#fff8e1;border:1px solid #ffc107;border-radius:10px;padding:12px;margin-bottom:12px;"><strong style="color:#f57f17;">REASON:</strong><p style="font-size:14px;margin-top:5px;">${reason}</p></div>
-        ${notes ? `<div style="background:#f8f9fa;border-radius:10px;padding:12px;margin-bottom:12px;"><strong>NOTES:</strong><p style="font-size:14px;margin-top:5px;">${notes}</p></div>` : ''}
-        <p style="font-size:13px;margin-bottom:15px;">Search patient code <strong>${p.code}</strong> on MEDITRACK for full digital records.</p>
-        <div style="margin-top:25px;font-size:14px;"><strong>Dr. ${doctor}</strong><br>${currentHospital.name} — ${today}<br><div style="margin-top:25px;border-top:1px solid #ddd;padding-top:8px;color:#999;font-size:12px;">Signature & Stamp</div></div>`;
-
+        try { await addDoc(collection(db, 'referrals'), { patientId: p.id, patientCode: p.code, patientName: p.name, fromHospital: currentHospital.name, fromHospitalCode: currentHospital.code, toHospital: to, doctorName: doctor, reason, urgency, notes, date: today, status: 'sent', createdAt: new Date().toISOString() }); } catch(e) {}
+        const letter = `<div style="text-align:right;font-size:13px;color:#666;margin-bottom:15px;">Date: ${today}</div><div style="font-size:18px;font-weight:bold;color:#0066cc;text-align:center;margin-bottom:5px;">🏥 MEDITRACK</div><div style="text-align:center;font-size:12px;color:#666;margin-bottom:15px;">Unified Patient Health Records Nigeria</div><div style="background:#f8f9fa;padding:10px;border-radius:8px;margin-bottom:12px;font-size:13px;"><strong>FROM:</strong> ${currentHospital.name} (${currentHospital.stateName})<br><strong>TO:</strong> ${to}<br><strong>RE:</strong> Referral — ${urgencyText}</div><p style="font-size:14px;margin-bottom:12px;">Dear Colleague,</p><div style="background:#e8f4fd;border:1px solid #0066cc;border-radius:10px;padding:15px;margin-bottom:12px;"><div style="font-weight:bold;font-size:15px;margin-bottom:8px;">PATIENT DETAILS</div><div style="font-size:14px;line-height:1.8;"><strong>Name:</strong> ${p.name}<br><strong>Code:</strong> <span style="font-family:monospace;">${p.code}</span><br><strong>Phone:</strong> ${p.phone}<br><strong>DOB:</strong> ${p.dob}<br><strong>Gender:</strong> ${p.gender}<br><strong>Blood:</strong> ${p.blood||'Unknown'}<br>${p.allergy ? `<strong style="color:red;">⚠️ ALLERGY:</strong> <span style="color:red;font-weight:bold;">${p.allergy.toUpperCase()}</span>` : '<strong style="color:green;">✅ No Known Allergies</strong>'}</div></div>${last ? `<div style="background:#f8f9fa;border-radius:10px;padding:12px;margin-bottom:12px;font-size:13px;">${last.diagnosis ? `<strong>Last Diagnosis:</strong> ${last.diagnosis}<br>` : ''}${last.medications ? `<strong>Current Medications:</strong> ${last.medications}` : ''}</div>` : ''}<div style="background:#fff8e1;border:1px solid #ffc107;border-radius:10px;padding:12px;margin-bottom:12px;"><strong style="color:#f57f17;">REASON:</strong><p style="font-size:14px;margin-top:5px;">${reason}</p></div>${notes ? `<div style="background:#f8f9fa;border-radius:10px;padding:12px;margin-bottom:12px;"><strong>NOTES:</strong><p style="font-size:14px;margin-top:5px;">${notes}</p></div>` : ''}<p style="font-size:13px;margin-bottom:15px;">Search <strong style="font-family:monospace;">${p.code}</strong> on MEDITRACK for complete digital records.</p><div style="margin-top:25px;font-size:14px;"><strong>Dr. ${doctor}</strong><br>${currentHospital.name} — ${today}<br><div style="margin-top:25px;border-top:1px solid #ddd;padding-top:8px;color:#999;font-size:12px;">Signature & Stamp</div></div>`;
         document.getElementById('referral-content').innerHTML = letter;
         document.getElementById('referral-view').style.display = 'none';
         document.getElementById('referral-preview-view').style.display = 'block';
@@ -920,19 +1063,76 @@
 
     window.printReferralLetter = function() { const c = document.getElementById('referral-content').innerHTML; const w = window.open('','_blank'); w.document.write(`<html><head><title>Referral Letter</title><style>body{font-family:Arial,sans-serif;padding:30px;max-width:700px;margin:0 auto;}</style></head><body>${c}<script>window.print();<\/script></body></html>`); }
     window.copyReferralWhatsApp = function() {
-        const p = patients.find(p => p.id === currentReferralPatientId);
-        if(!p) return;
+        const p = patients.find(p => p.id === currentReferralPatientId); if(!p) return;
         const text = `MEDITRACK REFERRAL\nPatient: ${p.name} (${p.code})\nFrom: ${currentHospital.name}\nTo: ${document.getElementById('referral-to').value}\nReason: ${document.getElementById('referral-reason').value}\n${p.allergy ? '⚠️ ALLERGY: ' + p.allergy.toUpperCase() : '✅ No Known Allergies'}`;
         navigator.clipboard.writeText(text).then(() => alert('✅ Copied!')).catch(() => {});
     }
 
-    // NURSE VITALS
+    // NURSE — TAB SWITCHING
+    window.switchNurseTab = function(tab) {
+        document.getElementById('nurse-tab-returning').classList.toggle('active', tab === 'returning');
+        document.getElementById('nurse-tab-new').classList.toggle('active', tab === 'new');
+        document.getElementById('nurse-returning-section').style.display = tab === 'returning' ? 'block' : 'none';
+        document.getElementById('nurse-new-section').style.display = tab === 'new' ? 'block' : 'none';
+    }
+
+    // RETURNING PATIENT SEARCH
+    window.searchReturningPatient = function() {
+        const q = document.getElementById('returning-search').value.toLowerCase().trim();
+        const result = document.getElementById('returning-result');
+        const form = document.getElementById('returning-patient-form');
+        if(q.length < 1) { result.innerHTML = ''; form.style.display = 'none'; selectedReturningPatient = null; return; }
+        const found = patients.find(p => p.code.toLowerCase() === q || p.phone === q || p.name.toLowerCase().includes(q));
+        if(found) {
+            selectedReturningPatient = found;
+            result.innerHTML = `<div style="background:#e8f4fd;border:1px solid #0066cc;border-radius:8px;padding:8px;font-size:13px;color:#0066cc;">✅ Patient found — fill vitals below and submit</div>`;
+            document.getElementById('returning-patient-name').textContent = found.name;
+            document.getElementById('returning-patient-code').textContent = found.code;
+            const lastVisit = found.visits?.length ? found.visits[found.visits.length-1] : null;
+            document.getElementById('returning-patient-info').textContent = `${found.gender} • ${found.blood||'Unknown'} • Last visit: ${lastVisit ? lastVisit.date + ' at ' + lastVisit.hospitalName : 'First visit'}`;
+            const allergyWarning = document.getElementById('returning-allergy-warning');
+            if(found.allergy) { allergyWarning.style.display = 'block'; allergyWarning.textContent = '⚠️ KNOWN ALLERGY: ' + found.allergy.toUpperCase(); }
+            else { allergyWarning.style.display = 'none'; }
+            form.style.display = 'block';
+        } else {
+            selectedReturningPatient = null;
+            result.innerHTML = '<div style="background:#fff0f0;border:1px solid #ff4444;border-radius:8px;padding:8px;font-size:13px;color:#ff4444;">❌ Patient not found. Check code or phone number.</div>';
+            form.style.display = 'none';
+        }
+    }
+
+    window.submitReturningVitals = async function() {
+        if(!selectedReturningPatient) { alert('Please find a patient first'); return; }
+        const nurseName = document.getElementById('returning-nurse-name').value;
+        if(!nurseName) { alert('Please enter nurse name'); return; }
+        const newVisit = {
+            date: new Date().toLocaleDateString('en-GB'), hospitalName: currentHospital.name, nurseName,
+            status: 'pending-doctor', patientStatus: 'pending',
+            vitals: { temperature: document.getElementById('ret-temp').value, pulse: document.getElementById('ret-pulse').value, bp: document.getElementById('ret-bp').value, weight: document.getElementById('ret-weight').value, rr: document.getElementById('ret-rr').value, spo2: document.getElementById('ret-spo2').value },
+            nurseNotes: document.getElementById('ret-notes').value,
+            complaint: '', diagnosis: '', medications: '', doctorName: '', notes: '', followup: ''
+        };
+        try {
+            setStatus('🔄 Saving...');
+            await updateDoc(doc(db, 'patients', selectedReturningPatient.id), { visits: [...(selectedReturningPatient.visits||[]), newVisit] });
+            setStatus('🟢 Vitals saved — patient queued for doctor');
+            alert(`✅ ${selectedReturningPatient.name} queued for doctor review`);
+            document.getElementById('returning-search').value = '';
+            document.getElementById('returning-result').innerHTML = '';
+            document.getElementById('returning-patient-form').style.display = 'none';
+            ['ret-temp','ret-pulse','ret-bp','ret-weight','ret-rr','ret-spo2','ret-notes'].forEach(id => document.getElementById(id).value = '');
+            selectedReturningPatient = null;
+            showView('dashboard');
+        } catch(e) { setStatus('🔴 Error: ' + e.message); }
+    }
+
+    // NURSE NEW PATIENT
     window.findPatientForNurse = function() {
         const q = document.getElementById('nurse-patient-search').value.toLowerCase();
         const r = document.getElementById('nurse-patient-result');
         if(q.length < 1) { r.textContent = ''; selectedPatientForNurse = null; return; }
         const found = patients.find(p => p.name.toLowerCase().includes(q) || p.code.toLowerCase().includes(q));
-        if(found) { selectedPatientForNurse = found; r.innerHTML = `✅ <strong>${found.name}</strong> (${found.code})${found.allergy ? ` <span style="color:red;">⚠️ ${found.allergy}</span>` : ''}`; r.style.color = '#4CAF50'; }
+        if(found) { selectedPatientForNurse = found; r.innerHTML = `✅ <strong>${found.name}</strong> <span style="font-family:monospace;">(${found.code})</span>${found.allergy ? ` <span style="color:red;">⚠️ ${found.allergy}</span>` : ''}`; r.style.color = '#4CAF50'; }
         else { selectedPatientForNurse = null; r.textContent = '❌ Not found'; r.style.color = 'red'; }
     }
 
@@ -941,13 +1141,7 @@
         const nurseName = document.getElementById('nurse-name').value;
         const hospital = document.getElementById('nurse-hospital').value;
         if(!nurseName || !hospital) { alert('Please enter nurse name and hospital'); return; }
-        const newVisit = {
-            date: new Date().toLocaleDateString('en-GB'), hospitalName: hospital, nurseName,
-            status: 'pending-doctor', patientStatus: 'pending',
-            vitals: { temperature: document.getElementById('vitals-temp').value, pulse: document.getElementById('vitals-pulse').value, bp: document.getElementById('vitals-bp').value, weight: document.getElementById('vitals-weight').value, rr: document.getElementById('vitals-rr').value, spo2: document.getElementById('vitals-spo2').value },
-            nurseNotes: document.getElementById('nurse-notes').value,
-            complaint: '', diagnosis: '', medications: '', doctorName: '', notes: '', followup: ''
-        };
+        const newVisit = { date: new Date().toLocaleDateString('en-GB'), hospitalName: hospital, nurseName, status: 'pending-doctor', patientStatus: 'pending', vitals: { temperature: document.getElementById('vitals-temp').value, pulse: document.getElementById('vitals-pulse').value, bp: document.getElementById('vitals-bp').value, weight: document.getElementById('vitals-weight').value, rr: document.getElementById('vitals-rr').value, spo2: document.getElementById('vitals-spo2').value }, nurseNotes: document.getElementById('nurse-notes').value, complaint: '', diagnosis: '', medications: '', doctorName: '', notes: '', followup: '' };
         try {
             setStatus('🔄 Saving...');
             await updateDoc(doc(db, 'patients', selectedPatientForNurse.id), { visits: [...(selectedPatientForNurse.visits||[]), newVisit] });
@@ -963,74 +1157,76 @@
     // DOCTOR TABS
     window.switchDoctorTab = function(tab) {
         ['pending','results','flags','referrals'].forEach(t => {
-            document.getElementById('doctor-tab-' + t).classList.remove('active');
-            const listId = t === 'pending' ? 'pending-visits-list' : t === 'results' ? 'lab-results-list' : t === 'flags' ? 'pharmacy-flags-list' : 'referrals-inbox-list';
-            document.getElementById(listId).style.display = 'none';
+            document.getElementById('doctor-tab-'+t).classList.remove('active');
+            const id = t==='pending'?'pending-visits-list':t==='results'?'lab-results-list':t==='flags'?'pharmacy-flags-list':'referrals-inbox-list';
+            document.getElementById(id).style.display = 'none';
         });
-        document.getElementById('doctor-tab-' + tab).classList.add('active');
-        const map = { pending: 'pending-visits-list', results: 'lab-results-list', flags: 'pharmacy-flags-list', referrals: 'referrals-inbox-list' };
+        document.getElementById('doctor-tab-'+tab).classList.add('active');
+        const map = {pending:'pending-visits-list',results:'lab-results-list',flags:'pharmacy-flags-list',referrals:'referrals-inbox-list'};
         document.getElementById(map[tab]).style.display = 'block';
-        if(tab === 'pending') renderPendingVisits();
-        else if(tab === 'results') renderLabResults();
-        else if(tab === 'flags') renderDoctorFlags();
-        else if(tab === 'referrals') renderReferralsInbox();
+        if(tab==='pending') renderPendingVisits(); else if(tab==='results') renderLabResults(); else if(tab==='flags') renderDoctorFlags(); else renderReferralsInbox();
     }
 
     function renderPendingVisits() {
         const list = document.getElementById('pending-visits-list');
         let html = '', count = 0;
-        patients.forEach(p => { if(p.visits) p.visits.forEach((v,i) => { if(v.status === 'pending-doctor' && v.hospitalName === currentHospital.name) { count++; html += `<div class="pending-visit-card" onclick="openConsultation('${p.id}',${i})"><div style="font-weight:bold;font-size:16px;">${p.name}</div><div style="color:#0066cc;font-size:14px;">${p.code}</div><div style="font-size:12px;color:#666;margin-top:3px;">📅 ${v.date} — 👩‍⚕️ ${v.nurseName}</div>${p.allergy ? `<div class="allergy-badge">⚠️ ${p.allergy}</div>` : ''}<span class="status-badge status-pending">⏳ Awaiting Review</span></div>`; } }); });
-        list.innerHTML = count ? `<div class="section-title">${count} PATIENT(S) WAITING</div>${html}` : '<div class="empty-search"><div class="icon">✅</div><p>No pending visits</p></div>';
+        patients.forEach(p => { if(p.visits) p.visits.forEach((v,i) => { if(v.status==='pending-doctor' && v.hospitalName===currentHospital.name) { count++; html += `<div class="pending-visit-card" onclick="openConsultation('${p.id}',${i})"><div style="font-weight:bold;font-size:16px;">${p.name}</div><div style="color:#0066cc;font-size:13px;font-family:monospace;">${p.code}</div><div style="font-size:12px;color:#666;margin-top:3px;">📅 ${v.date} — 👩‍⚕️ ${v.nurseName}</div>${v.vitals ? `<div style="font-size:11px;color:#555;margin-top:3px;">🌡️ ${v.vitals.temperature||'-'}°C &nbsp; ❤️ ${v.vitals.pulse||'-'} bpm &nbsp; 🩺 ${v.vitals.bp||'-'}</div>` : ''}${p.allergy ? `<div class="allergy-badge">⚠️ ${p.allergy}</div>` : ''}<span class="status-badge status-pending" style="margin-top:6px;">⏳ Awaiting Review</span></div>`; } }); });
+        list.innerHTML = count ? `<div class="section-title">${count} PATIENT(S) WAITING</div>${html}` : '<div class="empty-search"><div class="icon">✅</div><p>No pending visits at your hospital</p></div>';
     }
 
     function renderLabResults() {
         const list = document.getElementById('lab-results-list');
-        const completed = labRequests.filter(l => l.status === 'completed' && l.hospitalName === currentHospital.name);
-        if(!completed.length) { list.innerHTML = '<div class="empty-search"><div class="icon">🔬</div><p>No lab results yet</p></div>'; return; }
-        list.innerHTML = `<div class="section-title">${completed.length} RESULT(S) READY</div>`;
-        completed.forEach(l => { list.innerHTML += `<div style="background:white;margin:10px 15px;border-radius:10px;padding:15px;box-shadow:0 2px 5px rgba(0,0,0,0.1);border-left:4px solid #4CAF50;"><div style="font-weight:bold;font-size:16px;">${l.patientName}</div><div style="color:#009688;font-size:14px;">${l.patientCode}</div><div style="font-size:14px;margin-top:5px;"><strong>Test:</strong> ${l.testType}</div><div style="background:#e8f5e9;padding:10px;border-radius:8px;margin-top:8px;"><div style="font-size:12px;color:#666;">RESULT:</div><div style="font-size:16px;font-weight:bold;color:#2e7d32;">${l.result}</div></div><div style="font-size:12px;color:#666;margin-top:5px;">📅 ${l.date} — ${l.completedBy||'Lab'}</div><button onclick="openPostResult('${l.id}')" style="background:#0066cc;color:white;border:none;padding:8px;border-radius:8px;cursor:pointer;font-size:13px;margin-top:10px;width:100%;">🔄 Update Treatment</button></div>`; });
+        const completed = labRequests.filter(l => l.status==='completed' && l.hospitalName===currentHospital.name && !l.reviewedByDoctor);
+        if(!completed.length) { list.innerHTML = '<div class="empty-search"><div class="icon">🔬</div><p>No new lab results</p></div>'; return; }
+        list.innerHTML = `<div class="section-title">${completed.length} NEW RESULT(S)</div>`;
+        completed.forEach(l => { list.innerHTML += `<div style="background:white;margin:10px 15px;border-radius:10px;padding:15px;box-shadow:0 2px 5px rgba(0,0,0,0.1);border-left:4px solid #4CAF50;"><div style="font-weight:bold;font-size:16px;">${l.patientName}</div><div style="color:#009688;font-size:13px;font-family:monospace;">${l.patientCode}</div><div style="font-size:14px;margin-top:5px;font-weight:bold;">🔬 ${l.testType}</div><div style="background:#e8f5e9;padding:10px;border-radius:8px;margin-top:8px;"><div style="font-size:12px;color:#666;">RESULT:</div><div style="font-size:16px;font-weight:bold;color:#2e7d32;">${l.result}</div></div><div style="font-size:12px;color:#666;margin-top:5px;">📅 ${l.date} — ${l.completedBy||'Lab'}</div><button onclick="openPostResult('${l.id}')" style="background:#0066cc;color:white;border:none;padding:8px;border-radius:8px;cursor:pointer;font-size:13px;margin-top:10px;width:100%;">🔄 Update Treatment Based On Result</button></div>`; });
     }
 
     function renderDoctorFlags() {
         const list = document.getElementById('pharmacy-flags-list');
-        const pending = pharmacyFlags.filter(f => f.status === 'pending' && f.hospitalName === currentHospital.name);
+        const pending = pharmacyFlags.filter(f => f.status==='pending' && f.hospitalName===currentHospital.name);
         if(!pending.length) { list.innerHTML = '<div class="empty-search"><div class="icon">✅</div><p>No flags from pharmacy</p></div>'; return; }
         list.innerHTML = `<div class="section-title">${pending.length} FLAG(S)</div>`;
-        pending.forEach(f => { list.innerHTML += `<div style="background:white;margin:10px 15px;border-radius:10px;padding:15px;box-shadow:0 2px 5px rgba(0,0,0,0.1);border-left:4px solid #ff8800;"><div style="font-weight:bold;">${f.patientName} (${f.patientCode})</div><div class="flag-card"><div style="font-size:12px;color:#f57f17;font-weight:bold;">⚠️ PHARMACIST FLAG</div><div style="font-size:14px;margin-top:3px;">${f.flagMessage}</div><div style="font-size:12px;color:#666;">By: ${f.flaggedBy} — ${f.date}</div></div><button onclick="dismissFlag('${f.id}')" style="background:#4CAF50;color:white;border:none;padding:8px;border-radius:8px;cursor:pointer;font-size:13px;margin-top:10px;">✅ Acknowledge</button></div>`; });
+        pending.forEach(f => { list.innerHTML += `<div style="background:white;margin:10px 15px;border-radius:10px;padding:15px;box-shadow:0 2px 5px rgba(0,0,0,0.1);border-left:4px solid #ff8800;"><div style="font-weight:bold;">${f.patientName} <span style="font-family:monospace;font-size:13px;">(${f.patientCode})</span></div><div class="flag-card"><div style="font-size:12px;color:#f57f17;font-weight:bold;">⚠️ PHARMACIST FLAG</div><div style="font-size:14px;margin-top:3px;">${f.flagMessage}</div><div style="font-size:12px;color:#666;">By: ${f.flaggedBy} — ${f.date}</div></div><button onclick="dismissFlag('${f.id}')" style="background:#4CAF50;color:white;border:none;padding:8px;border-radius:8px;cursor:pointer;font-size:13px;margin-top:10px;">✅ Acknowledge</button></div>`; });
     }
 
     function renderReferralsInbox() {
         const list = document.getElementById('referrals-inbox-list');
-        const incoming = referrals.filter(r => r.toHospital.toLowerCase().includes(currentHospital.name.toLowerCase()) && r.status === 'sent');
+        const incoming = referrals.filter(r => r.toHospital.toLowerCase().includes(currentHospital.name.toLowerCase()) && r.status==='sent');
         if(!incoming.length) { list.innerHTML = '<div class="empty-search"><div class="icon">📨</div><p>No incoming referrals</p></div>'; return; }
         list.innerHTML = `<div class="section-title">${incoming.length} INCOMING REFERRAL(S)</div>`;
-        incoming.forEach(r => { list.innerHTML += `<div class="referral-inbox-card"><div style="font-weight:bold;font-size:16px;">${r.patientName}</div><div style="color:#0066cc;font-size:14px;">${r.patientCode}</div><div style="font-size:13px;color:#666;margin-top:5px;">📤 From: ${r.fromHospital}</div><div style="font-size:13px;color:#666;">👨‍⚕️ Dr. ${r.doctorName}</div><div style="font-size:13px;color:#666;">📅 ${r.date}</div><div style="background:#fff8e1;border:1px solid #ffc107;border-radius:8px;padding:10px;margin-top:8px;"><strong style="color:#f57f17;font-size:12px;">REASON:</strong><p style="font-size:14px;">${r.reason}</p></div><button onclick="acknowledgeReferral('${r.id}','${r.patientCode}')" style="background:#0066cc;color:white;border:none;padding:8px;border-radius:8px;cursor:pointer;font-size:13px;margin-top:10px;width:100%;">✅ Acknowledge & Find Patient</button></div>`; });
+        incoming.forEach(r => { list.innerHTML += `<div class="referral-inbox-card"><div style="font-weight:bold;font-size:16px;">${r.patientName}</div><div style="color:#0066cc;font-size:13px;font-family:monospace;">${r.patientCode}</div><div style="font-size:13px;color:#666;margin-top:5px;">📤 From: ${r.fromHospital}</div><div style="font-size:13px;color:#666;">👨‍⚕️ Dr. ${r.doctorName} — 📅 ${r.date}</div>${r.urgency==='urgent'?'<div style="color:red;font-weight:bold;font-size:13px;margin-top:3px;">🔴 URGENT</div>':''}<div style="background:#fff8e1;border:1px solid #ffc107;border-radius:8px;padding:10px;margin-top:8px;"><strong style="color:#f57f17;font-size:12px;">REASON:</strong><p style="font-size:14px;">${r.reason}</p></div><button onclick="acknowledgeReferral('${r.id}','${r.patientCode}')" style="background:#0066cc;color:white;border:none;padding:8px;border-radius:8px;cursor:pointer;font-size:13px;margin-top:10px;width:100%;">✅ Acknowledge & Find Patient</button></div>`; });
     }
 
     window.acknowledgeReferral = async function(referralId, patientCode) {
-        try {
-            await updateDoc(doc(db, 'referrals', referralId), { status: 'acknowledged', acknowledgedAt: new Date().toISOString() });
-            document.getElementById('search-input').value = patientCode;
-            showView('patients');
-            searchPatients();
-        } catch(e) { setStatus('🔴 Error: ' + e.message); }
+        try { await updateDoc(doc(db, 'referrals', referralId), { status: 'acknowledged', acknowledgedAt: new Date().toISOString() }); document.getElementById('search-input').value = patientCode; showView('patients'); searchPatients(); } catch(e) {}
     }
 
-    window.dismissFlag = async function(flagId) {
-        try { await updateDoc(doc(db, 'pharmacyFlags', flagId), { status: 'dismissed', dismissedBy: currentUser.name, dismissedAt: new Date().toISOString() }); setStatus('🟢 Flag dismissed'); } catch(e) { setStatus('🔴 Error'); }
-    }
+    window.dismissFlag = async function(flagId) { try { await updateDoc(doc(db, 'pharmacyFlags', flagId), { status: 'dismissed', dismissedBy: currentUser.name, dismissedAt: new Date().toISOString() }); } catch(e) {} }
 
     window.openConsultation = function(patientId, visitIndex) {
-        const p = patients.find(p => p.id === patientId);
-        if(!p) return;
+        const p = patients.find(p => p.id === patientId); if(!p) return;
         selectedVisitForDoctor = { patientId, visitIndex, patient: p };
+        consultingPatientAllergy = p.allergy || '';
         document.getElementById('doctor-view').style.display = 'none';
         document.getElementById('doctor-form-view').style.display = 'block';
         document.getElementById('consult-patient-name').textContent = p.name;
         document.getElementById('consult-patient-code').textContent = p.code + (p.allergy ? ' ⚠️ Allergic to ' + p.allergy : '');
         document.getElementById('doctor-name').value = currentUser.name || '';
+        document.getElementById('doctor-medications').value = '';
+        document.getElementById('drug-warning-live').style.display = 'none';
         const v = p.visits[visitIndex];
-        document.getElementById('consult-vitals').innerHTML = `<div class="vitals-grid"><div class="vitals-item"><div class="vitals-value">${v.vitals?.temperature||'-'}°C</div><div class="vitals-label">Temperature</div></div><div class="vitals-item"><div class="vitals-value">${v.vitals?.pulse||'-'}</div><div class="vitals-label">Pulse</div></div><div class="vitals-item"><div class="vitals-value">${v.vitals?.bp||'-'}</div><div class="vitals-label">BP</div></div><div class="vitals-item"><div class="vitals-value">${v.vitals?.weight||'-'} kg</div><div class="vitals-label">Weight</div></div><div class="vitals-item"><div class="vitals-value">${v.vitals?.rr||'-'}</div><div class="vitals-label">Resp Rate</div></div><div class="vitals-item"><div class="vitals-value">${v.vitals?.spo2||'-'}%</div><div class="vitals-label">O2 Sat</div></div></div>${v.nurseNotes ? `<div style="margin-top:10px;font-size:13px;color:#555;">👩‍⚕️ Nurse Notes: ${v.nurseNotes}</div>` : ''}`;
+        document.getElementById('consult-vitals').innerHTML = `<div class="vitals-grid"><div class="vitals-item"><div class="vitals-value">${v.vitals?.temperature||'-'}°C</div><div class="vitals-label">Temperature</div></div><div class="vitals-item"><div class="vitals-value">${v.vitals?.pulse||'-'}</div><div class="vitals-label">Pulse</div></div><div class="vitals-item"><div class="vitals-value">${v.vitals?.bp||'-'}</div><div class="vitals-label">BP</div></div><div class="vitals-item"><div class="vitals-value">${v.vitals?.weight||'-'} kg</div><div class="vitals-label">Weight</div></div><div class="vitals-item"><div class="vitals-value">${v.vitals?.rr||'-'}</div><div class="vitals-label">Resp Rate</div></div><div class="vitals-item"><div class="vitals-value">${v.vitals?.spo2||'-'}%</div><div class="vitals-label">O2 Sat</div></div></div>${v.nurseNotes ? `<div style="margin-top:10px;font-size:13px;color:#555;background:#f0f4f8;padding:8px;border-radius:6px;">👩‍⚕️ ${v.nurseNotes}</div>` : ''}`;
+    }
+
+    // LIVE DRUG WARNING
+    window.checkDrugWarningLive = function() {
+        const meds = document.getElementById('doctor-medications').value;
+        const warningEl = document.getElementById('drug-warning-live');
+        if(!consultingPatientAllergy || !meds) { warningEl.style.display = 'none'; return; }
+        const warning = checkDrugInteraction(consultingPatientAllergy, meds);
+        if(warning) { warningEl.style.display = 'block'; warningEl.textContent = warning; }
+        else { warningEl.style.display = 'none'; }
     }
 
     window.completeConsultation = async function() {
@@ -1045,40 +1241,27 @@
         const sendPharmacy = document.getElementById('doctor-send-pharmacy').value;
         const requestLab = document.getElementById('doctor-request-lab').value;
         if(!doctorName || !complaint || !diagnosis) { alert('Please fill doctor name, complaint and diagnosis'); return; }
-
         const { patientId, visitIndex, patient } = selectedVisitForDoctor;
         const warning = checkDrugInteraction(patient.allergy, medications);
-        if(warning && !confirm(warning + '\n\nProceed?')) return;
-
+        if(warning && !confirm(warning + '\n\nProceed anyway?')) return;
         const selectedTests = [...document.querySelectorAll('#lab-tests-checkboxes input:checked')].map(cb => cb.value);
-
         try {
             setStatus('🔄 Completing...');
             const updatedVisits = [...patient.visits];
             updatedVisits[visitIndex] = { ...updatedVisits[visitIndex], status: 'completed', patientStatus, doctorName, complaint, diagnosis, medications, notes, followup };
             await updateDoc(doc(db, 'patients', patientId), { visits: updatedVisits });
-
-            if(sendPharmacy === 'yes' && medications) {
-                await addDoc(collection(db, 'prescriptions'), { patientId, patientCode: patient.code, patientName: patient.name, allergy: patient.allergy||'', medications, doctorName, hospitalName: currentHospital.name, hospitalCode: currentHospital.code, date: new Date().toLocaleDateString('en-GB'), status: 'pending', createdAt: new Date().toISOString() });
-            }
-
-            if(requestLab === 'yes' && selectedTests.length) {
-                for(const testType of selectedTests) {
-                    await addDoc(collection(db, 'labRequests'), { patientId, patientCode: patient.code, patientName: patient.name, testType, reason: document.getElementById('lab-reason').value, urgency: document.getElementById('lab-urgency').value, doctorName, hospitalName: currentHospital.name, hospitalCode: currentHospital.code, date: new Date().toLocaleDateString('en-GB'), status: 'pending', result: '', createdAt: new Date().toISOString() });
-                }
-            }
-
+            if(sendPharmacy==='yes' && medications) { await addDoc(collection(db, 'prescriptions'), { patientId, patientCode: patient.code, patientName: patient.name, allergy: patient.allergy||'', medications, doctorName, hospitalName: currentHospital.name, hospitalCode: currentHospital.code, date: new Date().toLocaleDateString('en-GB'), status: 'pending', createdAt: new Date().toISOString() }); }
+            if(requestLab==='yes' && selectedTests.length) { for(const testType of selectedTests) { await addDoc(collection(db, 'labRequests'), { patientId, patientCode: patient.code, patientName: patient.name, testType, reason: document.getElementById('lab-reason').value, urgency: document.getElementById('lab-urgency').value, doctorName, hospitalName: currentHospital.name, hospitalCode: currentHospital.code, date: new Date().toLocaleDateString('en-GB'), status: 'pending', result: '', createdAt: new Date().toISOString() }); } }
             setStatus('🟢 Consultation completed');
             document.getElementById('doctor-success-msg').style.display = 'block';
-            selectedVisitForDoctor = null;
+            selectedVisitForDoctor = null; consultingPatientAllergy = '';
             setTimeout(() => { document.getElementById('doctor-success-msg').style.display = 'none'; showView('doctor'); }, 2000);
         } catch(e) { setStatus('🔴 Error: ' + e.message); }
     }
 
-    // POST RESULT UPDATE
+    // POST RESULT
     window.openPostResult = function(labId) {
-        const lab = labRequests.find(l => l.id === labId);
-        if(!lab) return;
+        const lab = labRequests.find(l => l.id === labId); if(!lab) return;
         selectedLabResultForUpdate = lab;
         document.getElementById('doctor-view').style.display = 'none';
         document.getElementById('post-result-view').style.display = 'block';
@@ -1094,20 +1277,12 @@
         const postNotes = document.getElementById('post-notes').value;
         const postStatus = document.getElementById('post-status').value;
         const sendPharmacy = document.getElementById('post-send-pharmacy').value;
-        const patient = patients.find(p => p.id === selectedLabResultForUpdate.patientId);
-        if(!patient) return;
+        const patient = patients.find(p => p.id === selectedLabResultForUpdate.patientId); if(!patient) return;
         try {
             setStatus('🔄 Updating...');
-            const updatedVisits = patient.visits.map(v => {
-                if(v.hospitalName === selectedLabResultForUpdate.hospitalName && v.doctorName === selectedLabResultForUpdate.doctorName) {
-                    return { ...v, patientStatus: postStatus, postDiagnosis: postDiagnosis||v.diagnosis, postMedications, postNotes, labResult: { testType: selectedLabResultForUpdate.testType, result: selectedLabResultForUpdate.result, completedBy: selectedLabResultForUpdate.completedBy } };
-                }
-                return v;
-            });
+            const updatedVisits = patient.visits.map(v => { if(v.hospitalName===selectedLabResultForUpdate.hospitalName && v.doctorName===selectedLabResultForUpdate.doctorName) { return { ...v, patientStatus: postStatus, postDiagnosis: postDiagnosis||v.diagnosis, postMedications, postNotes, labResult: { testType: selectedLabResultForUpdate.testType, result: selectedLabResultForUpdate.result, completedBy: selectedLabResultForUpdate.completedBy } }; } return v; });
             await updateDoc(doc(db, 'patients', patient.id), { visits: updatedVisits });
-            if(sendPharmacy === 'yes' && postMedications) {
-                await addDoc(collection(db, 'prescriptions'), { patientId: patient.id, patientCode: patient.code, patientName: patient.name, allergy: patient.allergy||'', medications: postMedications, doctorName: selectedLabResultForUpdate.doctorName, hospitalName: currentHospital.name, hospitalCode: currentHospital.code, date: new Date().toLocaleDateString('en-GB'), status: 'pending', createdAt: new Date().toISOString() });
-            }
+            if(sendPharmacy==='yes' && postMedications) { await addDoc(collection(db, 'prescriptions'), { patientId: patient.id, patientCode: patient.code, patientName: patient.name, allergy: patient.allergy||'', medications: postMedications, doctorName: selectedLabResultForUpdate.doctorName, hospitalName: currentHospital.name, hospitalCode: currentHospital.code, date: new Date().toLocaleDateString('en-GB'), status: 'pending', createdAt: new Date().toISOString() }); }
             await updateDoc(doc(db, 'labRequests', selectedLabResultForUpdate.id), { reviewedByDoctor: true });
             setStatus('🟢 Treatment updated');
             document.getElementById('post-result-success').style.display = 'block';
@@ -1118,237 +1293,246 @@
 
     function checkDrugInteraction(allergy, meds) {
         if(!allergy || !meds) return null;
-        const w = drugWarnings[allergy.toLowerCase()];
-        if(w) for(const d of w) if(meds.toLowerCase().includes(d)) return `⚠️ ${meds} may interact with ${allergy}`;
+        const al = allergy.toLowerCase(); const ml = meds.toLowerCase();
+        // Check allergy-drug conflicts
+        const w = drugWarnings[al];
+        if(w) for(const d of w) if(ml.includes(d)) return `⚠️ WARNING: ${meds} may interact with known allergy to ${allergy}. Verify before prescribing.`;
+        // Check drug-drug interactions
+        for(const [drug, conflicts] of Object.entries(drugWarnings)) {
+            if(ml.includes(drug)) { for(const conflict of conflicts) { if(conflict !== drug && ml.includes(conflict)) return `⚠️ Drug Interaction: ${drug} and ${conflict} may interact. Verify dosages.`; } }
+        }
         return null;
     }
 
-    // PHARMACY — FULL REDESIGN
+    // PHARMACY
     window.switchPharmacyTab = function(tab) {
-        ['pending','dispensed','costs'].forEach(t => {
-            document.getElementById('pharm-tab-' + t).classList.remove('active');
-            document.getElementById('pharmacy-' + t + (t === 'costs' ? '-section' : '-list')).style.display = 'none';
-        });
-        document.getElementById('pharm-tab-' + tab).classList.add('active');
-        document.getElementById('pharmacy-' + tab + (tab === 'costs' ? '-section' : '-list')).style.display = 'block';
-        if(tab === 'pending') renderPharmacyPending();
-        else if(tab === 'dispensed') renderPharmacyDispensed();
-        else if(tab === 'costs') renderPharmacyCosts();
+        ['pending','dispensed','inventory','costs'].forEach(t => { document.getElementById('pharm-tab-'+t).classList.remove('active'); document.getElementById('pharmacy-'+t+(t==='costs'||t==='inventory'?'-section':'-list')).style.display = 'none'; });
+        document.getElementById('pharm-tab-'+tab).classList.add('active');
+        document.getElementById('pharmacy-'+tab+(tab==='costs'||tab==='inventory'?'-section':'-list')).style.display = 'block';
+        if(tab==='pending') renderPharmacyPending(); else if(tab==='dispensed') renderPharmacyDispensed(); else if(tab==='inventory') renderInventory(); else renderPharmacyCosts();
     }
 
     function renderPharmacyPending() {
-        const list = document.getElementById('pharmacy-pending-list');
-        if(!list) return;
-        const pending = prescriptions.filter(p => p.status === 'pending');
+        const list = document.getElementById('pharmacy-pending-list'); if(!list) return;
+        const pending = prescriptions.filter(p => p.status==='pending');
         if(!pending.length) { list.innerHTML = '<div class="empty-search"><div class="icon">✅</div><p>No pending prescriptions</p></div>'; return; }
-        list.innerHTML = `<div class="section-title">${pending.length} PENDING PRESCRIPTION(S)</div>`;
+        list.innerHTML = `<div class="section-title">${pending.length} PENDING</div>`;
         pending.forEach(p => {
-            list.innerHTML += `<div class="pharmacy-full-card">
-                <div class="pharmacy-card-header">
-                    <div style="font-size:16px;font-weight:bold;">${p.patientName}</div>
-                    <div style="font-size:13px;opacity:0.8;">${p.patientCode} — Dr. ${p.doctorName}</div>
-                </div>
-                <div class="pharmacy-card-body">
-                    ${p.allergy ? `<div style="background:#fff0f0;border:1px solid #ff4444;border-radius:8px;padding:10px;margin-bottom:10px;"><div style="color:#ff4444;font-weight:bold;font-size:13px;">⚠️ ALLERGIC TO: ${p.allergy.toUpperCase()}</div></div>` : '<div style="background:#f0fff0;border:1px solid #4CAF50;border-radius:8px;padding:8px;margin-bottom:10px;color:#4CAF50;font-size:13px;font-weight:bold;">✅ No Known Allergies</div>'}
-                    <div style="font-size:14px;margin-bottom:10px;"><strong>💊 Medications:</strong><br>${p.medications}</div>
-                    <div style="font-size:12px;color:#666;margin-bottom:10px;">📅 ${p.date} — ${p.hospitalName}</div>
-                    <div class="form-group">
-                        <label style="font-size:13px;">Pharmacist Note to Patient (plain language)</label>
-                        <textarea id="pharm-note-${p.id}" placeholder="e.g. Take this medicine with food. Avoid alcohol. Complete the full course even if you feel better." style="width:100%;padding:10px;border:1px solid #ddd;border-radius:8px;font-size:13px;height:70px;resize:none;"></textarea>
-                    </div>
-                    <div class="cost-input-row">
-                        <input type="number" id="drug-cost-${p.id}" placeholder="Drug cost (₦)">
-                        <button onclick="dispenseWithNote('${p.id}')">✅ Dispense</button>
-                    </div>
-                    <button class="btn-small btn-flag" onclick="flagToDoctor('${p.id}')" style="width:100%;margin-top:5px;">⚠️ Flag Concern to Doctor</button>
-                </div>
-            </div>`;
+            // Check inventory for prescribed drugs
+            const drugName = p.medications?.split(' ')[0]?.toLowerCase() || '';
+            const invItem = inventory.find(i => i.name.toLowerCase().includes(drugName) && i.hospitalCode === currentHospital.code);
+            const stockWarning = invItem && invItem.quantity <= invItem.reorderLevel ? `<div style="background:#fff0f0;border:1px solid #ff4444;border-radius:6px;padding:6px;margin-bottom:8px;font-size:12px;color:#ff4444;">⚠️ LOW STOCK: ${invItem.name} — ${invItem.quantity} units remaining</div>` : '';
+            list.innerHTML += `<div class="pharmacy-full-card"><div class="pharmacy-card-header"><div style="font-size:16px;font-weight:bold;">${p.patientName}</div><div style="font-size:12px;opacity:0.8;font-family:monospace;">${p.patientCode} — Dr. ${p.doctorName}</div></div><div class="pharmacy-card-body">${stockWarning}${p.allergy ? `<div style="background:#fff0f0;border:1px solid #ff4444;border-radius:8px;padding:8px;margin-bottom:8px;"><div style="color:#ff4444;font-weight:bold;font-size:12px;">⚠️ ALLERGIC TO: ${p.allergy.toUpperCase()}</div></div>` : '<div style="background:#f0fff0;border:1px solid #4CAF50;border-radius:8px;padding:6px;margin-bottom:8px;color:#4CAF50;font-size:12px;font-weight:bold;">✅ No Known Allergies</div>'}<div style="font-size:14px;margin-bottom:8px;"><strong>💊 Medications:</strong><br>${p.medications}</div><div style="font-size:12px;color:#666;margin-bottom:10px;">📅 ${p.date} — ${p.hospitalName}</div><div class="form-group"><label style="font-size:13px;">Note to Patient (plain language)</label><textarea id="pharm-note-${p.id}" placeholder="e.g. Take with food. Complete the full course. Avoid alcohol." style="width:100%;padding:10px;border:1px solid #ddd;border-radius:8px;font-size:13px;height:65px;resize:none;"></textarea></div><div class="cost-input-row"><input type="number" id="drug-cost-${p.id}" placeholder="Drug cost (₦)"><button onclick="dispenseWithNote('${p.id}')">✅ Dispense</button></div><button style="background:#ff8800;color:white;border:none;padding:8px;border-radius:8px;cursor:pointer;font-size:12px;width:100%;margin-top:5px;" onclick="flagToDoctor('${p.id}')">⚠️ Flag Concern to Doctor</button></div></div>`;
         });
     }
 
     function renderPharmacyDispensed() {
         const list = document.getElementById('pharmacy-dispensed-list');
-        const dispensed = prescriptions.filter(p => p.status === 'dispensed');
+        const dispensed = prescriptions.filter(p => p.status==='dispensed');
         if(!dispensed.length) { list.innerHTML = '<div class="empty-search"><div class="icon">💊</div><p>No dispensed prescriptions yet</p></div>'; return; }
         list.innerHTML = `<div class="section-title">${dispensed.length} DISPENSED</div>`;
-        dispensed.forEach(p => { list.innerHTML += `<div style="background:white;margin:8px 15px;border-radius:10px;padding:15px;box-shadow:0 2px 5px rgba(0,0,0,0.08);"><div style="font-weight:bold;">${p.patientName} (${p.patientCode})</div><div style="font-size:13px;color:#555;margin-top:5px;">💊 ${p.medications}</div><div style="font-size:12px;color:#666;margin-top:3px;">Dispensed by: ${p.dispensedBy||'Unknown'}</div>${p.drugCost ? `<div style="font-size:12px;color:#0066cc;margin-top:3px;">💰 Cost: ₦${p.drugCost.toLocaleString()}</div>` : ''}<div class="dispensed-badge" style="margin-top:5px;">✅ Dispensed</div></div>`; });
+        dispensed.forEach(p => { list.innerHTML += `<div style="background:white;margin:8px 15px;border-radius:10px;padding:15px;box-shadow:0 2px 5px rgba(0,0,0,0.08);"><div style="font-weight:bold;">${p.patientName} <span style="font-family:monospace;font-size:12px;">(${p.patientCode})</span></div><div style="font-size:13px;color:#555;margin-top:5px;">💊 ${p.medications}</div>${p.pharmacistNote ? `<div style="background:#f3e5f5;border-left:3px solid #9c27b0;padding:6px;border-radius:0 6px 6px 0;margin-top:5px;font-size:12px;color:#4a148c;">Note to patient: ${p.pharmacistNote}</div>` : ''}<div style="font-size:12px;color:#666;margin-top:3px;">By: ${p.dispensedBy||'Unknown'} — ${p.date}</div>${p.drugCost ? `<div style="font-size:12px;color:#0066cc;margin-top:3px;">💰 ₦${p.drugCost?.toLocaleString()}</div>` : ''}<div class="dispensed-badge" style="margin-top:5px;">✅ Dispensed</div></div>`; });
+    }
+
+    // DRUG INVENTORY
+    function renderInventory() {
+        const section = document.getElementById('pharmacy-inventory-section');
+        const hospitalInventory = inventory.filter(i => i.hospitalCode === currentHospital.code);
+        section.innerHTML = `<div style="padding:15px;">
+            <div style="font-weight:bold;color:#333;margin-bottom:15px;">Drug Inventory Management</div>
+            <div style="background:white;border-radius:10px;padding:15px;margin-bottom:15px;box-shadow:0 2px 5px rgba(0,0,0,0.1);">
+                <div style="font-weight:bold;color:#0066cc;margin-bottom:10px;">➕ Add / Update Drug Stock</div>
+                <div class="form-group"><label>Drug Name *</label><input type="text" id="inv-drug-name" placeholder="e.g. Paracetamol 500mg"></div>
+                <div class="form-group"><label>Quantity (units) *</label><input type="number" id="inv-quantity" placeholder="e.g. 500"></div>
+                <div class="form-group"><label>Unit Price (₦) *</label><input type="number" id="inv-price" placeholder="e.g. 50"></div>
+                <div class="form-group"><label>Reorder Level (alert when below)</label><input type="number" id="inv-reorder" placeholder="e.g. 50"></div>
+                <button onclick="addToInventory()" style="background:#0066cc;color:white;border:none;padding:12px;border-radius:8px;cursor:pointer;font-size:14px;width:100%;">Add to Inventory</button>
+            </div>`;
+
+        if(!hospitalInventory.length) { section.innerHTML += '<p style="text-align:center;color:#999;padding:20px;">No drugs in inventory yet. Add some above.</p>'; }
+        else {
+            section.innerHTML += `<div style="font-weight:bold;color:#333;margin-bottom:10px;">${hospitalInventory.length} Drug(s) in Stock</div>`;
+            hospitalInventory.sort((a,b) => a.quantity - b.quantity).forEach(item => {
+                const isLow = item.quantity <= item.reorderLevel;
+                section.innerHTML += `<div class="inventory-card ${isLow ? 'inventory-low' : 'inventory-ok'}">
+                    <div>
+                        <div class="inventory-name">${item.name}</div>
+                        <div style="font-size:12px;color:#666;">Unit Price: ₦${item.unitPrice?.toLocaleString()||0}</div>
+                        <div style="font-size:12px;color:#666;">Reorder at: ${item.reorderLevel} units</div>
+                        ${isLow ? '<div style="font-size:11px;color:#ff4444;font-weight:bold;">🔴 LOW STOCK — Reorder Now</div>' : ''}
+                    </div>
+                    <div style="text-align:center;">
+                        <div class="inventory-qty ${isLow ? 'low' : 'ok'}">${item.quantity}</div>
+                        <div style="font-size:11px;color:#666;">units</div>
+                        <button onclick="updateStock('${item.id}')" style="background:#0066cc;color:white;border:none;padding:4px 8px;border-radius:6px;cursor:pointer;font-size:11px;margin-top:5px;">Update</button>
+                    </div>
+                </div>`;
+            });
+        }
+        section.innerHTML += '</div>';
+    }
+
+    window.addToInventory = async function() {
+        const name = document.getElementById('inv-drug-name').value.trim();
+        const quantity = parseInt(document.getElementById('inv-quantity').value) || 0;
+        const unitPrice = parseFloat(document.getElementById('inv-price').value) || 0;
+        const reorderLevel = parseInt(document.getElementById('inv-reorder').value) || 20;
+        if(!name || !quantity) { alert('Please enter drug name and quantity'); return; }
+        try {
+            // Check if drug already exists
+            const existing = inventory.find(i => i.name.toLowerCase() === name.toLowerCase() && i.hospitalCode === currentHospital.code);
+            if(existing) {
+                await updateDoc(doc(db, 'inventory', existing.id), { quantity: existing.quantity + quantity, unitPrice, reorderLevel, updatedAt: new Date().toISOString() });
+                alert(`✅ Added ${quantity} units to existing ${name} stock. Total: ${existing.quantity + quantity}`);
+            } else {
+                await addDoc(collection(db, 'inventory'), { name, quantity, unitPrice, reorderLevel, hospitalCode: currentHospital.code, hospitalName: currentHospital.name, createdAt: new Date().toISOString() });
+                alert(`✅ ${name} added to inventory`);
+            }
+            document.getElementById('inv-drug-name').value = '';
+            document.getElementById('inv-quantity').value = '';
+            document.getElementById('inv-price').value = '';
+            document.getElementById('inv-reorder').value = '';
+            renderInventory();
+        } catch(e) { alert('Error: ' + e.message); }
+    }
+
+    window.updateStock = async function(itemId) {
+        const item = inventory.find(i => i.id === itemId); if(!item) return;
+        const qty = prompt(`Current stock: ${item.quantity} units\nEnter new quantity for ${item.name}:`);
+        if(qty === null) return;
+        const newQty = parseInt(qty);
+        if(isNaN(newQty) || newQty < 0) { alert('Invalid quantity'); return; }
+        try { await updateDoc(doc(db, 'inventory', itemId), { quantity: newQty, updatedAt: new Date().toISOString() }); renderInventory(); } catch(e) { alert('Error: ' + e.message); }
     }
 
     function renderPharmacyCosts() {
         const section = document.getElementById('pharmacy-costs-section');
         const today = new Date().toLocaleDateString('en-GB');
-        const todayDispensed = prescriptions.filter(p => p.status === 'dispensed' && p.date === today && p.hospitalCode === currentHospital.code);
-        const totalDrugCost = todayDispensed.reduce((sum, p) => sum + (p.drugCost || 0), 0);
-        section.innerHTML = `<div style="padding:15px;">
-            <div class="cost-summary-card">
-                <div style="font-weight:bold;color:#9c27b0;margin-bottom:10px;">💊 Today's Drug Revenue</div>
-                <div class="cost-row"><span>Prescriptions Dispensed</span><span>${todayDispensed.length}</span></div>
-                <div class="cost-total"><span>Total Drug Revenue</span><span>₦${totalDrugCost.toLocaleString()}</span></div>
-            </div>
-            <div style="font-size:13px;color:#666;margin-top:10px;">Drug costs are recorded automatically when prescriptions are dispensed.</div>
-        </div>`;
+        const todayDispensed = prescriptions.filter(p => p.status==='dispensed' && p.date===today && p.hospitalCode===currentHospital.code);
+        const total = todayDispensed.reduce((s,p) => s + (p.drugCost||0), 0);
+        section.innerHTML = `<div style="padding:15px;"><div class="cost-summary-card"><div style="font-weight:bold;color:#9c27b0;margin-bottom:10px;">💊 Today's Drug Revenue</div><div class="cost-row"><span>Prescriptions Dispensed</span><span>${todayDispensed.length}</span></div><div class="cost-total"><span>Total</span><span>₦${total.toLocaleString()}</span></div></div></div>`;
     }
 
     window.dispenseWithNote = async function(prescriptionId) {
-        const prescription = prescriptions.find(p => p.id === prescriptionId);
-        if(!prescription) return;
-        const note = document.getElementById('pharm-note-' + prescriptionId).value.trim();
-        const cost = parseFloat(document.getElementById('drug-cost-' + prescriptionId).value) || 0;
+        const prescription = prescriptions.find(p => p.id === prescriptionId); if(!prescription) return;
+        const note = document.getElementById('pharm-note-'+prescriptionId).value.trim();
+        const cost = parseFloat(document.getElementById('drug-cost-'+prescriptionId).value) || 0;
         try {
             setStatus('🔄 Dispensing...');
             await updateDoc(doc(db, 'prescriptions', prescriptionId), { status: 'dispensed', dispensedBy: currentUser.name, dispensedAt: new Date().toISOString(), pharmacistNote: note, drugCost: cost });
             if(note) {
                 const patient = patients.find(p => p.id === prescription.patientId);
                 if(patient) {
-                    const updatedVisits = patient.visits.map(v => {
-                        if(v.medications === prescription.medications && v.hospitalName === currentHospital.name) return { ...v, pharmacistNote: note };
-                        return v;
-                    });
+                    const updatedVisits = patient.visits.map(v => { if(v.medications===prescription.medications && v.hospitalName===currentHospital.name) return { ...v, pharmacistNote: note }; return v; });
                     await updateDoc(doc(db, 'patients', prescription.patientId), { visits: updatedVisits });
                 }
             }
-            if(cost > 0) {
-                await addDoc(collection(db, 'financialRecords'), { type: 'drugs', amount: cost, patientCode: prescription.patientCode, patientName: prescription.patientName, hospitalCode: currentHospital.code, hospitalName: currentHospital.name, date: new Date().toLocaleDateString('en-GB'), recordedBy: currentUser.name, createdAt: new Date().toISOString() });
+            // Reduce inventory
+            const drugName = prescription.medications?.split(' ')[0]?.toLowerCase() || '';
+            const invItem = inventory.find(i => i.name.toLowerCase().includes(drugName) && i.hospitalCode === currentHospital.code);
+            if(invItem) {
+                const newQty = Math.max(0, invItem.quantity - 1);
+                await updateDoc(doc(db, 'inventory', invItem.id), { quantity: newQty });
             }
-            setStatus('🟢 Prescription dispensed');
+            if(cost > 0) { await addDoc(collection(db, 'financialRecords'), { type: 'drugs', amount: cost, patientCode: prescription.patientCode, patientName: prescription.patientName, hospitalCode: currentHospital.code, hospitalName: currentHospital.name, date: new Date().toLocaleDateString('en-GB'), recordedBy: currentUser.name, createdAt: new Date().toISOString() }); }
+            // Send SMS to patient
+            const patient = patients.find(p => p.id === prescription.patientId);
+            if(patient && note) { await sendSMS(patient.phone, `MEDITRACK: Your prescription has been dispensed. Pharmacist note: ${note}`); }
+            setStatus('🟢 Dispensed successfully');
         } catch(e) { setStatus('🔴 Error: ' + e.message); }
     }
 
     window.flagToDoctor = async function(prescriptionId) {
-        const p = prescriptions.find(p => p.id === prescriptionId);
-        if(!p) return;
+        const p = prescriptions.find(p => p.id === prescriptionId); if(!p) return;
         const message = prompt('Describe the concern for the doctor:');
         if(!message) return;
-        try {
-            await addDoc(collection(db, 'pharmacyFlags'), { prescriptionId, patientId: p.patientId, patientCode: p.patientCode, patientName: p.patientName, flagMessage: message, flaggedBy: currentUser.name, hospitalName: currentHospital.name, hospitalCode: currentHospital.code, date: new Date().toLocaleDateString('en-GB'), status: 'pending', createdAt: new Date().toISOString() });
-            setStatus('🟢 Flag sent to doctor');
-            alert('✅ Flag sent to doctor');
-        } catch(e) { setStatus('🔴 Error'); }
+        try { await addDoc(collection(db, 'pharmacyFlags'), { prescriptionId, patientId: p.patientId, patientCode: p.patientCode, patientName: p.patientName, flagMessage: message, flaggedBy: currentUser.name, hospitalName: currentHospital.name, hospitalCode: currentHospital.code, date: new Date().toLocaleDateString('en-GB'), status: 'pending', createdAt: new Date().toISOString() }); setStatus('🟢 Flag sent to doctor'); alert('✅ Flag sent to doctor'); } catch(e) { setStatus('🔴 Error'); }
     }
 
-    // LAB — FULL REDESIGN
+    // LAB
     window.switchLabTab = function(tab) {
-        ['pending','completed','costs'].forEach(t => {
-            document.getElementById('lab-tab-' + t).classList.remove('active');
-            document.getElementById('lab-' + t + (t === 'costs' ? '-section' : '-list')).style.display = 'none';
-        });
-        document.getElementById('lab-tab-' + tab).classList.add('active');
-        document.getElementById('lab-' + tab + (tab === 'costs' ? '-section' : '-list')).style.display = 'block';
-        if(tab === 'pending') renderLabPending();
-        else if(tab === 'completed') renderLabCompleted();
-        else if(tab === 'costs') renderLabCosts();
+        ['pending','completed','costs'].forEach(t => { document.getElementById('lab-tab-'+t).classList.remove('active'); document.getElementById('lab-'+t+(t==='costs'?'-section':'-list')).style.display = 'none'; });
+        document.getElementById('lab-tab-'+tab).classList.add('active');
+        document.getElementById('lab-'+tab+(tab==='costs'?'-section':'-list')).style.display = 'block';
+        if(tab==='pending') renderLabPending(); else if(tab==='completed') renderLabCompleted(); else renderLabCosts();
     }
 
     function renderLabPending() {
-        const list = document.getElementById('lab-pending-list');
-        if(!list) return;
-        const pending = labRequests.filter(l => l.status === 'pending');
+        const list = document.getElementById('lab-pending-list'); if(!list) return;
+        const pending = labRequests.filter(l => l.status==='pending');
         if(!pending.length) { list.innerHTML = '<div class="empty-search"><div class="icon">🔬</div><p>No pending lab requests</p></div>'; return; }
         list.innerHTML = `<div class="section-title">${pending.length} PENDING REQUEST(S)</div>`;
-        pending.forEach(l => {
-            list.innerHTML += `<div class="lab-full-card">
-                <div class="lab-card-header">
-                    <div style="font-size:16px;font-weight:bold;">${l.patientName}</div>
-                    <div style="font-size:13px;opacity:0.8;">${l.patientCode} — Dr. ${l.doctorName}</div>
-                </div>
-                <div class="lab-card-body">
-                    <div style="font-size:15px;font-weight:bold;margin-bottom:5px;">🔬 ${l.testType}</div>
-                    ${l.urgency === 'urgent' ? '<div style="color:red;font-weight:bold;font-size:13px;margin-bottom:5px;">🔴 URGENT</div>' : '<div style="color:#009688;font-size:13px;margin-bottom:5px;">🟢 Routine</div>'}
-                    ${l.reason ? `<div style="font-size:13px;color:#555;margin-bottom:8px;">Reason: ${l.reason}</div>` : ''}
-                    <div style="font-size:12px;color:#666;margin-bottom:10px;">📅 ${l.date} — ${l.hospitalName}</div>
-                    <div class="form-group">
-                        <label style="font-size:13px;">Test Result *</label>
-                        <input type="text" id="result-${l.id}" placeholder="Enter test result..." style="width:100%;padding:10px;border:1px solid #ddd;border-radius:8px;font-size:14px;">
-                    </div>
-                    <div class="cost-input-row">
-                        <input type="number" id="lab-cost-${l.id}" placeholder="Test cost (₦)">
-                        <button class="btn-small btn-result" onclick="submitLabResult('${l.id}')" style="padding:10px 15px;">📤 Submit</button>
-                    </div>
-                </div>
-            </div>`;
-        });
+        pending.forEach(l => { list.innerHTML += `<div class="lab-full-card"><div class="lab-card-header"><div style="font-size:16px;font-weight:bold;">${l.patientName}</div><div style="font-size:12px;opacity:0.8;font-family:monospace;">${l.patientCode} — Dr. ${l.doctorName}</div></div><div class="lab-card-body"><div style="font-size:15px;font-weight:bold;margin-bottom:5px;">🔬 ${l.testType}</div>${l.urgency==='urgent'?'<div style="color:red;font-weight:bold;font-size:13px;margin-bottom:5px;">🔴 URGENT</div>':'<div style="color:#009688;font-size:13px;margin-bottom:5px;">🟢 Routine</div>'}${l.reason?`<div style="font-size:13px;color:#555;margin-bottom:8px;">Reason: ${l.reason}</div>`:''}<div style="font-size:12px;color:#666;margin-bottom:10px;">📅 ${l.date} — ${l.hospitalName}</div><div class="form-group"><label style="font-size:13px;">Test Result *</label><input type="text" id="result-${l.id}" placeholder="Enter test result..." style="width:100%;padding:10px;border:1px solid #ddd;border-radius:8px;font-size:14px;"></div><div class="cost-input-row"><input type="number" id="lab-cost-${l.id}" placeholder="Test cost (₦)"><button style="background:#009688;color:white;" onclick="submitLabResult('${l.id}')">📤 Submit</button></div></div></div>`; });
     }
 
     function renderLabCompleted() {
         const list = document.getElementById('lab-completed-list');
-        const completed = labRequests.filter(l => l.status === 'completed');
+        const completed = labRequests.filter(l => l.status==='completed');
         if(!completed.length) { list.innerHTML = '<div class="empty-search"><div class="icon">✅</div><p>No completed tests yet</p></div>'; return; }
         list.innerHTML = `<div class="section-title">${completed.length} COMPLETED</div>`;
-        completed.forEach(l => { list.innerHTML += `<div style="background:white;margin:8px 15px;border-radius:10px;padding:15px;box-shadow:0 2px 5px rgba(0,0,0,0.08);border-left:4px solid #4CAF50;"><div style="font-weight:bold;">${l.patientName} (${l.patientCode})</div><div style="font-size:14px;margin-top:5px;"><strong>${l.testType}</strong></div><div style="background:#e8f5e9;padding:8px;border-radius:6px;margin-top:5px;"><div style="font-size:12px;color:#666;">RESULT:</div><div style="font-size:15px;font-weight:bold;color:#2e7d32;">${l.result}</div></div>${l.testCost ? `<div style="font-size:12px;color:#0066cc;margin-top:5px;">💰 Cost: ₦${l.testCost.toLocaleString()}</div>` : ''}<div style="font-size:12px;color:#666;margin-top:3px;">By: ${l.completedBy||'Lab'} — ${l.date}</div></div>`; });
+        completed.forEach(l => { list.innerHTML += `<div style="background:white;margin:8px 15px;border-radius:10px;padding:15px;box-shadow:0 2px 5px rgba(0,0,0,0.08);border-left:4px solid #4CAF50;"><div style="font-weight:bold;">${l.patientName} <span style="font-family:monospace;font-size:12px;">(${l.patientCode})</span></div><div style="font-size:14px;margin-top:5px;font-weight:bold;">${l.testType}</div><div style="background:#e8f5e9;padding:8px;border-radius:6px;margin-top:5px;"><div style="font-size:12px;color:#666;">RESULT:</div><div style="font-size:15px;font-weight:bold;color:#2e7d32;">${l.result}</div></div>${l.testCost?`<div style="font-size:12px;color:#0066cc;margin-top:5px;">💰 ₦${l.testCost?.toLocaleString()}</div>`:''}<div style="font-size:12px;color:#666;margin-top:3px;">By: ${l.completedBy||'Lab'} — ${l.date}</div></div>`; });
     }
 
     function renderLabCosts() {
         const section = document.getElementById('lab-costs-section');
         const today = new Date().toLocaleDateString('en-GB');
-        const todayCompleted = labRequests.filter(l => l.status === 'completed' && l.date === today && l.hospitalCode === currentHospital.code);
-        const totalLabCost = todayCompleted.reduce((sum, l) => sum + (l.testCost || 0), 0);
-        section.innerHTML = `<div style="padding:15px;">
-            <div class="cost-summary-card">
-                <div style="font-weight:bold;color:#009688;margin-bottom:10px;">🔬 Today's Lab Revenue</div>
-                <div class="cost-row"><span>Tests Completed</span><span>${todayCompleted.length}</span></div>
-                <div class="cost-total"><span>Total Lab Revenue</span><span>₦${totalLabCost.toLocaleString()}</span></div>
-            </div>
-        </div>`;
+        const todayCompleted = labRequests.filter(l => l.status==='completed' && l.date===today && l.hospitalCode===currentHospital.code);
+        const total = todayCompleted.reduce((s,l) => s + (l.testCost||0), 0);
+        section.innerHTML = `<div style="padding:15px;"><div class="cost-summary-card"><div style="font-weight:bold;color:#009688;margin-bottom:10px;">🔬 Today's Lab Revenue</div><div class="cost-row"><span>Tests Completed</span><span>${todayCompleted.length}</span></div><div class="cost-total"><span>Total</span><span>₦${total.toLocaleString()}</span></div></div></div>`;
     }
 
     window.submitLabResult = async function(labId) {
-        const result = document.getElementById('result-' + labId).value.trim();
+        const result = document.getElementById('result-'+labId).value.trim();
         if(!result) { alert('Please enter test result'); return; }
-        const cost = parseFloat(document.getElementById('lab-cost-' + labId).value) || 0;
+        const cost = parseFloat(document.getElementById('lab-cost-'+labId).value) || 0;
         try {
-            setStatus('🔄 Submitting result...');
+            setStatus('🔄 Submitting...');
             const lab = labRequests.find(l => l.id === labId);
             await updateDoc(doc(db, 'labRequests', labId), { status: 'completed', result, testCost: cost, completedBy: currentUser.name, completedAt: new Date().toISOString() });
             if(lab) {
                 const patient = patients.find(p => p.id === lab.patientId);
-                if(patient?.visits) {
-                    const updatedVisits = patient.visits.map(v => { if(v.hospitalName === lab.hospitalName && v.doctorName === lab.doctorName) return { ...v, labResult: { testType: lab.testType, result, completedBy: currentUser.name, completedAt: new Date().toLocaleDateString('en-GB') } }; return v; });
-                    await updateDoc(doc(db, 'patients', patient.id), { visits: updatedVisits });
-                }
+                if(patient?.visits) { const updatedVisits = patient.visits.map(v => { if(v.hospitalName===lab.hospitalName && v.doctorName===lab.doctorName) return { ...v, labResult: { testType: lab.testType, result, completedBy: currentUser.name, completedAt: new Date().toLocaleDateString('en-GB') } }; return v; }); await updateDoc(doc(db, 'patients', patient.id), { visits: updatedVisits }); }
+                // Notify doctor via SMS (framework)
+                await sendSMS('doctor_phone', `MEDITRACK: Lab result ready for ${lab.patientName} (${lab.patientCode}). Test: ${lab.testType}. Result: ${result}`);
             }
-            if(cost > 0 && lab) {
-                await addDoc(collection(db, 'financialRecords'), { type: 'lab', amount: cost, testType: lab.testType, patientCode: lab.patientCode, patientName: lab.patientName, hospitalCode: currentHospital.code, hospitalName: currentHospital.name, date: new Date().toLocaleDateString('en-GB'), recordedBy: currentUser.name, createdAt: new Date().toISOString() });
-            }
+            if(cost > 0 && lab) { await addDoc(collection(db, 'financialRecords'), { type: 'lab', amount: cost, testType: lab.testType, patientCode: lab.patientCode, patientName: lab.patientName, hospitalCode: currentHospital.code, hospitalName: currentHospital.name, date: new Date().toLocaleDateString('en-GB'), recordedBy: currentUser.name, createdAt: new Date().toISOString() }); }
             setStatus('🟢 Result submitted');
         } catch(e) { setStatus('🔴 Error: ' + e.message); }
     }
 
     // ANALYTICS
     window.switchAnalyticsTab = function(tab) {
-        ['daily','conditions','staff','finance'].forEach(t => { document.getElementById('analytics-tab-' + t).classList.remove('active'); document.getElementById('analytics-' + t).style.display = 'none'; });
-        document.getElementById('analytics-tab-' + tab).classList.add('active');
-        document.getElementById('analytics-' + tab).style.display = 'block';
+        ['daily','conditions','staff','state','finance'].forEach(t => { document.getElementById('analytics-tab-'+t).classList.remove('active'); document.getElementById('analytics-'+t).style.display = 'none'; });
+        document.getElementById('analytics-tab-'+tab).classList.add('active');
+        document.getElementById('analytics-'+tab).style.display = 'block';
         renderAnalytics(tab);
     }
 
     function renderAnalytics(tab) {
-        if(tab === 'daily') renderDailyAnalytics();
-        else if(tab === 'conditions') renderConditionsAnalytics();
-        else if(tab === 'staff') renderStaffAnalytics();
-        else if(tab === 'finance') renderFinanceAnalytics();
+        if(tab==='daily') renderDailyAnalytics(); else if(tab==='conditions') renderConditionsAnalytics(); else if(tab==='staff') renderStaffAnalytics(); else if(tab==='state') renderStateAnalytics(); else renderFinanceAnalytics();
     }
 
     function renderDailyAnalytics() {
         const container = document.getElementById('analytics-daily');
         const dailyCounts = {};
-        patients.forEach(p => { if(p.visits) p.visits.forEach(v => { if(v.hospitalName === currentHospital.name) dailyCounts[v.date] = (dailyCounts[v.date]||0) + 1; }); });
-        const sorted = Object.entries(dailyCounts).sort((a,b) => { const da = a[0].split('/').reverse().join('-'); const db2 = b[0].split('/').reverse().join('-'); return new Date(db2) - new Date(da); }).slice(0,14);
+        patients.forEach(p => { if(p.visits) p.visits.forEach(v => { if(v.hospitalName===currentHospital.name) dailyCounts[v.date] = (dailyCounts[v.date]||0)+1; }); });
+        const sorted = Object.entries(dailyCounts).sort((a,b) => { const da=a[0].split('/').reverse().join('-'); const db2=b[0].split('/').reverse().join('-'); return new Date(db2)-new Date(da); }).slice(0,14);
         const max = Math.max(...sorted.map(d=>d[1]),1);
         if(!sorted.length) { container.innerHTML = '<div class="empty-search"><div class="icon">📅</div><p>No visit data yet</p></div>'; return; }
         container.innerHTML = '<div style="padding:15px;"><div style="font-weight:bold;color:#333;margin-bottom:15px;">Patient Visits — Last 14 Days</div>';
-        sorted.forEach(([date,count]) => { const width = Math.round(count/max*100); container.innerHTML += `<div style="margin-bottom:10px;"><div class="chart-label">${date}</div><div class="chart-bar"><div class="chart-bar-fill" style="width:${width}%;">${count} visit${count>1?'s':''}</div></div></div>`; });
+        sorted.forEach(([date,count]) => { const width=Math.round(count/max*100); container.innerHTML += `<div style="margin-bottom:10px;"><div class="chart-label">${date} — ${count} patient${count>1?'s':''}</div><div class="chart-bar"><div class="chart-bar-fill" style="width:${width}%;">${count}</div></div></div>`; });
         container.innerHTML += '</div>';
     }
 
     function renderConditionsAnalytics() {
         const container = document.getElementById('analytics-conditions');
         const conditions = {};
-        patients.forEach(p => { if(p.visits) p.visits.forEach(v => { if(v.hospitalName === currentHospital.name && v.diagnosis) { const d = v.diagnosis.toLowerCase(); conditions[d] = (conditions[d]||0) + 1; } }); });
+        patients.forEach(p => { if(p.visits) p.visits.forEach(v => { if(v.hospitalName===currentHospital.name && v.diagnosis) { const d=v.diagnosis.toLowerCase(); conditions[d]=(conditions[d]||0)+1; } }); });
         const sorted = Object.entries(conditions).sort((a,b)=>b[1]-a[1]).slice(0,10);
         const max = Math.max(...sorted.map(d=>d[1]),1);
         if(!sorted.length) { container.innerHTML = '<div class="empty-search"><div class="icon">🩺</div><p>No diagnosis data yet</p></div>'; return; }
-        container.innerHTML = '<div style="padding:15px;"><div style="font-weight:bold;color:#333;margin-bottom:15px;">Top 10 Conditions</div>';
-        sorted.forEach(([cond,count]) => { const width = Math.round(count/max*100); container.innerHTML += `<div style="margin-bottom:10px;"><div class="chart-label">${cond.charAt(0).toUpperCase()+cond.slice(1)}</div><div class="chart-bar"><div class="chart-bar-fill" style="width:${width}%;background:#00aa55;">${count} case${count>1?'s':''}</div></div></div>`; });
+        container.innerHTML = '<div style="padding:15px;"><div style="font-weight:bold;color:#333;margin-bottom:15px;">Top 10 Conditions At Your Hospital</div>';
+        sorted.forEach(([cond,count]) => { const width=Math.round(count/max*100); container.innerHTML += `<div style="margin-bottom:10px;"><div class="chart-label">${cond.charAt(0).toUpperCase()+cond.slice(1)} — ${count} case${count>1?'s':''}</div><div class="chart-bar"><div class="chart-bar-fill" style="width:${width}%;background:#00aa55;">${count}</div></div></div>`; });
         container.innerHTML += '</div>';
     }
 
@@ -1356,46 +1540,65 @@
         const container = document.getElementById('analytics-staff');
         const doctorCounts = {};
         let total = 0;
-        patients.forEach(p => { if(p.visits) p.visits.forEach(v => { if(v.hospitalName === currentHospital.name && v.doctorName) { doctorCounts[v.doctorName] = (doctorCounts[v.doctorName]||0)+1; total++; } }); });
+        patients.forEach(p => { if(p.visits) p.visits.forEach(v => { if(v.hospitalName===currentHospital.name && v.doctorName) { doctorCounts[v.doctorName]=(doctorCounts[v.doctorName]||0)+1; total++; } }); });
         const sorted = Object.entries(doctorCounts).sort((a,b)=>b[1]-a[1]);
         const max = Math.max(...sorted.map(d=>d[1]),1);
         container.innerHTML = `<div style="padding:15px;"><div style="background:white;border-radius:10px;padding:15px;margin-bottom:15px;box-shadow:0 2px 5px rgba(0,0,0,0.1);"><div style="font-size:13px;color:#666;">Total Consultations</div><div style="font-size:36px;font-weight:bold;color:#0066cc;">${total}</div></div>`;
-        if(sorted.length) { container.innerHTML += '<div style="font-weight:bold;color:#333;margin-bottom:15px;">By Doctor</div>'; sorted.forEach(([doc,count]) => { const width = Math.round(count/max*100); container.innerHTML += `<div style="margin-bottom:10px;"><div class="chart-label">Dr. ${doc}</div><div class="chart-bar"><div class="chart-bar-fill" style="width:${width}%;background:#ff8800;">${count}</div></div></div>`; }); }
+        if(sorted.length) { container.innerHTML += '<div style="font-weight:bold;color:#333;margin-bottom:15px;">By Doctor</div>'; sorted.forEach(([d,count]) => { const width=Math.round(count/max*100); container.innerHTML += `<div style="margin-bottom:10px;"><div class="chart-label">Dr. ${d} — ${count}</div><div class="chart-bar"><div class="chart-bar-fill" style="width:${width}%;background:#ff8800;">${count}</div></div></div>`; }); }
+        container.innerHTML += '</div>';
+    }
+
+    function renderStateAnalytics() {
+        const container = document.getElementById('analytics-state');
+        // State-level data — patients registered across the network by state
+        const stateCounts = {}, stateConditions = {};
+        patients.forEach(p => {
+            const state = p.stateName || p.state || 'Unknown';
+            stateCounts[state] = (stateCounts[state]||0) + 1;
+            if(p.visits) p.visits.forEach(v => { if(v.diagnosis) { const key = state + ':' + v.diagnosis.toLowerCase(); stateConditions[key] = (stateConditions[key]||0)+1; } });
+        });
+        const sortedStates = Object.entries(stateCounts).sort((a,b)=>b[1]-a[1]);
+        const max = Math.max(...sortedStates.map(d=>d[1]),1);
+        if(!sortedStates.length) { container.innerHTML = '<div class="empty-search"><div class="icon">🗺️</div><p>No state data yet</p></div>'; return; }
+        container.innerHTML = '<div style="padding:15px;"><div style="font-weight:bold;color:#333;margin-bottom:5px;">Patients By State — Network Wide</div><div style="font-size:12px;color:#666;margin-bottom:15px;">Total patients across all MEDITRACK facilities</div>';
+        sortedStates.forEach(([state,count]) => { const width=Math.round(count/max*100); container.innerHTML += `<div style="margin-bottom:10px;"><div class="chart-label">🗺️ ${state} — ${count} patient${count>1?'s':''}</div><div class="chart-bar"><div class="chart-bar-fill" style="width:${width}%;background:#9c27b0;">${count}</div></div></div>`; });
+
+        // Top condition per state
+        container.innerHTML += '<div style="margin-top:20px;font-weight:bold;color:#333;margin-bottom:10px;">Most Common Condition Per State</div>';
+        sortedStates.forEach(([state]) => {
+            const stateCondList = Object.entries(stateConditions).filter(([k]) => k.startsWith(state+':')).map(([k,v]) => [k.split(':')[1], v]).sort((a,b)=>b[1]-a[1]);
+            if(stateCondList.length) { container.innerHTML += `<div style="background:white;border-radius:8px;padding:10px;margin-bottom:8px;box-shadow:0 1px 4px rgba(0,0,0,0.08);"><div style="font-size:13px;font-weight:bold;color:#333;">🗺️ ${state}</div><div style="font-size:13px;color:#9c27b0;margin-top:3px;">Top: ${stateCondList[0][0].charAt(0).toUpperCase()+stateCondList[0][0].slice(1)} (${stateCondList[0][1]} cases)</div></div>`; }
+        });
         container.innerHTML += '</div>';
     }
 
     function renderFinanceAnalytics() {
         const container = document.getElementById('analytics-finance');
         const today = new Date().toLocaleDateString('en-GB');
-        const todayRecords = financialRecords.filter(r => r.hospitalCode === currentHospital.code && r.date === today);
-        const consultationRevenue = todayRecords.filter(r => r.type === 'consultation').reduce((s,r) => s + (r.amount||0), 0);
-        const labRevenue = todayRecords.filter(r => r.type === 'lab').reduce((s,r) => s + (r.amount||0), 0);
-        const drugRevenue = todayRecords.filter(r => r.type === 'drugs').reduce((s,r) => s + (r.amount||0), 0);
-        const totalRevenue = consultationRevenue + labRevenue + drugRevenue;
-
-        const allRecords = financialRecords.filter(r => r.hospitalCode === currentHospital.code);
-        const allTime = allRecords.reduce((s,r) => s + (r.amount||0), 0);
-
+        const todayRecords = financialRecords.filter(r => r.hospitalCode===currentHospital.code && r.date===today);
+        const consultRev = todayRecords.filter(r=>r.type==='consultation').reduce((s,r)=>s+(r.amount||0),0);
+        const labRev = todayRecords.filter(r=>r.type==='lab').reduce((s,r)=>s+(r.amount||0),0);
+        const drugRev = todayRecords.filter(r=>r.type==='drugs').reduce((s,r)=>s+(r.amount||0),0);
+        const totalToday = consultRev + labRev + drugRev;
+        const allTime = financialRecords.filter(r=>r.hospitalCode===currentHospital.code).reduce((s,r)=>s+(r.amount||0),0);
+        // Weekly breakdown
+        const weeklyData = {};
+        financialRecords.filter(r=>r.hospitalCode===currentHospital.code).forEach(r => { weeklyData[r.date] = (weeklyData[r.date]||0) + (r.amount||0); });
+        const sortedWeekly = Object.entries(weeklyData).sort((a,b)=>{const da=a[0].split('/').reverse().join('-');const db2=b[0].split('/').reverse().join('-');return new Date(db2)-new Date(da);}).slice(0,7);
+        const maxWeekly = Math.max(...sortedWeekly.map(d=>d[1]),1);
         container.innerHTML = `<div style="padding:15px;">
             <div style="font-weight:bold;color:#333;margin-bottom:10px;">💰 Today's Revenue Breakdown</div>
-            <div class="cost-summary-card">
-                <div class="cost-row"><span>Consultation Fees</span><span style="color:#0066cc;font-weight:bold;">₦${consultationRevenue.toLocaleString()}</span></div>
-                <div class="cost-row"><span>Lab Test Fees</span><span style="color:#009688;font-weight:bold;">₦${labRevenue.toLocaleString()}</span></div>
-                <div class="cost-row"><span>Drug Sales</span><span style="color:#9c27b0;font-weight:bold;">₦${drugRevenue.toLocaleString()}</span></div>
-                <div class="cost-total"><span>Total Today</span><span>₦${totalRevenue.toLocaleString()}</span></div>
-            </div>
-            <div class="cost-summary-card" style="margin-top:10px;">
-                <div style="font-size:13px;color:#666;margin-bottom:5px;">All Time Revenue</div>
-                <div style="font-size:28px;font-weight:bold;color:#0066cc;">₦${allTime.toLocaleString()}</div>
-            </div>
-            <div style="font-size:13px;color:#666;margin-top:10px;">Revenue is recorded when consultation fees are entered at registration, lab costs are added with results, and drug costs are entered when dispensing.</div>
+            <div class="cost-summary-card"><div class="cost-row"><span>Consultation Fees</span><span style="color:#0066cc;font-weight:bold;">₦${consultRev.toLocaleString()}</span></div><div class="cost-row"><span>Lab Test Fees</span><span style="color:#009688;font-weight:bold;">₦${labRev.toLocaleString()}</span></div><div class="cost-row"><span>Drug Sales</span><span style="color:#9c27b0;font-weight:bold;">₦${drugRev.toLocaleString()}</span></div><div class="cost-total"><span>Total Today</span><span>₦${totalToday.toLocaleString()}</span></div></div>
+            <div class="cost-summary-card" style="margin-top:10px;"><div style="font-size:13px;color:#666;margin-bottom:5px;">All-Time Revenue</div><div style="font-size:28px;font-weight:bold;color:#0066cc;">₦${allTime.toLocaleString()}</div></div>
+            ${sortedWeekly.length ? `<div style="margin-top:15px;font-weight:bold;color:#333;margin-bottom:10px;">Revenue — Last 7 Days</div>${sortedWeekly.map(([date,amount])=>`<div style="margin-bottom:8px;"><div class="chart-label">${date}</div><div class="chart-bar"><div class="chart-bar-fill" style="width:${Math.round(amount/maxWeekly*100)}%;background:#4CAF50;">₦${amount.toLocaleString()}</div></div></div>`).join('')}` : ''}
         </div>`;
     }
 
-    // ADMIN PANEL
+    // ADMIN
     function renderAdminPanel() {
         document.getElementById('admin-hospital-name').textContent = currentHospital.name;
         document.getElementById('admin-hospital-code').textContent = currentHospital.code;
+        document.getElementById('admin-hospital-state').textContent = currentHospital.stateName;
         loadStaffList();
     }
 
@@ -1409,7 +1612,7 @@
             const list = document.getElementById('staff-list');
             if(!staff.length) { list.innerHTML = '<p style="color:#666;font-size:14px;">No staff yet</p>'; return; }
             list.innerHTML = '';
-            staff.forEach((s,i) => { list.innerHTML += `<div class="staff-card"><div><div class="staff-name">${s.name}</div><div style="margin-top:3px;"><span class="role-badge role-${s.role}">${s.role}</span></div><div class="staff-key" style="margin-top:3px;">Key: ${s.key}</div></div>${s.role !== 'admin' ? `<button class="remove-btn" onclick="removeStaff(${i})">Remove</button>` : '<span style="font-size:12px;color:#999;">Admin</span>'}</div>`; });
+            staff.forEach((s,i) => { list.innerHTML += `<div class="staff-card"><div><div class="staff-name">${s.name}</div><div style="margin-top:3px;"><span class="role-badge role-${s.role}">${s.role}</span></div><div class="staff-key" style="margin-top:3px;">Key: ${s.key}</div></div>${s.role!=='admin'?`<button class="remove-btn" onclick="removeStaff(${i})">Remove</button>`:'<span style="font-size:12px;color:#999;">Admin</span>'}</div>`; });
         } catch(e) { console.error(e); }
     }
 
@@ -1421,9 +1624,8 @@
         try {
             const hospitalDoc = await getDoc(doc(db, 'hospitals', currentHospital.code));
             const data = hospitalDoc.data();
-            if(data.staff.find(s => s.key === key)) { alert('Access key already exists. Use a different one.'); return; }
-            const updatedStaff = [...data.staff, { name, role, key, addedAt: new Date().toISOString() }];
-            await updateDoc(doc(db, 'hospitals', currentHospital.code), { staff: updatedStaff });
+            if(data.staff.find(s=>s.key===key)) { alert('Access key already exists. Use a different one.'); return; }
+            await updateDoc(doc(db, 'hospitals', currentHospital.code), { staff: [...data.staff, { name, role, key, addedAt: new Date().toISOString() }] });
             document.getElementById('new-staff-name').value = '';
             document.getElementById('new-staff-role').value = '';
             document.getElementById('new-staff-key').value = '';
@@ -1440,7 +1642,7 @@
         try {
             const hospitalDoc = await getDoc(doc(db, 'hospitals', currentHospital.code));
             const data = hospitalDoc.data();
-            await updateDoc(doc(db, 'hospitals', currentHospital.code), { staff: data.staff.filter((_,i) => i !== index) });
+            await updateDoc(doc(db, 'hospitals', currentHospital.code), { staff: data.staff.filter((_,i)=>i!==index) });
             loadStaffList();
             const msg = document.getElementById('admin-success-msg');
             msg.textContent = '✅ Staff member removed';
@@ -1449,7 +1651,7 @@
         } catch(e) { alert('Error: ' + e.message); }
     }
 
-    // REGISTER PATIENT
+    // REGISTER PATIENT — with new code format
     window.registerPatient = async function() {
         const name = document.getElementById('reg-name').value;
         const phone = document.getElementById('reg-phone').value;
@@ -1458,37 +1660,47 @@
         const consultationFee = parseFloat(document.getElementById('reg-consultation-fee').value) || 0;
         if(!name || !phone || !dob || !gender) { alert('Please fill required fields'); return; }
         const existing = patients.find(p => p.phone === phone);
-        if(existing) { alert('Patient already exists: ' + existing.name + ' (' + existing.code + ')'); return; }
+        if(existing) { alert(`Patient already registered: ${existing.name} (${existing.code})`); return; }
+
         try {
-            setStatus('🔄 Registering...');
-            const newDoc = await addDoc(collection(db, 'patients'), {
-                code: "NG-" + Date.now().toString(36).toUpperCase(),
-                name, phone, dob: new Date(dob).toLocaleDateString('en-GB'), gender,
+            setStatus('🔄 Generating patient code...');
+            const code = await generatePatientCode();
+            setStatus('🔄 Registering patient...');
+
+            await addDoc(collection(db, 'patients'), {
+                code, name, phone, dob: new Date(dob).toLocaleDateString('en-GB'), gender,
                 blood: document.getElementById('reg-blood').value,
                 allergy: document.getElementById('reg-allergy').value,
+                hmo: document.getElementById('reg-hmo').value,
                 kin: document.getElementById('reg-kin').value,
                 kinPhone: document.getElementById('reg-kin-phone').value,
                 consultationFee, registeredAtHospital: currentHospital.name,
-                registeredBy: currentUser.name, visits: [], createdAt: new Date().toISOString()
+                registeredBy: currentUser.name, state: currentHospital.state,
+                stateAbbrev: currentHospital.state, stateName: currentHospital.stateName,
+                hospitalAbbrev: currentHospital.abbrev, hospitalCode: currentHospital.code,
+                visits: [], createdAt: new Date().toISOString()
             });
-            if(consultationFee > 0) {
-                await addDoc(collection(db, 'financialRecords'), { type: 'consultation', amount: consultationFee, patientName: name, hospitalCode: currentHospital.code, hospitalName: currentHospital.name, date: new Date().toLocaleDateString('en-GB'), recordedBy: currentUser.name, createdAt: new Date().toISOString() });
-            }
-            setStatus('🟢 Patient registered');
+
+            // Send SMS to patient with their code
+            const smsMessage = `Welcome to MEDITRACK. Your patient code is: ${code}. Keep this safe and present it at any MEDITRACK clinic for instant access to your health records.`;
+            await sendSMS(phone, smsMessage);
+
+            if(consultationFee > 0) { await addDoc(collection(db, 'financialRecords'), { type: 'consultation', amount: consultationFee, patientName: name, patientCode: code, hospitalCode: currentHospital.code, hospitalName: currentHospital.name, date: new Date().toLocaleDateString('en-GB'), recordedBy: currentUser.name, createdAt: new Date().toISOString() }); }
+
+            setStatus('🟢 Patient registered — Code: ' + code);
+            document.getElementById('register-success-msg').textContent = `✅ Patient Registered! Code: ${code}`;
             document.getElementById('register-success-msg').style.display = 'block';
-            ['reg-name','reg-phone','reg-dob','reg-gender','reg-blood','reg-allergy','reg-kin','reg-kin-phone','reg-consultation-fee'].forEach(id => document.getElementById(id).value = '');
-            setTimeout(() => { document.getElementById('register-success-msg').style.display = 'none'; showView('dashboard'); }, 2000);
+            ['reg-name','reg-phone','reg-dob','reg-gender','reg-blood','reg-allergy','reg-hmo','reg-kin','reg-kin-phone','reg-consultation-fee'].forEach(id => document.getElementById(id).value = '');
+            setTimeout(() => { document.getElementById('register-success-msg').style.display = 'none'; showView('dashboard'); }, 3000);
         } catch(e) { setStatus('🔴 Error: ' + e.message); }
     }
 
     // PRINT CARD
     window.printPatientCard = function() {
-        const p = patients.find(p => p.id === currentPatientId);
-        if(!p) return;
+        const p = patients.find(p => p.id === currentPatientId); if(!p) return;
         const w = window.open('','_blank');
-        w.document.write(`<html><head><title>Patient Card</title><style>body{font-family:Arial,sans-serif;padding:20px;}.card{border:2px solid #0066cc;border-radius:10px;padding:20px;max-width:350px;margin:0 auto;}</style></head><body><div class="card"><div style="background:#0066cc;color:white;padding:10px;border-radius:8px;text-align:center;margin-bottom:15px;"><div style="font-size:18px;font-weight:bold;">🏥 MEDITRACK</div></div><div style="font-size:28px;font-weight:bold;color:#0066cc;text-align:center;margin:10px 0;letter-spacing:3px;">${p.code}</div><div style="font-size:13px;margin:5px 0;"><strong>Name:</strong> ${p.name}</div><div style="font-size:13px;margin:5px 0;"><strong>Phone:</strong> ${p.phone}</div><div style="font-size:13px;margin:5px 0;"><strong>DOB:</strong> ${p.dob}</div><div style="font-size:13px;margin:5px 0;"><strong>Blood Group:</strong> ${p.blood||'Not recorded'}</div>${p.allergy ? `<div style="background:#ff4444;color:white;padding:8px;border-radius:5px;text-align:center;margin-top:10px;font-weight:bold;">⚠️ ALLERGIC TO: ${p.allergy.toUpperCase()}</div>` : ''}<div style="text-align:center;font-size:11px;color:#666;margin-top:15px;">Present this card at any MEDITRACK facility</div></div><script>window.print();<\/script></body></html>`);
+        w.document.write(`<html><head><title>Patient Card</title><style>body{font-family:Arial,sans-serif;padding:20px;}.card{border:2px solid #0066cc;border-radius:10px;padding:20px;max-width:350px;margin:0 auto;}</style></head><body><div class="card"><div style="background:#0066cc;color:white;padding:10px;border-radius:8px;text-align:center;margin-bottom:15px;"><div style="font-size:18px;font-weight:bold;">🏥 MEDITRACK</div><div style="font-size:11px;">Unified Patient Health Records — Nigeria</div></div><div style="font-size:22px;font-weight:bold;color:#0066cc;text-align:center;margin:10px 0;letter-spacing:2px;font-family:monospace;">${p.code}</div><div style="font-size:13px;margin:5px 0;"><strong>Name:</strong> ${p.name}</div><div style="font-size:13px;margin:5px 0;"><strong>Phone:</strong> ${p.phone}</div><div style="font-size:13px;margin:5px 0;"><strong>DOB:</strong> ${p.dob}</div><div style="font-size:13px;margin:5px 0;"><strong>Blood Group:</strong> ${p.blood||'Not recorded'}</div><div style="font-size:13px;margin:5px 0;"><strong>State:</strong> ${p.stateName||'Not recorded'}</div>${p.hmo?`<div style="font-size:13px;margin:5px 0;"><strong>HMO:</strong> ${p.hmo}</div>`:''}${p.allergy?`<div style="background:#ff4444;color:white;padding:8px;border-radius:5px;text-align:center;margin-top:10px;font-weight:bold;">⚠️ ALLERGIC TO: ${p.allergy.toUpperCase()}</div>`:''}<div style="text-align:center;font-size:11px;color:#666;margin-top:15px;">Present this card at any MEDITRACK facility for instant access to your health records</div></div><script>window.print();<\/script></body></html>`);
     }
 </script>
-
 </body>
 </html>
