@@ -1,0 +1,25 @@
+{
+  "name": "MEDITRACK",
+  "short_name": "MEDITRACK",
+  "description": "Unified Patient Health Records Nigeria",
+  "start_url": "/meditrack/",
+  "scope": "/meditrack/",
+  "display": "standalone",
+  "background_color": "#0066cc",
+  "theme_color": "#0066cc",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "https://via.placeholder.com/192/0066cc/ffffff?text=MT",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "https://via.placeholder.com/512/0066cc/ffffff?text=MT",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
