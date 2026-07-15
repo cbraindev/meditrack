@@ -1096,14 +1096,133 @@ async function loadAllDataLocal(){
 
 function loadAllDataFirebase(){
     setStatus('🔄 Loading from cloud...');
-    onSnapshot(query(collection(db,'patients'),where('hospitalCode','==',currentHospital.code),orderBy('createdAt','desc')),snap=>{patients=[];snap.forEach(d=>patients.push({id:d.id,...d.data()}));saveToCache('patients_'+currentHospital.code,patients);setStatus('🟢 '+currentHospital.name+' — Cloud connected');updateDashboard();});
-    onSnapshot(query(collection(db,'prescriptions'),where('hospitalCode','==',currentHospital.code)),snap=>{prescriptions=[];snap.forEach(d=>prescriptions.push({id:d.id,...d.data()}));saveToCache('prescriptions_'+currentHospital.code,prescriptions);renderPharmacyPending();updateDashboard();});
-    onSnapshot(query(collection(db,'labRequests'),where('hospitalCode','==',currentHospital.code)),snap=>{labRequests=[];snap.forEach(d=>labRequests.push({id:d.id,...d.data()}));saveToCache('labrequests_'+currentHospital.code,labRequests);updateDashboard();});
-    onSnapshot(query(collection(db,'pharmacyFlags'),where('hospitalCode','==',currentHospital.code)),snap=>{pharmacyFlags=[];snap.forEach(d=>pharmacyFlags.push({id:d.id,...d.data()}));updateDashboard();});
-    onSnapshot(collection(db,'referrals'),snap=>{referrals=[];snap.forEach(d=>referrals.push({id:d.id,...d.data()}));});
-    onSnapshot(query(collection(db,'financialRecords'),where('hospitalCode','==',currentHospital.code)),snap=>{financialRecords=[];snap.forEach(d=>financialRecords.push({id:d.id,...d.data()}));saveToCache('financialrecords_'+currentHospital.code,financialRecords);updateDashboard();});
-    onSnapshot(query(collection(db,'inventory'),where('hospitalCode','==',currentHospital.code)),snap=>{inventory=[];snap.forEach(d=>inventory.push({id:d.id,...d.data()}));saveToCache('inventory_'+currentHospital.code,inventory);updateDashboard();});
-    onSnapshot(query(collection(db,'bills'),where('hospitalCode','==',currentHospital.code)),snap=>{bills=[];snap.forEach(d=>bills.push({id:d.id,...d.data()}));saveToCache('bills_'+currentHospital.code,bills);updateDashboard();});
+
+    // PATIENTS — no orderBy to avoid index requirement
+    onSnapshot(
+        query(
+            collection(db,'patients'),
+            where('hospitalCode','==',currentHospital.code)
+        ),
+        snap=>{
+            patients=[];
+            snap.forEach(d=>patients.push({id:d.id,...d.data()}));
+            // Sort locally instead of in Firebase query
+            patients.sort((a,b)=>
+                new Date(b.createdAt||0)-new Date(a.createdAt||0)
+            );
+            saveToCache('patients_'+currentHospital.code,patients);
+            setStatus('🟢 '+currentHospital.name+' — Connected — '+patients.length+' patients');
+            updateDashboard();
+            renderPendingVisits();
+        },
+        err=>{
+            console.error('Patients load error:',err.message);
+            setStatus('⚠️ Loading error — '+err.message);
+        }
+    );
+
+    // PRESCRIPTIONS
+    onSnapshot(
+        query(
+            collection(db,'prescriptions'),
+            where('hospitalCode','==',currentHospital.code)
+        ),
+        snap=>{
+            prescriptions=[];
+            snap.forEach(d=>prescriptions.push({id:d.id,...d.data()}));
+            saveToCache('prescriptions_'+currentHospital.code,prescriptions);
+            renderPharmacyPending();
+            updateDashboard();
+        },
+        err=>console.error('Prescriptions error:',err.message)
+    );
+
+    // LAB REQUESTS
+    onSnapshot(
+        query(
+            collection(db,'labRequests'),
+            where('hospitalCode','==',currentHospital.code)
+        ),
+        snap=>{
+            labRequests=[];
+            snap.forEach(d=>labRequests.push({id:d.id,...d.data()}));
+            saveToCache('labrequests_'+currentHospital.code,labRequests);
+            updateDashboard();
+        },
+        err=>console.error('Lab requests error:',err.message)
+    );
+
+    // PHARMACY FLAGS
+    onSnapshot(
+        query(
+            collection(db,'pharmacyFlags'),
+            where('hospitalCode','==',currentHospital.code)
+        ),
+        snap=>{
+            pharmacyFlags=[];
+            snap.forEach(d=>pharmacyFlags.push({id:d.id,...d.data()}));
+            updateDashboard();
+        },
+        err=>console.error('Pharmacy flags error:',err.message)
+    );
+
+    // REFERRALS — no hospital filter, all hospitals see incoming referrals
+    onSnapshot(
+        collection(db,'referrals'),
+        snap=>{
+            referrals=[];
+            snap.forEach(d=>referrals.push({id:d.id,...d.data()}));
+        },
+        err=>console.error('Referrals error:',err.message)
+    );
+
+    // FINANCIAL RECORDS
+    onSnapshot(
+        query(
+            collection(db,'financialRecords'),
+            where('hospitalCode','==',currentHospital.code)
+        ),
+        snap=>{
+            financialRecords=[];
+            snap.forEach(d=>financialRecords.push({id:d.id,...d.data()}));
+            saveToCache('financialrecords_'+currentHospital.code,financialRecords);
+            updateDashboard();
+        },
+        err=>console.error('Financial records error:',err.message)
+    );
+
+    // INVENTORY
+    onSnapshot(
+        query(
+            collection(db,'inventory'),
+            where('hospitalCode','==',currentHospital.code)
+        ),
+        snap=>{
+            inventory=[];
+            snap.forEach(d=>inventory.push({id:d.id,...d.data()}));
+            inventory.sort((a,b)=>
+                (a.name||'').localeCompare(b.name||'')
+            );
+            saveToCache('inventory_'+currentHospital.code,inventory);
+            updateDashboard();
+        },
+        err=>console.error('Inventory error:',err.message)
+    );
+
+    // BILLS
+    onSnapshot(
+        query(
+            collection(db,'bills'),
+            where('hospitalCode','==',currentHospital.code)
+        ),
+        snap=>{
+            bills=[];
+            snap.forEach(d=>bills.push({id:d.id,...d.data()}));
+            saveToCache('bills_'+currentHospital.code,bills);
+            updateDashboard();
+        },
+        err=>console.error('Bills error:',err.message)
+    );
 }
 
 async function generatePatientCode(){
