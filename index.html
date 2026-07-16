@@ -1421,7 +1421,133 @@ window.copyReferralWhatsApp=function(){const p=patients.find(p=>p.id===currentRe
 
 // NURSE
 window.switchNurseTab=function(tab){document.getElementById('nurse-tab-returning').classList.toggle('active',tab==='returning');document.getElementById('nurse-tab-new').classList.toggle('active',tab==='new');document.getElementById('nurse-returning-section').style.display=tab==='returning'?'block':'none';document.getElementById('nurse-new-section').style.display=tab==='new'?'block':'none';}
-window.searchReturningPatient=function(){const q=document.getElementById('returning-search').value.toLowerCase().trim();const result=document.getElementById('returning-result');const form=document.getElementById('returning-patient-form');if(q.length<1){result.innerHTML='';form.style.display='none';selectedReturningPatient=null;return;}const found=patients.find(p=>p.code?.toLowerCase()===q||p.phone===q||p.name?.toLowerCase().includes(q));if(found){selectedReturningPatient=found;result.innerHTML=`<div style="background:#e8f4fd;border:1px solid #0066cc;border-radius:8px;padding:8px;font-size:13px;color:#0066cc;">✅ Patient found</div>`;document.getElementById('returning-patient-name').textContent=found.name||'';document.getElementById('returning-patient-code').textContent=found.code||'';const last=found.visits?.length?found.visits[found.visits.length-1]:null;document.getElementById('returning-patient-info').textContent=`${found.gender} • ${found.blood||'Unknown'} • Last visit: ${last?last.date+' at '+last.hospitalName:'First visit'}`;const aw=document.getElementById('returning-allergy-warning');if(found.allergy){aw.style.display='block';aw.textContent='⚠️ KNOWN ALLERGY: '+found.allergy.toUpperCase();}else aw.style.display='none';const hw=document.getElementById('returning-hmo-info');if(found.hmoCompany||found.hmo){hw.style.display='block';hw.textContent=`🏥 HMO: ${found.hmoCompany||'Unknown'} — ${found.hmo||'No number'}`;}else hw.style.display='none';form.style.display='block';}else{selectedReturningPatient=null;result.innerHTML='<div style="background:#fff0f0;border:1px solid #ff4444;border-radius:8px;padding:8px;font-size:13px;color:#ff4444;">❌ Patient not found</div>';form.style.display='none';}}
+window.searchReturningPatient=async function(){
+    const q=document.getElementById('returning-search').value.toLowerCase().trim();
+    const result=document.getElementById('returning-result');
+    const form=document.getElementById('returning-patient-form');
+
+    if(q.length<1){
+        result.innerHTML='';
+        form.style.display='none';
+        selectedReturningPatient=null;
+        return;
+    }
+
+    // First search local patients
+    let found=patients.find(p=>
+        p.code?.toLowerCase()===q||
+        p.phone===q||
+        p.phone?.replace(/\s/g,'')===q.replace(/\s/g,'')||
+        p.name?.toLowerCase().includes(q)
+    );
+
+    // If not found locally — search Firebase for external patients
+    if(!found&&isOnline&&q.length>=3){
+        result.innerHTML=`<div style="background:#e8f4fd;border:1px solid #0066cc;border-radius:8px;padding:8px;font-size:13px;color:#0066cc;">🔍 Searching national records...</div>`;
+
+        try{
+            // Search by code
+            const codeSnap=await getDocs(query(
+                collection(db,'patients'),
+                where('code','==',q.toUpperCase())
+            ));
+
+            // Search by phone
+            const phoneSnap=await getDocs(query(
+                collection(db,'patients'),
+                where('phone','==',q)
+            ));
+
+            // Check results
+            let externalPatient=null;
+            codeSnap.forEach(d=>{
+                if(!externalPatient)
+                    externalPatient={id:d.id,...d.data()};
+            });
+            if(!externalPatient){
+                phoneSnap.forEach(d=>{
+                    if(!externalPatient)
+                        externalPatient={id:d.id,...d.data()};
+                });
+            }
+
+            if(externalPatient){
+                found=externalPatient;
+                // Add to local patients array so rest of workflow works
+                if(!patients.find(p=>p.id===found.id)){
+                    patients.push(found);
+                }
+            }
+
+        }catch(e){
+            console.log('External patient search error:',e.message);
+        }
+    }
+
+    if(found){
+        selectedReturningPatient=found;
+        const isExternal=found.hospitalCode!==currentHospital.code;
+        const last=found.visits?.length?
+            found.visits[found.visits.length-1]:null;
+
+        result.innerHTML=`<div style="background:#e8f4fd;border:1px solid #0066cc;border-radius:8px;padding:8px;font-size:13px;color:#0066cc;">
+            ✅ Patient found${isExternal?` — <strong style="color:#ff8800;">External patient from ${safe(found.registeredAtHospital)}</strong>`:''}
+        </div>`;
+
+        document.getElementById('returning-patient-name').textContent=found.name||'';
+        document.getElementById('returning-patient-code').textContent=found.code||'';
+
+        const lastVisitText=last?
+            last.date+' at '+last.hospitalName:
+            'First visit at this facility';
+        document.getElementById('returning-patient-info').textContent=
+            `${found.gender||''} • ${found.blood||'Unknown'} • Last visit: ${lastVisitText}`;
+
+        // Show allergy warning
+        const aw=document.getElementById('returning-allergy-warning');
+        if(found.allergy){
+            aw.style.display='block';
+            aw.textContent='⚠️ KNOWN ALLERGY: '+found.allergy.toUpperCase();
+        }else{
+            aw.style.display='none';
+        }
+
+        // Show HMO info
+        const hw=document.getElementById('returning-hmo-info');
+        if(found.hmoCompany||found.hmo){
+            hw.style.display='block';
+            hw.textContent=`🏥 HMO: ${found.hmoCompany||'Unknown'} — ${found.hmo||'No number'}`;
+        }else{
+            hw.style.display='none';
+        }
+
+        // Show external warning banner if from another hospital
+        if(isExternal){
+            const existingBanner=document.getElementById('external-patient-banner');
+            if(!existingBanner){
+                const banner=document.createElement('div');
+                banner.id='external-patient-banner';
+                banner.style.cssText='background:#fff8e1;border:1px solid #ffc107;border-radius:8px;padding:10px;margin-bottom:10px;font-size:13px;';
+                banner.innerHTML=`<div style="font-weight:bold;color:#f57f17;margin-bottom:4px;">🌐 External Patient</div>
+                <div style="color:#666;">Originally registered at <strong>${safe(found.registeredAtHospital)}</strong>.</div>
+                <div style="color:#666;margin-top:3px;">This visit will be recorded at <strong>${safe(currentHospital.name)}</strong>.</div>`;
+                document.getElementById('returning-patient-form').prepend(banner);
+            }
+        }else{
+            const existingBanner=document.getElementById('external-patient-banner');
+            if(existingBanner)existingBanner.remove();
+        }
+
+        form.style.display='block';
+
+    }else{
+        selectedReturningPatient=null;
+        result.innerHTML=`<div style="background:#fff0f0;border:1px solid #ff4444;border-radius:8px;padding:8px;font-size:13px;color:#ff4444;">
+            ❌ Patient not found locally or in national MEDITRACK records
+        </div>`;
+        form.style.display='none';
+    }
+}
 
 window.submitReturningVitals=async function(){
     if(!selectedReturningPatient){alert('Please find a patient first');return;}
