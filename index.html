@@ -1112,10 +1112,14 @@ window.loginStaff=async function(){
     const errEl=document.getElementById('login-error');errEl.style.display='none';
     document.getElementById('rate-limit-notice').style.display='none';
     if(!hospitalCode||!accessKey){errEl.textContent='Please enter hospital code and access key';errEl.style.display='block';return;}
-
-    // Always attempt Firebase first — the cached `isOnline` flag can go stale
-    // (a stray 'offline' event never followed by 'online' would otherwise
-    // permanently block real login attempts even with a working connection).
+    if(!isOnline){
+        const cached=loadFromCache('hospital_'+hospitalCode);
+        if(cached){
+            const hashedInput=await hashKey(accessKey);
+            const staff=cached.staff?.find(s=>s.keyHash===hashedInput||s.key===accessKey);
+            if(staff){currentHospital={name:cached.name,code:hospitalCode,state:cached.state,abbrev:cached.abbrev,stateName:cached.stateName};currentUser={name:staff.name,role:staff.role,key:accessKey};patients=loadFromCache('patients_'+hospitalCode)||[];prescriptions=loadFromCache('prescriptions_'+hospitalCode)||[];labRequests=loadFromCache('labrequests_'+hospitalCode)||[];financialRecords=loadFromCache('financialrecords_'+hospitalCode)||[];inventory=loadFromCache('inventory_'+hospitalCode)||[];bills=loadFromCache('bills_'+hospitalCode)||[];document.getElementById('auth-overlay').style.display='none';initializeMainApp();setStatus('📵 Offline mode — cached data loaded');resetLoginAttempts();addSecurityLog(`Offline login: ${staff.name}`);return;}errEl.textContent=cached?'Access key not recognised':'No cached data. Please login online first.';}
+        errEl.style.display='block';return;
+    }
     try{
         const hDoc=await getDoc(doc(db,'hospitals',hospitalCode));
         if(!hDoc.exists()){incrementLoginAttempts();errEl.textContent='Hospital not found.';errEl.style.display='block';return;}
@@ -1125,40 +1129,12 @@ window.loginStaff=async function(){
         if(!staff){const attempt=incrementLoginAttempts();errEl.textContent=`Invalid access key. ${5-attempt.count} attempts remaining.`;errEl.style.display='block';addSecurityLog(`Failed login for ${hospitalCode}`);return;}
         currentHospital={name:hData.name,code:hospitalCode,state:hData.state,abbrev:hData.abbrev,stateName:hData.stateName||stateNames[hData.state]||hData.state};
         currentUser={name:staff.name,role:staff.role,key:accessKey};
-        isOnline=true;
         saveToCache('hospital_'+hospitalCode,hData);
-
         resetLoginAttempts();
         addSecurityLog(`Login: ${staff.name} (${staff.role})`);
         document.getElementById('auth-overlay').style.display='none';
         initializeMainApp();
-    }catch(e){
-        isOnline=false;
-        // Real network failure — try offline cached login as a fallback
-        const cached=loadFromCache('hospital_'+hospitalCode);
-        if(cached){
-            const hashedInput=await hashKey(accessKey);
-            const staff=cached.staff?.find(s=>s.keyHash===hashedInput||s.key===accessKey);
-            if(staff){
-                currentHospital={name:cached.name,code:hospitalCode,state:cached.state,abbrev:cached.abbrev,stateName:cached.stateName};
-                currentUser={name:staff.name,role:staff.role,key:accessKey};
-                patients=loadFromCache('patients_'+hospitalCode)||[];
-                prescriptions=loadFromCache('prescriptions_'+hospitalCode)||[];
-                labRequests=loadFromCache('labrequests_'+hospitalCode)||[];
-                financialRecords=loadFromCache('financialrecords_'+hospitalCode)||[];
-                inventory=loadFromCache('inventory_'+hospitalCode)||[];
-                bills=loadFromCache('bills_'+hospitalCode)||[];
-                document.getElementById('auth-overlay').style.display='none';
-                initializeMainApp();
-                setStatus('📵 Offline mode — cached data loaded');
-                resetLoginAttempts();
-                addSecurityLog(`Offline login: ${staff.name}`);
-                return;
-            }
-        }
-        errEl.textContent='Login failed: '+e.message+(cached?'':' (and no cached data for offline use)');
-        errEl.style.display='block';
-    }
+    }catch(e){errEl.textContent='Login failed: '+e.message;errEl.style.display='block';}
 }
 
 function initializeMainApp(){
@@ -2238,11 +2214,9 @@ function renderConditionsAnalytics(){const container=document.getElementById('an
 function renderStaffAnalytics(){const container=document.getElementById('analytics-staff');const staffActivity={};patients.forEach(p=>{if(p.visits)p.visits.forEach(v=>{if(v.hospitalName===currentHospital.name){if(v.doctorName){if(!staffActivity[v.doctorName])staffActivity[v.doctorName]={role:'Doctor',count:0,patients:[]};staffActivity[v.doctorName].count++;staffActivity[v.doctorName].patients.push({name:p.name,code:p.code,date:v.date,diagnosis:v.diagnosis||'',medications:v.medications||''});}if(v.nurseName){if(!staffActivity[v.nurseName])staffActivity[v.nurseName]={role:'Nurse',count:0,patients:[]};staffActivity[v.nurseName].count++;staffActivity[v.nurseName].patients.push({name:p.name,code:p.code,date:v.date,diagnosis:'',medications:''});}}});});const sorted=Object.entries(staffActivity).sort((a,b)=>b[1].count-a[1].count);if(!sorted.length){container.innerHTML='<div class="empty-search"><div class="icon">👨‍⚕️</div><p>No staff activity yet</p></div>';return;}container.innerHTML='<div style="padding:15px;"><div style="font-weight:bold;color:#333;margin-bottom:15px;">Staff Activity</div>';sorted.forEach(([name,data])=>{const recent=data.patients.slice(-5).reverse();container.innerHTML+=`<div style="background:white;border-radius:10px;padding:15px;margin-bottom:12px;box-shadow:0 2px 5px rgba(0,0,0,0.08);"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;"><div><div style="font-weight:bold;font-size:16px;">${safe(name)}</div><div style="font-size:12px;color:#666;">${safe(data.role)}</div></div><div style="text-align:center;background:#e8f4fd;padding:8px 15px;border-radius:8px;"><div style="font-size:24px;font-weight:bold;color:#0066cc;">${data.count}</div><div style="font-size:11px;color:#666;">Total</div></div></div><div style="font-size:12px;font-weight:bold;color:#666;margin-bottom:6px;">Recent Patients:</div>${recent.map(pat=>`<div style="background:#f8f9fa;border-radius:6px;padding:8px;margin-bottom:5px;font-size:12px;"><div style="font-weight:bold;">${safe(pat.name)} <span style="font-family:monospace;">(${safe(pat.code)})</span></div><div style="color:#666;">📅 ${safe(pat.date)}${pat.diagnosis?' — '+safe(pat.diagnosis):''}</div>${pat.medications?`<div style="color:#555;">💊 ${safe(pat.medications)}</div>`:''}</div>`).join('')}</div>`;});container.innerHTML+='</div>';}
 function renderFinanceAnalytics(){const container=document.getElementById('analytics-finance');const today=new Date().toLocaleDateString('en-GB');const todayRecs=financialRecords.filter(r=>r.date===today);const consultRev=todayRecs.filter(r=>r.type==='consultation').reduce((s,r)=>s+(r.amount||0),0);const labRev=todayRecs.filter(r=>r.type==='lab').reduce((s,r)=>s+(r.amount||0),0);const drugRev=todayRecs.filter(r=>r.type==='drugs').reduce((s,r)=>s+(r.amount||0),0);const bedRev=todayRecs.filter(r=>r.type==='bed_space').reduce((s,r)=>s+(r.amount||0),0);const paymentRev=todayRecs.filter(r=>r.type==='payment').reduce((s,r)=>s+(r.amount||0),0);const totalToday=consultRev+labRev+drugRev+bedRev+paymentRev;const allTime=financialRecords.reduce((s,r)=>s+(r.amount||0),0);const unpaidBills=bills.filter(b=>b.paymentStatus==='unpaid'||b.paymentStatus==='partial');const totalOutstanding=unpaidBills.reduce((s,b)=>s+(b.balance||0),0);container.innerHTML=`<div style="padding:15px;"><div style="font-weight:bold;color:#333;margin-bottom:10px;">💰 Today's Revenue — ${today}</div><div style="background:white;border-radius:10px;padding:15px;margin-bottom:15px;box-shadow:0 2px 5px rgba(0,0,0,0.1);">${consultRev>0?`<div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #f5f5f5;font-size:14px;"><span>Consultation Fees</span><span style="color:#0066cc;font-weight:bold;">₦${consultRev.toLocaleString()}</span></div>`:''} ${labRev>0?`<div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #f5f5f5;font-size:14px;"><span>Lab Tests</span><span style="color:#009688;font-weight:bold;">₦${labRev.toLocaleString()}</span></div>`:''} ${drugRev>0?`<div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #f5f5f5;font-size:14px;"><span>Drug Sales</span><span style="color:#9c27b0;font-weight:bold;">₦${drugRev.toLocaleString()}</span></div>`:''} ${bedRev>0?`<div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #f5f5f5;font-size:14px;"><span>Bed Space</span><span style="color:#ff8800;font-weight:bold;">₦${bedRev.toLocaleString()}</span></div>`:''} ${paymentRev>0?`<div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #f5f5f5;font-size:14px;"><span>Payments Received</span><span style="color:#00aa55;font-weight:bold;">₦${paymentRev.toLocaleString()}</span></div>`:''}<div style="display:flex;justify-content:space-between;padding:12px 0;font-size:16px;font-weight:bold;color:#0066cc;border-top:2px solid #0066cc;margin-top:5px;"><span>Total Today</span><span>₦${totalToday.toLocaleString()}</span></div></div><div style="background:white;border-radius:10px;padding:15px;margin-bottom:15px;box-shadow:0 2px 5px rgba(0,0,0,0.1);"><div style="font-size:13px;color:#666;margin-bottom:5px;">All-Time Revenue</div><div style="font-size:28px;font-weight:bold;color:#0066cc;">₦${allTime.toLocaleString()}</div></div>${totalOutstanding>0?`<div style="background:#fff0f0;border:2px solid #ff4444;border-radius:10px;padding:15px;"><div style="font-size:13px;color:#ff4444;font-weight:bold;margin-bottom:5px;">🔴 Outstanding Balances</div><div style="font-size:24px;font-weight:bold;color:#ff4444;">₦${totalOutstanding.toLocaleString()}</div><div style="font-size:12px;color:#666;margin-top:3px;">${unpaidBills.length} unpaid/partial bill${unpaidBills.length>1?'s':''}</div></div>`:''}</div>`;}
 
-// ADMIN
-function renderAdminPanel(){document.getElementById('admin-hospital-name').textContent=currentHospital.name||'';document.getElementById('admin-hospital-code').textContent=currentHospital.code||'';document.getElementById('admin-hospital-state').textContent=currentHospital.stateName||'';loadStaffList();try{const logs=JSON.parse(localStorage.getItem('mt_security_log')||'[]');const logEl=document.getElementById('security-log');if(logEl)logEl.innerHTML=logs.slice(0,10).map(l=>`<div style="padding:3px 0;border-bottom:1px solid #eee;font-size:11px;">${safe(l.time?.substring(0,19)||'')} — ${safe(l.event)} (${safe(l.user)})</div>`).join('')||'No events yet';}catch(e){}
-// Show server status in admin panel
-if(connectionMode==='local'){localGet('/status').then(status=>{const statusEl=document.getElementById('server-status-admin');if(statusEl){statusEl.innerHTML=`<div style="color:#2e7d32;font-weight:bold;margin-bottom:5px;">🟢 Clinic Server Active</div><div style="font-size:12px;color:#666;">Patients: ${status.patients} | Pending sync: ${status.pendingSync} | Uptime: ${status.uptime}</div>`;if(status.connectedStaff?.length){statusEl.innerHTML+=`<div style="font-size:12px;color:#0066cc;margin-top:5px;">Connected: ${status.connectedStaff.map(s=>safe(s.staff_name)+' ('+safe(s.staff_role)+')').join(', ')}</div>`;}}}). catch(()=>{});}
-}
+
+// ADMIN — see renderAdminPanel defined below with diagnostic tools
+
 
 async function loadStaffList(){try{const hDoc=await getDoc(doc(db,'hospitals',currentHospital.code));if(!hDoc.exists())return;const data=hDoc.data();const staff=data.staff||[];document.getElementById('admin-staff-count').textContent=staff.length;const list=document.getElementById('staff-list');if(!staff.length){list.innerHTML='<p style="color:#666;font-size:14px;">No staff yet</p>';return;}list.innerHTML='';staff.forEach((s,i)=>{list.innerHTML+=`<div class="staff-card"><div><div class="staff-name">${safe(s.name)}</div><div style="margin-top:3px;"><span class="role-badge role-${s.role}">${safe(s.role)}</span></div>${s.license?`<div style="font-size:11px;color:#666;margin-top:2px;">License: ${safe(s.license)}</div>`:''}<div class="staff-key" style="margin-top:3px;">Key preview: ${safe(s.keyPreview||'****')}</div></div>${s.role!=='admin'?`<button class="remove-btn" onclick="removeStaff(${i})">Remove</button>`:'<span style="font-size:12px;color:#999;">Admin</span>'}</div>`;});}catch(e){console.error(e);}}
 
@@ -2386,8 +2360,7 @@ window.debugPatientLoad=async function(){
     }
 }
 
-// Add repair button to admin panel
-const _origRenderAdmin=window.renderAdminPanel||function(){};
+// Complete renderAdminPanel with diagnostic tools
 function renderAdminPanel(){
     document.getElementById('admin-hospital-name').textContent=currentHospital.name||'';
     document.getElementById('admin-hospital-code').textContent=currentHospital.code||'';
