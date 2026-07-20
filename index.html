@@ -940,7 +940,47 @@ setInterval(()=>{if(!currentUser)return;const idle=Date.now()-lastActivity;if(id
 
 window.validateNigerianPhone=function(input){const phone=input.value.replace(/\s/g,'');const msg=document.getElementById('phone-validation-msg');if(!phone){msg.textContent='';return;}const valid=/^(070|080|081|090|091)\d{8}$/.test(phone);if(valid){msg.textContent='✅ Valid Nigerian number';msg.style.color='#4CAF50';}else{msg.textContent='⚠️ Must be 11 digits starting with 070, 080, 081, 090, or 091';msg.style.color='#ff8800';}}
 
-function addSecurityLog(event){try{const logs=JSON.parse(localStorage.getItem('mt_security_log')||'[]');logs.unshift({event,time:new Date().toISOString(),user:currentUser?.name||'Unknown',hospital:currentHospital?.code||'Unknown'});if(logs.length>50)logs.splice(50);localStorage.setItem('mt_security_log',JSON.stringify(logs));const logEl=document.getElementById('security-log');if(logEl)logEl.innerHTML=logs.slice(0,10).map(l=>`<div style="padding:3px 0;border-bottom:1px solid #eee;font-size:11px;">${safe(l.time?.substring(0,19)||'')} — ${safe(l.event)} (${safe(l.user)})</div>`).join('');}catch(e){}}
+function addSecurityLog(event){
+    try{
+        const logs=JSON.parse(localStorage.getItem('mt_security_log')||'[]');
+        logs.unshift({
+            event,
+            time:new Date().toISOString(),
+            user:currentUser?.name||'Unknown',
+            role:currentUser?.role||'Unknown',
+            hospital:currentHospital?.code||'Unknown',
+            hospitalName:currentHospital?.name||'Unknown'
+        });
+        // Keep only last 200 entries total
+        if(logs.length>200)logs.splice(200);
+        localStorage.setItem('mt_security_log',JSON.stringify(logs));
+    }catch(e){}
+}
+
+function getSecurityLogForCurrentHospital(){
+    try{
+        const logs=JSON.parse(localStorage.getItem('mt_security_log')||'[]');
+        // Filter to only show events from THIS hospital
+        return logs.filter(l=>
+            !l.hospital || // legacy entries without hospital field
+            l.hospital===currentHospital?.code
+        );
+    }catch(e){return[];}
+}
+
+window.clearSecurityLog=function(){
+    if(!confirm('Clear all activity log entries for this hospital?'))return;
+    try{
+        // Only clear entries for this hospital — preserve other hospitals
+        const logs=JSON.parse(localStorage.getItem('mt_security_log')||'[]');
+        const otherHospitalLogs=logs.filter(l=>
+            l.hospital&&l.hospital!==currentHospital?.code
+        );
+        localStorage.setItem('mt_security_log',JSON.stringify(otherHospitalLogs));
+        renderAdminPanel();
+        setStatus('🟢 Activity log cleared');
+    }catch(e){}
+}
 
 async function generateReceiptNumber(){try{let num=1;await runTransaction(db,async(t)=>{const cRef=doc(db,'counters',`receipts_${currentHospital.code}`);const cDoc=await t.get(cRef);num=cDoc.exists()?(cDoc.data().count+1):1;t.set(cRef,{count:num},{merge:true});});const today=new Date();const dateStr=`${today.getFullYear()}${String(today.getMonth()+1).padStart(2,'0')}${String(today.getDate()).padStart(2,'0')}`;return `INV-${currentHospital.code}-${dateStr}-${String(num).padStart(4,'0')}`;}catch(e){return `INV-${currentHospital.code}-${Date.now()}`;}}
 
@@ -1283,22 +1323,53 @@ function scheduleListenerReload(reason){
     },3000);
 }
 
-// Fast parallel initial load — runs once on login
-// Much faster than waiting for all onSnapshot listeners to settle
+// Fast parallel initial load
 async function quickLoadFromFirebase(){
     if(!isOnline||!currentHospital)return;
     try{
         setStatus('⚡ Loading...');
-        const[patientSnap,rxSnap,labSnap,flagSnap,finSnap,invSnap,billSnap]=await Promise.all([
+        const[patientSnap,rxSnap,labSnap,flagSnap,finSnap,invSnap,billSnap,visitingSnap]=await Promise.all([
             getDocs(query(collection(db,'patients'),where('hospitalCode','==',currentHospital.code))),
             getDocs(query(collection(db,'prescriptions'),where('hospitalCode','==',currentHospital.code))),
             getDocs(query(collection(db,'labRequests'),where('hospitalCode','==',currentHospital.code))),
             getDocs(query(collection(db,'pharmacyFlags'),where('hospitalCode','==',currentHospital.code))),
             getDocs(query(collection(db,'financialRecords'),where('hospitalCode','==',currentHospital.code))),
             getDocs(query(collection(db,'inventory'),where('hospitalCode','==',currentHospital.code))),
-            getDocs(query(collection(db,'bills'),where('hospitalCode','==',currentHospital.code)))
+            getDocs(query(collection(db,'bills'),where('hospitalCode','==',currentHospital.code))),
+            // Load external patients visiting this hospital
+            getDocs(query(collection(db,'visitingPatients'),where('hospitalCode','==',currentHospital.code)))
         ]);
-        patients=[];patientSnap.forEach(d=>patients.push({id:d.id,...d.data()}));
+
+        patients=[];
+        patientSnap.forEach(d=>patients.push({id:d.id,...d.data()}));
+
+        // Load each visiting external patient's full record
+        const visitingIds=[];
+        visitingSnap.forEach(d=>visitingIds.push(d.data().patientId));
+
+        if(visitingIds.length>0){
+            // Fetch external patients in batches of 10 (Firestore limit)
+            const batches=[];
+            for(let i=0;i<visitingIds.length;i+=10){
+                batches.push(visitingIds.slice(i,i+10));
+            }
+            for(const batch of batches){
+                try{
+                    const extSnap=await getDocs(query(
+                        collection(db,'patients'),
+                        where('__name__','in',batch)
+                    ));
+                    extSnap.forEach(d=>{
+                        const data={id:d.id,...d.data()};
+                        // Only add if not already in patients array
+                        if(!patients.find(p=>p.id===data.id)){
+                            patients.push(data);
+                        }
+                    });
+                }catch(e){console.warn('External patient batch load:',e.message);}
+            }
+        }
+
         patients.sort((a,b)=>new Date(b.createdAt||0)-new Date(a.createdAt||0));
         prescriptions=[];rxSnap.forEach(d=>prescriptions.push({id:d.id,...d.data()}));
         labRequests=[];labSnap.forEach(d=>labRequests.push({id:d.id,...d.data()}));
@@ -1307,26 +1378,25 @@ async function quickLoadFromFirebase(){
         inventory=[];invSnap.forEach(d=>inventory.push({id:d.id,...d.data()}));
         inventory.sort((a,b)=>(a.name||'').localeCompare(b.name||''));
         bills=[];billSnap.forEach(d=>bills.push({id:d.id,...d.data()}));
-        // Cache everything
+
         saveToCache('patients_'+currentHospital.code,patients);
         saveToCache('prescriptions_'+currentHospital.code,prescriptions);
         saveToCache('labrequests_'+currentHospital.code,labRequests);
         saveToCache('financialrecords_'+currentHospital.code,financialRecords);
         saveToCache('inventory_'+currentHospital.code,inventory);
         saveToCache('bills_'+currentHospital.code,bills);
+
         initialLoadComplete=true;
-        setStatus('🟢 '+currentHospital.name+' — '+patients.length+' patients loaded');
+        const extCount=visitingIds.length;
+        setStatus('🟢 '+currentHospital.name+' — '+patients.length+' patients'+(extCount>0?` (${extCount} visiting)`:''));
         updateDashboard();
         renderPendingVisits();
         renderPharmacyPending();
         renderLabPending();
-        console.log('⚡ Quick load: '+patients.length+' patients, '+prescriptions.length+' Rx, '+labRequests.length+' lab');
-        // Now start real-time listeners for live updates
-        // These will only update when something CHANGES — not overwrite current data
+        console.log('⚡ Quick load: '+patients.length+' patients ('+extCount+' external), '+prescriptions.length+' Rx');
         loadAllDataFirebase();
     }catch(e){
         console.error('Quick load failed:',e.message);
-        // Fall back to cache while listeners start
         const cached=loadFromCache('patients_'+currentHospital.code);
         if(cached){
             patients=cached;
@@ -1447,6 +1517,50 @@ function loadAllDataFirebase(){
         err=>{console.error('Referrals error:',err.message);}
     ));
 
+    // VISITING PATIENTS — external patients who have visited this hospital
+    // When a new external patient is added, fetch their full record and add to patients array
+    _activeListeners.push(onSnapshot(
+        query(collection(db,'visitingPatients'),where('hospitalCode','==',currentHospital.code)),
+        async snap=>{
+            const visitingIds=[];
+            snap.forEach(d=>visitingIds.push(d.data().patientId));
+            if(visitingIds.length===0)return;
+
+            // Fetch any visiting patients not already in patients array
+            const missing=visitingIds.filter(id=>!patients.find(p=>p.id===id));
+            if(missing.length===0)return;
+
+            try{
+                // Fetch in batches of 10
+                for(let i=0;i<missing.length;i+=10){
+                    const batch=missing.slice(i,i+10);
+                    const extSnap=await getDocs(query(
+                        collection(db,'patients'),
+                        where('__name__','in',batch)
+                    ));
+                    extSnap.forEach(d=>{
+                        const data={id:d.id,...d.data()};
+                        if(!patients.find(p=>p.id===data.id)){
+                            patients.push(data);
+                        }
+                    });
+                }
+                // Re-sort and refresh views
+                patients.sort((a,b)=>new Date(b.createdAt||0)-new Date(a.createdAt||0));
+                saveToCache('patients_'+currentHospital.code,patients);
+                updateDashboard();
+                // This is the key — doctor page updates when external patient arrives
+                if(document.getElementById('doctor-view')?.style.display!=='none'){
+                    renderPendingVisits();
+                }
+                console.log('External visiting patients loaded:',missing.length);
+            }catch(e){
+                console.warn('Visiting patients load error:',e.message);
+            }
+        },
+        err=>{console.error('Visiting patients error:',err.message);}
+    ));
+
     // FINANCIAL RECORDS
     _activeListeners.push(onSnapshot(
         query(collection(db,'financialRecords'),where('hospitalCode','==',currentHospital.code)),
@@ -1514,7 +1628,11 @@ function updateDashboard(){
     document.getElementById('dash-patients').textContent=patients.length;
     const today=new Date().toLocaleDateString('en-GB');
     let todayCount=0,pendingCount=0,admittedCount=0;
-    patients.forEach(p=>{if(p.visits)p.visits.forEach(v=>{if(v.hospitalName===currentHospital.name){if(v.date===today)todayCount++;if(v.status==='pending-doctor')pendingCount++;if(v.patientStatus==='admitted')admittedCount++;}});});
+    patients.forEach(p=>{if(p.visits)p.visits.forEach(v=>{
+        const isThisHospital=v.hospitalCode===currentHospital.code||
+            v.hospitalName===currentHospital.name||
+            (v.hospitalName&&currentHospital.name&&v.hospitalName.trim().toLowerCase()===currentHospital.name.trim().toLowerCase());
+        if(isThisHospital){if(v.date===today)todayCount++;if(v.status==='pending-doctor')pendingCount++;if(v.patientStatus==='admitted')admittedCount++;}});});
     document.getElementById('dash-today').textContent=todayCount;
     document.getElementById('dash-pending').textContent=pendingCount;
     document.getElementById('dash-admitted').textContent=admittedCount;
@@ -1886,7 +2004,7 @@ window.submitReturningVitals=async function(){
         date:new Date().toLocaleDateString('en-GB'),
         visitTimestamp:new Date().toISOString(),
         hospitalName:currentHospital.name,
-        hospitalCode:currentHospital.code,  // KEY FIX — stamp hospitalCode on visit
+        hospitalCode:currentHospital.code,
         nurseName,
         status:'pending-doctor',
         patientStatus:'pending',
@@ -1906,6 +2024,31 @@ window.submitReturningVitals=async function(){
         setStatus('🔄 Saving...');
         const updatedVisits=[...(selectedReturningPatient.visits||[]),newVisit];
         await smartSave('updatePatient','patients',{id:selectedReturningPatient.id,visits:updatedVisits});
+
+        // KEY FIX — If external patient, record them as visiting this hospital
+        // This makes them visible to the doctor at this hospital
+        const isExternal=selectedReturningPatient.hospitalCode!==currentHospital.code;
+        if(isExternal&&isOnline){
+            try{
+                await setDoc(
+                    doc(db,'visitingPatients',
+                        `${currentHospital.code}_${selectedReturningPatient.id}`),
+                    {
+                        patientId:selectedReturningPatient.id,
+                        patientCode:selectedReturningPatient.code,
+                        hospitalCode:currentHospital.code,
+                        hospitalName:currentHospital.name,
+                        registeredAt:selectedReturningPatient.hospitalCode,
+                        visitDate:new Date().toLocaleDateString('en-GB'),
+                        createdAt:new Date().toISOString()
+                    }
+                );
+                console.log('External patient recorded as visiting this hospital');
+            }catch(e){
+                console.warn('Could not record visiting patient:',e.message);
+            }
+        }
+
         if(consultFee>0)await smartSave('addFinancialRecord','financialRecords',{type:'consultation',amount:consultFee,patientCode:selectedReturningPatient.code,patientName:selectedReturningPatient.name,hospitalCode:currentHospital.code,hospitalName:currentHospital.name,date:new Date().toLocaleDateString('en-GB'),recordedBy:currentUser.name,createdAt:new Date().toISOString()});
         setStatus(isOnline||connectionMode==='local'?'🟢 Vitals saved — Doctor notified':'📵 Vitals saved offline');
         alert(`✅ ${selectedReturningPatient.name} queued for doctor.${connectionMode==='local'?' Doctor notified in real-time.':''}`);
@@ -2366,28 +2509,61 @@ function renderAdminPanel(){
     document.getElementById('admin-hospital-code').textContent=currentHospital.code||'';
     document.getElementById('admin-hospital-state').textContent=currentHospital.stateName||'';
     loadStaffList();
+
+    // Security log — filtered to THIS hospital only
     try{
-        const logs=JSON.parse(localStorage.getItem('mt_security_log')||'[]');
+        const logs=getSecurityLogForCurrentHospital();
         const logEl=document.getElementById('security-log');
-        if(logEl)logEl.innerHTML=logs.slice(0,10).map(l=>`<div style="padding:3px 0;border-bottom:1px solid #eee;font-size:11px;">${safe(l.time?.substring(0,19)||'')} — ${safe(l.event)} (${safe(l.user)})</div>`).join('')||'No events yet';
+        if(logEl){
+            if(!logs.length){
+                logEl.innerHTML='<div style="color:#999;font-size:12px;padding:5px;">No activity recorded yet.</div>';
+            }else{
+                // Color code by event type
+                logEl.innerHTML=logs.slice(0,20).map(l=>{
+                    const isLogin=l.event?.toLowerCase().includes('login');
+                    const isLogout=l.event?.toLowerCase().includes('logout');
+                    const isPatient=l.event?.toLowerCase().includes('patient');
+                    const isBill=l.event?.toLowerCase().includes('bill');
+                    const isStaff=l.event?.toLowerCase().includes('staff');
+                    const isFailed=l.event?.toLowerCase().includes('failed');
+                    const color=isFailed?'#ff4444':isLogin?'#2e7d32':isLogout?'#666':isPatient?'#0066cc':isBill?'#9c27b0':isStaff?'#ff8800':'#333';
+                    const icon=isFailed?'🔴':isLogin?'🟢':isLogout?'⚪':isPatient?'👤':isBill?'💰':isStaff?'👥':'📋';
+                    const timeStr=l.time?new Date(l.time).toLocaleString('en-GB',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'}):'';
+                    return `<div style="padding:5px 0;border-bottom:1px solid #f0f0f0;font-size:12px;display:flex;gap:6px;align-items:flex-start;">
+                        <span>${icon}</span>
+                        <div style="flex:1;">
+                            <div style="color:${color};font-weight:bold;">${safe(l.event||'')}</div>
+                            <div style="color:#999;font-size:11px;">${safe(l.user||'')} ${l.role?'('+safe(l.role)+')':''} — ${timeStr}</div>
+                        </div>
+                    </div>`;
+                }).join('');
+            }
+        }
     }catch(e){}
+
+    // Server status if on local server
     if(connectionMode==='local'){
         localGet('/status').then(status=>{
             const statusEl=document.getElementById('server-status-admin');
             if(statusEl){
-                statusEl.innerHTML=`<div style="color:#2e7d32;font-weight:bold;margin-bottom:5px;">🟢 Clinic Server Active</div><div style="font-size:12px;color:#666;">Patients: ${status.patients} | Pending sync: ${status.pendingSync} | Uptime: ${status.uptime}</div>${status.connectedStaff?.length?`<div style="font-size:12px;color:#0066cc;margin-top:5px;">Connected: ${status.connectedStaff.map(s=>safe(s.staff_name||'?')+' ('+safe(s.staff_role||'?')+')').join(', ')}</div>`:''}`;
+                statusEl.innerHTML=`<div style="color:#2e7d32;font-weight:bold;margin-bottom:5px;">🟢 Clinic Server Active</div>
+                <div style="font-size:12px;color:#666;">Patients: ${status.patients} | Pending sync: ${status.pendingSync} | Uptime: ${status.uptime}</div>
+                ${status.connectedStaff?.length?`<div style="font-size:12px;color:#0066cc;margin-top:5px;">
+                Connected now: ${status.connectedStaff.map(s=>safe(s.staff_name||'?')+' ('+safe(s.staff_role||'?')+')').join(', ')}</div>`:''}`;
             }
         }).catch(()=>{});
     }
-    // Add diagnostic tools section
+
+    // Diagnostic tools section
     const diagSection=document.getElementById('admin-diagnostics');
     if(diagSection){
         diagSection.innerHTML=`
         <div style="background:#fff8e1;border:1px solid #ffc107;border-radius:10px;padding:15px;margin:10px 15px;">
             <div style="font-weight:bold;color:#f57f17;margin-bottom:8px;">🔧 Diagnostic Tools</div>
-            <div style="font-size:13px;color:#666;margin-bottom:10px;">If doctor/pharmacy/lab sees 0 patients, use these tools.</div>
+            <div style="font-size:13px;color:#666;margin-bottom:10px;">If doctor, pharmacy or lab sees 0 patients, use these tools to diagnose and fix.</div>
             <button onclick="debugPatientLoad()" style="width:100%;background:#0066cc;color:white;border:none;padding:10px;border-radius:8px;cursor:pointer;font-size:13px;margin-bottom:8px;">🔍 Run Diagnosis — Check Firebase Data</button>
-            <button onclick="repairPatientHospitalCodes()" style="width:100%;background:#ff8800;color:white;border:none;padding:10px;border-radius:8px;cursor:pointer;font-size:13px;">🔧 Repair Tool — Fix Missing Hospital Codes</button>
+            <button onclick="repairPatientHospitalCodes()" style="width:100%;background:#ff8800;color:white;border:none;padding:10px;border-radius:8px;cursor:pointer;font-size:13px;margin-bottom:8px;">🔧 Repair Tool — Fix Missing Hospital Codes</button>
+            <button onclick="clearSecurityLog()" style="width:100%;background:#f5f5f5;color:#666;border:1px solid #ddd;padding:8px;border-radius:8px;cursor:pointer;font-size:12px;">🗑️ Clear Activity Log</button>
         </div>`;
     }
 }</script>
