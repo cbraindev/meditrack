@@ -2439,555 +2439,10 @@ window.dispenseAllItems=async function(prescriptionId,medCount){
 
 function renderPharmacyDispensed(){const list=document.getElementById('pharmacy-dispensed-list');const dispensed=prescriptions.filter(p=>p.status==='dispensed');if(!dispensed.length){list.innerHTML='<div class="empty-search"><div class="icon">💊</div><p>No dispensed prescriptions yet</p></div>';return;}list.innerHTML=`<div class="section-title">${dispensed.length} DISPENSED</div>`;dispensed.forEach(p=>{list.innerHTML+=`<div style="background:white;margin:8px 15px;border-radius:10px;padding:15px;box-shadow:0 2px 5px rgba(0,0,0,0.08);"><div style="font-weight:bold;">${safe(p.patientName)} <span style="font-family:monospace;font-size:12px;">(${safe(p.patientCode)})</span></div><div style="font-size:13px;color:#555;margin-top:5px;">💊 ${safe(p.medications)}</div>${p.dispensingSummary?`<div style="font-size:12px;color:#666;margin-top:3px;">${(Array.isArray(p.dispensingSummary)?p.dispensingSummary:JSON.parse(p.dispensingSummary||'[]')).map(d=>`${safe(d.item)}: ${d.units} × ₦${d.unitPrice||0}`).join(' | ')}</div>`:''} ${p.pharmacistNote?`<div class="pharmacist-note">Note: ${safe(p.pharmacistNote)}</div>`:''}<div style="font-size:12px;color:#666;margin-top:3px;">By: ${safe(p.dispensedBy||'Unknown')} — ${safe(p.date)}</div><div style="font-size:12px;color:#0066cc;font-weight:bold;margin-top:3px;">Total: ₦${p.drugCost?.toLocaleString()||0}</div><div style="background:#e8f5e9;color:#4CAF50;padding:4px 10px;border-radius:12px;font-size:12px;font-weight:bold;display:inline-block;margin-top:5px;">✅ Dispensed</div></div>`;});}
 
-function renderInventory(){const section=document.getElementById('pharmacy-inventory-section');section.innerHTML=`<div style="padding:15px;"><div style="font-weight:bold;color:#333;margin-bottom:15px;">Drug Inventory</div><div style="background:white;border-radius:10px;padding:15px;margin-bottom:15px;box-shadow:0 2px 5px rgba(0,0,0,0.1);"><div style="font-weight:bold;color:#0066cc;margin-bottom:10px;">➕ Add / Update Drug Stock</div><div class="form-group"><label>Drug Name *</label><input type="text" id="inv-drug-name" placeholder="e.g. Paracetamol 500mg"></div><div class="form-group"><label>Quantity (units) *</label><input type="number" id="inv-quantity" placeholder="e.g. 500"></div><div class="form-group"><label>Unit Price (₦) *</label><input type="number" id="inv-price" placeholder="e.g. 50"></div><div class="form-group"><label>Reorder Alert Level</label><input type="number" id="inv-reorder" placeholder="e.g. 50"></div><button onclick="addToInventory()" style="background:#0066cc;color:white;border:none;padding:12px;border-radius:8px;cursor:pointer;font-size:14px;width:100%;">Add to Inventory</button></div>`;if(!inventory.length){section.innerHTML+='<p style="text-align:center;color:#999;padding:20px;">No drugs in inventory yet.</p>';}else{section.innerHTML+=`<div style="padding:0 15px;font-weight:bold;color:#333;margin-bottom:10px;">${inventory.length} Drug(s) in Stock</div>`;inventory.sort((a,b)=>a.quantity-b.quantity).forEach(item=>{const isLow=item.quantity<=item.reorderLevel;section.innerHTML+=`<div class="inventory-card ${isLow?'inventory-low':'inventory-ok'}"><div><div class="inventory-name">${safe(item.name)}</div><div style="font-size:12px;color:#666;">Unit Price: ₦${item.unitPrice?.toLocaleString()||0}</div><div style="font-size:12px;color:#666;">Reorder at: ${item.reorderLevel} units</div>${isLow?'<div style="font-size:11px;color:#ff4444;font-weight:bold;">🔴 LOW STOCK</div>':''}</div><div style="text-align:center;"><div class="inventory-qty ${isLow?'low':'ok'}">${item.quantity}</div><div style="font-size:11px;color:#666;">units</div><button onclick="updateStock('${item.id}')" style="background:#0066cc;color:white;border:none;padding:4px 8px;border-radius:6px;cursor:pointer;font-size:11px;margin-top:5px;">Update</button></div></div>`;});}section.innerHTML+='</div>';}
-
-window.addToInventory=async function(){
-    const name=document.getElementById('inv-drug-name').value.trim();const quantity=parseInt(document.getElementById('inv-quantity').value)||0;const unitPrice=parseFloat(document.getElementById('inv-price').value)||0;const reorderLevel=parseInt(document.getElementById('inv-reorder').value)||20;
-    if(!name||!quantity){alert('Please enter drug name and quantity');return;}
-    try{
-        const existing=inventory.find(i=>i.name?.toLowerCase()===name.toLowerCase());
-        if(existing){
-            if(connectionMode==='local'){await localPut(`/api/inventory/${existing.id}`,{quantity:existing.quantity+quantity,unitPrice,reorderLevel});}
-            else{await updateDoc(doc(db,'inventory',existing.id),{quantity:existing.quantity+quantity,unitPrice,reorderLevel,updatedAt:new Date().toISOString()});}
-            alert(`✅ Added ${quantity} units. Total: ${existing.quantity+quantity}`);
-        }else{
-            const invData={name,quantity,unitPrice,reorderLevel,hospitalCode:currentHospital.code,hospitalName:currentHospital.name,createdAt:new Date().toISOString()};
-            if(connectionMode==='local'){await localPost('/api/inventory',invData);}
-            else{await addDoc(collection(db,'inventory'),invData);}
-            alert(`✅ ${name} added to inventory`);
-        }
-        ['inv-drug-name','inv-quantity','inv-price','inv-reorder'].forEach(id=>document.getElementById(id).value='');
-        renderInventory();
-    }catch(e){alert('Error: '+e.message);}
-}
-
-window.updateStock=async function(itemId){
-    const item=inventory.find(i=>i.id===itemId);if(!item)return;
-    const qty=prompt(`Current: ${item.quantity} units\nNew quantity for ${item.name}:`);if(qty===null)return;
-    const newQty=parseInt(qty);if(isNaN(newQty)||newQty<0){alert('Invalid quantity');return;}
-    try{
-        if(connectionMode==='local'){await localPut(`/api/inventory/${itemId}`,{quantity:newQty,unitPrice:item.unitPrice,reorderLevel:item.reorderLevel});}
-        else{await updateDoc(doc(db,'inventory',itemId),{quantity:newQty,updatedAt:new Date().toISOString()});}
-        renderInventory();
-    }catch(e){alert('Error updating stock');}
-}
-
-function renderPharmacyCosts(){const section=document.getElementById('pharmacy-costs-section');const today=new Date().toLocaleDateString('en-GB');const todayDispensed=prescriptions.filter(p=>p.status==='dispensed'&&p.date===today);const total=todayDispensed.reduce((s,p)=>s+(p.drugCost||0),0);section.innerHTML=`<div style="padding:15px;"><div style="background:white;border-radius:10px;padding:15px;box-shadow:0 2px 5px rgba(0,0,0,0.1);"><div style="font-weight:bold;color:#9c27b0;margin-bottom:10px;">💊 Today's Drug Revenue</div><div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #f5f5f5;font-size:14px;"><span>Dispensed</span><span>${todayDispensed.length}</span></div><div style="display:flex;justify-content:space-between;padding:10px 0;font-size:16px;font-weight:bold;color:#9c27b0;"><span>Total</span><span>₦${total.toLocaleString()}</span></div></div></div>`;}
-
-window.flagToDoctor=async function(prescriptionId){
-    const p=prescriptions.find(p=>p.id===prescriptionId);if(!p)return;
-    const message=prompt('Describe the concern for the doctor:');if(!message)return;
-    const flagData={prescriptionId,patientId:p.patientId,patientCode:p.patientCode,patientName:p.patientName,flagMessage:message,flaggedBy:currentUser.name,hospitalName:currentHospital.name,hospitalCode:currentHospital.code,date:new Date().toLocaleDateString('en-GB'),status:'pending',createdAt:new Date().toISOString()};
-    try{
-        if(connectionMode==='local'){await localPost('/api/pharmacy-flags',flagData);}
-        else{await addDoc(collection(db,'pharmacyFlags'),flagData);}
-        setStatus('🟢 Flag sent to doctor');alert('✅ Flag sent to doctor');
-    }catch(e){setStatus('🔴 Error sending flag');}
-}
-
-// LAB
-window.switchLabTab=function(tab){['pending','completed','costs'].forEach(t=>{document.getElementById('lab-tab-'+t).classList.remove('active');document.getElementById('lab-'+t+(t==='costs'?'-section':'-list')).style.display='none';});document.getElementById('lab-tab-'+tab).classList.add('active');document.getElementById('lab-'+tab+(tab==='costs'?'-section':'-list')).style.display='block';if(tab==='pending')renderLabPending();else if(tab==='completed')renderLabCompleted();else renderLabCosts();}
-function renderLabPending(){const list=document.getElementById('lab-pending-list');if(!list)return;const pending=labRequests.filter(l=>l.status==='pending');if(!pending.length){list.innerHTML='<div class="empty-search"><div class="icon">🔬</div><p>No pending lab requests</p></div>';return;}list.innerHTML=`<div class="section-title">${pending.length} PENDING REQUEST(S)</div>`;pending.forEach(l=>{list.innerHTML+=`<div class="lab-full-card"><div class="lab-card-header"><div style="font-size:16px;font-weight:bold;">${safe(l.patientName)}</div><div style="font-size:12px;opacity:0.8;font-family:monospace;">${safe(l.patientCode)} — Dr. ${safe(l.doctorName)}</div></div><div class="lab-card-body"><div style="font-size:15px;font-weight:bold;margin-bottom:5px;">🔬 ${safe(l.testType)}</div>${l.urgency==='urgent'?'<div style="color:red;font-weight:bold;font-size:13px;margin-bottom:5px;">🔴 URGENT</div>':'<div style="color:#009688;font-size:13px;margin-bottom:5px;">🟢 Routine</div>'}${l.reason?`<div style="font-size:13px;color:#555;margin-bottom:8px;">Reason: ${safe(l.reason)}</div>`:''}<div style="font-size:12px;color:#666;margin-bottom:10px;">📅 ${safe(l.date)}</div><div class="form-group"><label style="font-size:13px;">Test Result *</label><input type="text" id="result-${l.id}" placeholder="Enter result..." style="width:100%;padding:10px;border:1px solid #ddd;border-radius:8px;font-size:14px;"></div><div style="display:flex;gap:8px;margin-bottom:10px;"><input type="number" id="lab-cost-${l.id}" placeholder="Test cost (₦)" style="flex:1;padding:10px;border:1px solid #ddd;border-radius:8px;font-size:14px;"><button style="background:#009688;color:white;border:none;padding:10px 15px;border-radius:8px;cursor:pointer;font-size:13px;" onclick="submitLabResult('${l.id}')">📤 Submit</button></div></div></div>`;});}
-function renderLabCompleted(){const list=document.getElementById('lab-completed-list');const completed=labRequests.filter(l=>l.status==='completed');if(!completed.length){list.innerHTML='<div class="empty-search"><div class="icon">✅</div><p>No completed tests yet</p></div>';return;}list.innerHTML=`<div class="section-title">${completed.length} COMPLETED</div>`;completed.forEach(l=>{list.innerHTML+=`<div style="background:white;margin:8px 15px;border-radius:10px;padding:15px;box-shadow:0 2px 5px rgba(0,0,0,0.08);border-left:4px solid ${l.reviewedByDoctor?'#4CAF50':'#ff8800'};"><div style="font-weight:bold;">${safe(l.patientName)} <span style="font-family:monospace;font-size:12px;">(${safe(l.patientCode)})</span></div><div style="font-size:14px;margin-top:5px;font-weight:bold;">${safe(l.testType)}</div><div style="background:#e8f5e9;padding:8px;border-radius:6px;margin-top:5px;"><div style="font-size:12px;color:#666;">RESULT:</div><div style="font-size:15px;font-weight:bold;color:#2e7d32;">${safe(l.result)}</div></div>${l.testCost?`<div style="font-size:12px;color:#0066cc;margin-top:5px;">💰 ₦${l.testCost?.toLocaleString()}</div>`:''}<div style="font-size:12px;color:#666;margin-top:3px;">By: ${safe(l.completedBy||'Lab')} — ${safe(l.date)}</div><div style="margin-top:5px;font-size:11px;font-weight:bold;color:${l.reviewedByDoctor?'#4CAF50':'#ff8800'};">${l.reviewedByDoctor?'✅ Doctor reviewed':'⏳ Awaiting doctor review'}</div></div>`;});}
-function renderLabCosts(){const section=document.getElementById('lab-costs-section');const today=new Date().toLocaleDateString('en-GB');const todayCompleted=labRequests.filter(l=>l.status==='completed'&&l.date===today);const total=todayCompleted.reduce((s,l)=>s+(l.testCost||0),0);section.innerHTML=`<div style="padding:15px;"><div style="background:white;border-radius:10px;padding:15px;box-shadow:0 2px 5px rgba(0,0,0,0.1);"><div style="font-weight:bold;color:#009688;margin-bottom:10px;">🔬 Today's Lab Revenue</div><div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #f5f5f5;font-size:14px;"><span>Tests Completed</span><span>${todayCompleted.length}</span></div><div style="display:flex;justify-content:space-between;padding:10px 0;font-size:16px;font-weight:bold;color:#009688;"><span>Total</span><span>₦${total.toLocaleString()}</span></div></div></div>`;}
-
-window.submitLabResult=async function(labId){
-    const result=document.getElementById('result-'+labId).value.trim();if(!result){alert('Please enter test result');return;}
-    const cost=parseFloat(document.getElementById('lab-cost-'+labId).value)||0;
-    try{
-        setStatus('🔄 Submitting result...');
-        const lab=labRequests.find(l=>l.id===labId);
-        const updateData={id:labId,status:'completed',result,testCost:cost,completedBy:currentUser.name,completedAt:new Date().toISOString()};
-        if(connectionMode==='local'){await localPut(`/api/lab-requests/${labId}`,updateData);}
-        else{await smartSave('updateLabRequest','labRequests',updateData);}
-        if(lab){const patient=patients.find(p=>p.id===lab.patientId);if(patient?.visits){const updatedVisits=patient.visits.map(v=>{if(v.hospitalName===lab.hospitalName&&v.doctorName===lab.doctorName)return{...v,labResult:{testType:lab.testType,result,completedBy:currentUser.name,completedAt:new Date().toLocaleDateString('en-GB')}};return v;});await smartSave('updatePatient','patients',{id:patient.id,visits:updatedVisits});}}
-        if(cost>0&&lab)await smartSave('addFinancialRecord','financialRecords',{type:'lab',amount:cost,testType:lab.testType,patientCode:lab.patientCode,patientName:lab.patientName,hospitalCode:currentHospital.code,hospitalName:currentHospital.name,date:new Date().toLocaleDateString('en-GB'),recordedBy:currentUser.name,createdAt:new Date().toISOString()});
-        setStatus(connectionMode==='local'?'🟢 Result submitted — Doctor notified in real-time':'🟢 Result submitted');
-    }catch(e){setStatus('🔴 Error: '+e.message);}
-}
-
-// ANALYTICS
-window.switchAnalyticsTab=function(tab){['daily','conditions','staff','finance'].forEach(t=>{document.getElementById('analytics-tab-'+t).classList.remove('active');document.getElementById('analytics-'+t).style.display='none';});document.getElementById('analytics-tab-'+tab).classList.add('active');document.getElementById('analytics-'+tab).style.display='block';renderAnalytics(tab);}
-function renderAnalytics(tab){if(tab==='daily')renderDailyAnalytics();else if(tab==='conditions')renderConditionsAnalytics();else if(tab==='staff')renderStaffAnalytics();else renderFinanceAnalytics();}
-function renderDailyAnalytics(){const container=document.getElementById('analytics-daily');const dailyCounts={};patients.forEach(p=>{if(p.visits)p.visits.forEach(v=>{if(v.hospitalName===currentHospital.name)dailyCounts[v.date]=(dailyCounts[v.date]||0)+1;});});const sorted=Object.entries(dailyCounts).sort((a,b)=>{const da=a[0].split('/').reverse().join('-');const db2=b[0].split('/').reverse().join('-');return new Date(db2)-new Date(da);}).slice(0,14);const max=Math.max(...sorted.map(d=>d[1]),1);if(!sorted.length){container.innerHTML='<div class="empty-search"><div class="icon">📅</div><p>No visit data yet</p></div>';return;}container.innerHTML='<div style="padding:15px;"><div style="font-weight:bold;color:#333;margin-bottom:15px;">Patient Visits — Last 14 Days</div>';sorted.forEach(([date,count])=>{const width=Math.round(count/max*100);container.innerHTML+=`<div style="margin-bottom:10px;"><div class="chart-label">${safe(date)} — ${count} patient${count>1?'s':''}</div><div class="chart-bar"><div class="chart-bar-fill" style="width:${width}%;">${count}</div></div></div>`;});container.innerHTML+='</div>';}
-function renderConditionsAnalytics(){const container=document.getElementById('analytics-conditions');const conditions={};patients.forEach(p=>{if(p.visits)p.visits.forEach(v=>{if(v.hospitalName===currentHospital.name&&v.diagnosis){const d=v.diagnosis.toLowerCase();conditions[d]=(conditions[d]||0)+1;}});});const sorted=Object.entries(conditions).sort((a,b)=>b[1]-a[1]).slice(0,10);const max=Math.max(...sorted.map(d=>d[1]),1);if(!sorted.length){container.innerHTML='<div class="empty-search"><div class="icon">🩺</div><p>No diagnosis data yet</p></div>';return;}container.innerHTML='<div style="padding:15px;"><div style="font-weight:bold;color:#333;margin-bottom:15px;">Top 10 Conditions</div>';sorted.forEach(([cond,count])=>{const width=Math.round(count/max*100);container.innerHTML+=`<div style="margin-bottom:10px;"><div class="chart-label">${safe(cond.charAt(0).toUpperCase()+cond.slice(1))} — ${count}</div><div class="chart-bar"><div class="chart-bar-fill" style="width:${width}%;background:#00aa55;">${count}</div></div></div>`;});container.innerHTML+='</div>';}
-function renderStaffAnalytics(){const container=document.getElementById('analytics-staff');const staffActivity={};patients.forEach(p=>{if(p.visits)p.visits.forEach(v=>{if(v.hospitalName===currentHospital.name){if(v.doctorName){if(!staffActivity[v.doctorName])staffActivity[v.doctorName]={role:'Doctor',count:0,patients:[]};staffActivity[v.doctorName].count++;staffActivity[v.doctorName].patients.push({name:p.name,code:p.code,date:v.date,diagnosis:v.diagnosis||'',medications:v.medications||''});}if(v.nurseName){if(!staffActivity[v.nurseName])staffActivity[v.nurseName]={role:'Nurse',count:0,patients:[]};staffActivity[v.nurseName].count++;staffActivity[v.nurseName].patients.push({name:p.name,code:p.code,date:v.date,diagnosis:'',medications:''});}}});});const sorted=Object.entries(staffActivity).sort((a,b)=>b[1].count-a[1].count);if(!sorted.length){container.innerHTML='<div class="empty-search"><div class="icon">👨‍⚕️</div><p>No staff activity yet</p></div>';return;}container.innerHTML='<div style="padding:15px;"><div style="font-weight:bold;color:#333;margin-bottom:15px;">Staff Activity</div>';sorted.forEach(([name,data])=>{const recent=data.patients.slice(-5).reverse();container.innerHTML+=`<div style="background:white;border-radius:10px;padding:15px;margin-bottom:12px;box-shadow:0 2px 5px rgba(0,0,0,0.08);"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;"><div><div style="font-weight:bold;font-size:16px;">${safe(name)}</div><div style="font-size:12px;color:#666;">${safe(data.role)}</div></div><div style="text-align:center;background:#e8f4fd;padding:8px 15px;border-radius:8px;"><div style="font-size:24px;font-weight:bold;color:#0066cc;">${data.count}</div><div style="font-size:11px;color:#666;">Total</div></div></div><div style="font-size:12px;font-weight:bold;color:#666;margin-bottom:6px;">Recent Patients:</div>${recent.map(pat=>`<div style="background:#f8f9fa;border-radius:6px;padding:8px;margin-bottom:5px;font-size:12px;"><div style="font-weight:bold;">${safe(pat.name)} <span style="font-family:monospace;">(${safe(pat.code)})</span></div><div style="color:#666;">📅 ${safe(pat.date)}${pat.diagnosis?' — '+safe(pat.diagnosis):''}</div>${pat.medications?`<div style="color:#555;">💊 ${safe(pat.medications)}</div>`:''}</div>`).join('')}</div>`;});container.innerHTML+='</div>';}
-function renderFinanceAnalytics(){const container=document.getElementById('analytics-finance');const today=new Date().toLocaleDateString('en-GB');const todayRecs=financialRecords.filter(r=>r.date===today);const consultRev=todayRecs.filter(r=>r.type==='consultation').reduce((s,r)=>s+(r.amount||0),0);const labRev=todayRecs.filter(r=>r.type==='lab').reduce((s,r)=>s+(r.amount||0),0);const drugRev=todayRecs.filter(r=>r.type==='drugs').reduce((s,r)=>s+(r.amount||0),0);const bedRev=todayRecs.filter(r=>r.type==='bed_space').reduce((s,r)=>s+(r.amount||0),0);const paymentRev=todayRecs.filter(r=>r.type==='payment').reduce((s,r)=>s+(r.amount||0),0);const totalToday=consultRev+labRev+drugRev+bedRev+paymentRev;const allTime=financialRecords.reduce((s,r)=>s+(r.amount||0),0);const unpaidBills=bills.filter(b=>b.paymentStatus==='unpaid'||b.paymentStatus==='partial');const totalOutstanding=unpaidBills.reduce((s,b)=>s+(b.balance||0),0);container.innerHTML=`<div style="padding:15px;"><div style="font-weight:bold;color:#333;margin-bottom:10px;">💰 Today's Revenue — ${today}</div><div style="background:white;border-radius:10px;padding:15px;margin-bottom:15px;box-shadow:0 2px 5px rgba(0,0,0,0.1);">${consultRev>0?`<div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #f5f5f5;font-size:14px;"><span>Consultation Fees</span><span style="color:#0066cc;font-weight:bold;">₦${consultRev.toLocaleString()}</span></div>`:''} ${labRev>0?`<div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #f5f5f5;font-size:14px;"><span>Lab Tests</span><span style="color:#009688;font-weight:bold;">₦${labRev.toLocaleString()}</span></div>`:''} ${drugRev>0?`<div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #f5f5f5;font-size:14px;"><span>Drug Sales</span><span style="color:#9c27b0;font-weight:bold;">₦${drugRev.toLocaleString()}</span></div>`:''} ${bedRev>0?`<div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #f5f5f5;font-size:14px;"><span>Bed Space</span><span style="color:#ff8800;font-weight:bold;">₦${bedRev.toLocaleString()}</span></div>`:''} ${paymentRev>0?`<div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #f5f5f5;font-size:14px;"><span>Payments Received</span><span style="color:#00aa55;font-weight:bold;">₦${paymentRev.toLocaleString()}</span></div>`:''}<div style="display:flex;justify-content:space-between;padding:12px 0;font-size:16px;font-weight:bold;color:#0066cc;border-top:2px solid #0066cc;margin-top:5px;"><span>Total Today</span><span>₦${totalToday.toLocaleString()}</span></div></div><div style="background:white;border-radius:10px;padding:15px;margin-bottom:15px;box-shadow:0 2px 5px rgba(0,0,0,0.1);"><div style="font-size:13px;color:#666;margin-bottom:5px;">All-Time Revenue</div><div style="font-size:28px;font-weight:bold;color:#0066cc;">₦${allTime.toLocaleString()}</div></div>${totalOutstanding>0?`<div style="background:#fff0f0;border:2px solid #ff4444;border-radius:10px;padding:15px;"><div style="font-size:13px;color:#ff4444;font-weight:bold;margin-bottom:5px;">🔴 Outstanding Balances</div><div style="font-size:24px;font-weight:bold;color:#ff4444;">₦${totalOutstanding.toLocaleString()}</div><div style="font-size:12px;color:#666;margin-top:3px;">${unpaidBills.length} unpaid/partial bill${unpaidBills.length>1?'s':''}</div></div>`:''}</div>`;
-container.innerHTML+=`<div style="padding:0 15px 15px;"><button onclick="showDailyReconciliation()" style="width:100%;background:#0066cc;color:white;border:none;padding:14px;border-radius:10px;font-size:15px;font-weight:bold;cursor:pointer;margin-bottom:10px;">🖨️ Print Daily Reconciliation</button><button onclick="showView('billing-list')" style="width:100%;background:#00aa55;color:white;border:none;padding:12px;border-radius:10px;font-size:14px;cursor:pointer;">💰 Manage Bills</button></div>`;}
 
 
-// ADMIN — see renderAdminPanel defined below with diagnostic tools
 
 
-async function loadStaffList(){try{const hDoc=await getDoc(doc(db,'hospitals',currentHospital.code));if(!hDoc.exists())return;const data=hDoc.data();const staff=data.staff||[];document.getElementById('admin-staff-count').textContent=staff.length;const list=document.getElementById('staff-list');if(!staff.length){list.innerHTML='<p style="color:#666;font-size:14px;">No staff yet</p>';return;}list.innerHTML='';staff.forEach((s,i)=>{list.innerHTML+=`<div class="staff-card"><div><div class="staff-name">${safe(s.name)}</div><div style="margin-top:3px;"><span class="role-badge role-${s.role}">${safe(s.role)}</span></div>${s.license?`<div style="font-size:11px;color:#666;margin-top:2px;">License: ${safe(s.license)}</div>`:''}<div class="staff-key" style="margin-top:3px;">Key preview: ${safe(s.keyPreview||'****')}</div></div>${s.role!=='admin'?`<button class="remove-btn" onclick="removeStaff(${i})">Remove</button>`:'<span style="font-size:12px;color:#999;">Admin</span>'}</div>`;});}catch(e){console.error(e);}}
-
-window.addStaffMember=async function(){const name=document.getElementById('new-staff-name').value.trim();const role=document.getElementById('new-staff-role').value;const license=document.getElementById('new-staff-license').value.trim();const key=document.getElementById('new-staff-key').value.trim();if(!name||!role||!key){alert('Please fill name, role and access key');return;}if(key.length<8){alert('Access key must be at least 8 characters');return;}try{const hDoc=await getDoc(doc(db,'hospitals',currentHospital.code));const data=hDoc.data();const hashedKey=await hashKey(key);if(data.staff.find(s=>s.keyHash===hashedKey)){alert('Access key already exists. Choose a different key.');return;}await updateDoc(doc(db,'hospitals',currentHospital.code),{staff:[...data.staff,{name,role,license,keyHash:hashedKey,keyPreview:key.substring(0,4)+'****',addedAt:new Date().toISOString()}]});document.getElementById('new-staff-name').value='';document.getElementById('new-staff-role').value='';document.getElementById('new-staff-license').value='';document.getElementById('new-staff-key').value='';const msg=document.getElementById('admin-success-msg');msg.textContent=`✅ ${name} added as ${role}. Key: ${key} — Save this key, it cannot be recovered.`;msg.style.display='block';setTimeout(()=>msg.style.display='none',8000);addSecurityLog(`Staff added: ${name} (${role})`);loadStaffList();}catch(e){alert('Error: '+e.message);}}
-
-window.removeStaff=async function(index){if(!confirm('Remove this staff member?'))return;try{const hDoc=await getDoc(doc(db,'hospitals',currentHospital.code));const data=hDoc.data();const removed=data.staff[index];await updateDoc(doc(db,'hospitals',currentHospital.code),{staff:data.staff.filter((_,i)=>i!==index)});loadStaffList();addSecurityLog(`Staff removed: ${removed?.name||'Unknown'}`);const msg=document.getElementById('admin-success-msg');msg.textContent='✅ Staff member removed';msg.style.display='block';setTimeout(()=>msg.style.display='none',3000);}catch(e){alert('Error: '+e.message);}}
-
-// REGISTER PATIENT
-window.registerPatient=async function(){
-    const name=document.getElementById('reg-name').value.trim();const phone=document.getElementById('reg-phone').value.trim();const dob=document.getElementById('reg-dob').value;const gender=document.getElementById('reg-gender').value;const consent=document.getElementById('reg-consent').checked;const consultationFee=parseFloat(document.getElementById('reg-consultation-fee').value)||0;
-    if(!name||!phone||!dob||!gender){alert('Please fill required fields');return;}
-    if(!consent){alert('Please obtain and confirm patient consent before registering.');return;}
-    const phoneClean=phone.replace(/\s/g,'');
-    if(!/^(070|080|081|090|091)\d{8}$/.test(phoneClean)){if(!confirm('The phone number does not appear to be a valid Nigerian number. Continue anyway?'))return;}
-    const existing=patients.find(p=>p.phone===phoneClean);
-    if(existing){alert(`Patient already registered: ${existing.name} (${existing.code})`);return;}
-    try{
-        setStatus('🔄 Generating patient code...');
-        const code=await generatePatientCode();
-        const newPatient={code,name,phone:phoneClean,dob:new Date(dob).toLocaleDateString('en-GB'),gender,blood:document.getElementById('reg-blood').value,allergy:document.getElementById('reg-allergy').value,hmoCompany:document.getElementById('reg-hmo-company').value,hmo:document.getElementById('reg-hmo').value,hmoPlan:document.getElementById('reg-hmo-plan').value,kin:document.getElementById('reg-kin').value,kinPhone:document.getElementById('reg-kin-phone').value,consultationFee,consentGiven:true,consentDate:new Date().toISOString(),registeredAtHospital:currentHospital.name,registeredBy:currentUser.name,state:currentHospital.state,stateAbbrev:currentHospital.state,stateName:currentHospital.stateName,hospitalAbbrev:currentHospital.abbrev,hospitalCode:currentHospital.code,visits:[],createdAt:new Date().toISOString()};
-        await smartSave('addPatient','patients',newPatient);
-        if(consultationFee>0)await smartSave('addFinancialRecord','financialRecords',{type:'consultation',amount:consultationFee,patientName:name,patientCode:code,hospitalCode:currentHospital.code,hospitalName:currentHospital.name,date:new Date().toLocaleDateString('en-GB'),recordedBy:currentUser.name,createdAt:new Date().toISOString()});
-        await sendSMS(phoneClean,`Welcome to MEDITRACK. Your patient code is: ${code}. Present this at any MEDITRACK clinic for instant access to your health records.`);
-        addSecurityLog(`Patient registered: ${code}`);
-        setStatus(connectionMode==='local'?`🏥 Patient registered — Code: ${code}`:`🟢 Patient registered — Code: ${code}`);
-        const msg=document.getElementById('register-success-msg');msg.textContent=`✅ Registered! Code: ${code}`;msg.style.display='block';
-        ['reg-name','reg-phone','reg-dob','reg-gender','reg-blood','reg-allergy','reg-hmo-company','reg-hmo','reg-hmo-plan','reg-kin','reg-kin-phone','reg-consultation-fee'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
-        document.getElementById('reg-consent').checked=false;document.getElementById('phone-validation-msg').textContent='';
-        setTimeout(()=>{msg.style.display='none';showView('dashboard');},3000);
-    }catch(e){setStatus('🔴 Error: '+e.message);}
-}
-
-window.printPatientCard=function(){const p=patients.find(p=>p.id===currentPatientId);if(!p)return;const w=window.open('','_blank');w.document.write(`<!DOCTYPE html><html><head><title>Patient Card</title><style>body{font-family:Arial,sans-serif;padding:20px;}.card{border:2px solid #0066cc;border-radius:10px;padding:20px;max-width:350px;margin:0 auto;}</style></head><body><div class="card"><div style="background:#0066cc;color:white;padding:10px;border-radius:8px;text-align:center;margin-bottom:15px;"><div style="font-size:18px;font-weight:bold;">🏥 MEDITRACK</div><div style="font-size:11px;">Unified Patient Health Records — Nigeria</div></div><div style="font-size:22px;font-weight:bold;color:#0066cc;text-align:center;margin:10px 0;letter-spacing:2px;font-family:monospace;">${safe(p.code)}</div><div style="font-size:13px;margin:5px 0;"><strong>Name:</strong> ${safe(p.name)}</div><div style="font-size:13px;margin:5px 0;"><strong>Phone:</strong> ${safe(p.phone)}</div><div style="font-size:13px;margin:5px 0;"><strong>DOB:</strong> ${safe(p.dob)}</div><div style="font-size:13px;margin:5px 0;"><strong>Blood Group:</strong> ${safe(p.blood||'Not recorded')}</div><div style="font-size:13px;margin:5px 0;"><strong>State:</strong> ${safe(p.stateName||'Not recorded')}</div>${p.hmoCompany?`<div style="font-size:13px;margin:5px 0;"><strong>HMO:</strong> ${safe(p.hmoCompany)} — ${safe(p.hmo||'No number')}</div>`:''} ${p.allergy?`<div style="background:#ff4444;color:white;padding:8px;border-radius:5px;text-align:center;margin-top:10px;font-weight:bold;">⚠️ ALLERGIC TO: ${safe(p.allergy.toUpperCase())}</div>`:'<div style="background:#4CAF50;color:white;padding:8px;border-radius:5px;text-align:center;margin-top:10px;font-weight:bold;">✅ NO KNOWN ALLERGIES</div>'}<div style="text-align:center;font-size:11px;color:#666;margin-top:15px;">Present at any MEDITRACK facility for instant health records</div></div><script>window.print();<\/script></body></html>`);}
-
-// ============================================================
-// DATA REPAIR TOOL — fixes patients registered before hospitalCode fix
-// Run this once from Admin panel if doctor sees 0 patients
-// ============================================================
-window.repairPatientHospitalCodes=async function(){
-    if(!currentHospital||!isOnline){
-        alert('Must be online to run repair');return;
-    }
-    if(!confirm(`This will scan ALL patients in Firebase and fix any that are missing hospitalCode for ${currentHospital.name}.\n\nOnly run this once. Continue?`))return;
-
-    setStatus('🔄 Scanning Firebase for patients to repair...');
-    const results={fixed:0,skipped:0,errors:0};
-
-    try{
-        // Get ALL patients with this hospital name but possibly missing/wrong hospitalCode
-        const byName=await getDocs(query(
-            collection(db,'patients'),
-            where('registeredAtHospital','==',currentHospital.name)
-        ));
-
-        const toFix=[];
-        byName.forEach(d=>{
-            const data=d.data();
-            if(!data.hospitalCode||data.hospitalCode!==currentHospital.code){
-                toFix.push({id:d.id,...data});
-            }
-        });
-
-        if(toFix.length===0){
-            setStatus('✅ No repairs needed — all patients have correct hospitalCode');
-            alert('✅ All patients already have the correct hospitalCode. No repairs needed.');
-            return;
-        }
-
-        setStatus(`🔄 Fixing ${toFix.length} patients...`);
-
-        for(const patient of toFix){
-            try{
-                await updateDoc(doc(db,'patients',patient.id),{
-                    hospitalCode:currentHospital.code,
-                    hospitalAbbrev:currentHospital.abbrev,
-                    state:currentHospital.state,
-                    stateName:currentHospital.stateName
-                });
-                results.fixed++;
-            }catch(e){
-                results.errors++;
-            }
-        }
-
-        const msg=`✅ Repair complete!\nFixed: ${results.fixed} patients\nErrors: ${results.errors}`;
-        setStatus('🟢 Repair complete — reloading data...');
-        alert(msg);
-        addSecurityLog(`Data repair: ${results.fixed} patients fixed`);
-
-        // Reload data so doctor now sees the repaired patients
-        initialLoadComplete=false;
-        quickLoadFromFirebase();
-
-    }catch(e){
-        setStatus('🔴 Repair failed: '+e.message);
-        alert('Repair failed: '+e.message);
-    }
-}
-
-// Debug tool — shows what is in Firebase vs what is loaded
-window.debugPatientLoad=async function(){
-    if(!currentHospital||!isOnline)return;
-    setStatus('🔍 Running diagnosis...');
-    try{
-        // Check all patients in Firebase
-        const allSnap=await getDocs(collection(db,'patients'));
-        let total=0,withCode=0,matchingCode=0,missingCode=0;
-        const samples=[];
-        allSnap.forEach(d=>{
-            total++;
-            const data=d.data();
-            if(data.hospitalCode){
-                withCode++;
-                if(data.hospitalCode===currentHospital.code){
-                    matchingCode++;
-                    if(samples.length<3)samples.push({name:data.name,code:data.code,hospitalCode:data.hospitalCode});
-                }
-            }else{
-                missingCode++;
-            }
-        });
-
-        const report=`🔍 MEDITRACK DIAGNOSIS\n\n`+
-            `Your hospital code: ${currentHospital.code}\n`+
-            `Your hospital name: ${currentHospital.name}\n\n`+
-            `Firebase patients:\n`+
-            `  Total in database: ${total}\n`+
-            `  Have hospitalCode field: ${withCode}\n`+
-            `  Match YOUR hospital code: ${matchingCode}\n`+
-            `  Missing hospitalCode: ${missingCode}\n\n`+
-            `Currently loaded in app: ${patients.length}\n\n`+
-            `${matchingCode===0?'⚠️ PROBLEM: No patients match your hospital code.\nRun the Repair Tool from Admin panel.':'✅ Patients are matching correctly.'}\n\n`+
-            `Sample matching patients:\n`+
-            samples.map(p=>`  ${p.name} (${p.code})`).join('\n');
-
-        alert(report);
-        setStatus('🟢 Diagnosis complete');
-    }catch(e){
-        alert('Diagnosis failed: '+e.message);
-        setStatus('🔴 Diagnosis error');
-    }
-}
-
-// Complete renderAdminPanel with diagnostic tools
-function renderAdminPanel(){
-    document.getElementById('admin-hospital-name').textContent=currentHospital.name||'';
-    document.getElementById('admin-hospital-code').textContent=currentHospital.code||'';
-    document.getElementById('admin-hospital-state').textContent=currentHospital.stateName||'';
-    loadStaffList();
-
-    // Security log — filtered to THIS hospital only
-    try{
-        const logs=getSecurityLogForCurrentHospital();
-        const logEl=document.getElementById('security-log');
-        if(logEl){
-            if(!logs.length){
-                logEl.innerHTML='<div style="color:#999;font-size:12px;padding:5px;">No activity recorded yet.</div>';
-            }else{
-                // Color code by event type
-                logEl.innerHTML=logs.slice(0,20).map(l=>{
-                    const isLogin=l.event?.toLowerCase().includes('login');
-                    const isLogout=l.event?.toLowerCase().includes('logout');
-                    const isPatient=l.event?.toLowerCase().includes('patient');
-                    const isBill=l.event?.toLowerCase().includes('bill');
-                    const isStaff=l.event?.toLowerCase().includes('staff');
-                    const isFailed=l.event?.toLowerCase().includes('failed');
-                    const color=isFailed?'#ff4444':isLogin?'#2e7d32':isLogout?'#666':isPatient?'#0066cc':isBill?'#9c27b0':isStaff?'#ff8800':'#333';
-                    const icon=isFailed?'🔴':isLogin?'🟢':isLogout?'⚪':isPatient?'👤':isBill?'💰':isStaff?'👥':'📋';
-                    const timeStr=l.time?new Date(l.time).toLocaleString('en-GB',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'}):'';
-                    return `<div style="padding:5px 0;border-bottom:1px solid #f0f0f0;font-size:12px;display:flex;gap:6px;align-items:flex-start;">
-                        <span>${icon}</span>
-                        <div style="flex:1;">
-                            <div style="color:${color};font-weight:bold;">${safe(l.event||'')}</div>
-                            <div style="color:#999;font-size:11px;">${safe(l.user||'')} ${l.role?'('+safe(l.role)+')':''} — ${timeStr}</div>
-                        </div>
-                    </div>`;
-                }).join('');
-            }
-        }
-    }catch(e){}
-
-    // Server status if on local server
-    if(connectionMode==='local'){
-        localGet('/status').then(status=>{
-            const statusEl=document.getElementById('server-status-admin');
-            if(statusEl){
-                statusEl.innerHTML=`<div style="color:#2e7d32;font-weight:bold;margin-bottom:5px;">🟢 Clinic Server Active</div>
-                <div style="font-size:12px;color:#666;">Patients: ${status.patients} | Pending sync: ${status.pendingSync} | Uptime: ${status.uptime}</div>
-                ${status.connectedStaff?.length?`<div style="font-size:12px;color:#0066cc;margin-top:5px;">
-                Connected now: ${status.connectedStaff.map(s=>safe(s.staff_name||'?')+' ('+safe(s.staff_role||'?')+')').join(', ')}</div>`:''}`;
-            }
-        }).catch(()=>{});
-    }
-
-    // Diagnostic tools section
-    const diagSection=document.getElementById('admin-diagnostics');
-    if(diagSection){
-        diagSection.innerHTML=`
-        <div style="background:#fff8e1;border:1px solid #ffc107;border-radius:10px;padding:15px;margin:10px 15px;">
-            <div style="font-weight:bold;color:#f57f17;margin-bottom:8px;">🔧 Diagnostic Tools</div>
-            <div style="font-size:13px;color:#666;margin-bottom:10px;">If doctor, pharmacy or lab sees 0 patients, use these tools to diagnose and fix.</div>
-            <button onclick="debugPatientLoad()" style="width:100%;background:#0066cc;color:white;border:none;padding:10px;border-radius:8px;cursor:pointer;font-size:13px;margin-bottom:8px;">🔍 Run Diagnosis — Check Firebase Data</button>
-            <button onclick="repairPatientHospitalCodes()" style="width:100%;background:#ff8800;color:white;border:none;padding:10px;border-radius:8px;cursor:pointer;font-size:13px;margin-bottom:8px;">🔧 Repair Tool — Fix Missing Hospital Codes</button>
-            <button onclick="clearSecurityLog()" style="width:100%;background:#f5f5f5;color:#666;border:1px solid #ddd;padding:8px;border-radius:8px;cursor:pointer;font-size:12px;">🗑️ Clear Activity Log</button>
-        </div>`;
-    }
-}
-
-// ============================================================
-// BILLING LIST — Outstanding Balance Manager
-// Visible to Admin, Receptionist, Doctor
-// ============================================================
-let currentBillingFilter='all';
-
-window.setBillingFilter=function(filter){
-    currentBillingFilter=filter;
-    ['all','unpaid','partial','paid','nobill'].forEach(f=>{
-        const el=document.getElementById('bl-tab-'+f);
-        if(el)el.classList.toggle('active',f===filter);
-    });
-    renderBillingList();
-};
-
-function renderBillingList(){
-    const today=new Date().toLocaleDateString('en-GB');
-    const searchQ=(document.getElementById('bl-search')?.value||'').toLowerCase().trim();
-
-    // Calculate summary stats
-    const todayCollections=financialRecords
-        .filter(r=>r.date===today&&r.type==='payment')
-        .reduce((s,r)=>s+(r.amount||0),0);
-    const outstanding=bills
-        .filter(b=>b.paymentStatus==='unpaid'||b.paymentStatus==='partial')
-        .reduce((s,b)=>s+(b.balance||0),0);
-    const unpaidCount=bills
-        .filter(b=>b.paymentStatus==='unpaid'||b.paymentStatus==='partial').length;
-
-    const todayEl=document.getElementById('bl-today-collections');
-    const outEl=document.getElementById('bl-outstanding');
-    const countEl=document.getElementById('bl-unpaid-count');
-    if(todayEl)todayEl.textContent='₦'+todayCollections.toLocaleString();
-    if(outEl)outEl.textContent='₦'+outstanding.toLocaleString();
-    if(countEl)countEl.textContent=unpaidCount;
-
-    // Build rows — one row per visit per patient
-    const rows=[];
-
-    patients.forEach(p=>{
-        // Apply search filter
-        if(searchQ){
-            const matches=p.name?.toLowerCase().includes(searchQ)||
-                p.code?.toLowerCase().includes(searchQ)||
-                p.phone?.includes(searchQ);
-            if(!matches)return;
-        }
-
-        if(!p.visits||p.visits.length===0){
-            // Patient with no visits — only show in 'all' or 'nobill' tab
-            if(currentBillingFilter==='all'||currentBillingFilter==='nobill'){
-                rows.push({patient:p,visit:null,visitIndex:-1,bill:null,status:'nobill'});
-            }
-            return;
-        }
-
-        p.visits.forEach((v,visitIndex)=>{
-            // Only show visits at this hospital
-            const isHere=v.hospitalCode===currentHospital.code||
-                v.hospitalName?.trim().toLowerCase()===currentHospital.name?.trim().toLowerCase();
-            if(!isHere)return;
-
-            const bill=bills.find(b=>b.patientId===p.id&&b.visitIndex===visitIndex);
-            const status=bill?.paymentStatus||'nobill';
-
-            // Filter tab
-            if(currentBillingFilter!=='all'&&status!==currentBillingFilter)return;
-
-            rows.push({patient:p,visit:v,visitIndex,bill,status});
-        });
-    });
-
-    // Sort — unpaid and partial float to top, paid sink to bottom
-    const sortOrder={unpaid:0,partial:1,nobill:2,paid:3};
-    rows.sort((a,b)=>{
-        const sa=sortOrder[a.status]??2;
-        const sb=sortOrder[b.status]??2;
-        if(sa!==sb)return sa-sb;
-        // Within same status, sort by visit date descending
-        const da=a.visit?.date||a.patient.createdAt||'';
-        const db2=b.visit?.date||b.patient.createdAt||'';
-        return db2.localeCompare(da);
-    });
-
-    const container=document.getElementById('billing-list-items');
-    if(!container)return;
-
-    if(rows.length===0){
-        container.innerHTML=`<div class="empty-search"><div class="icon">💰</div><p>No billing records found</p></div>`;
-        return;
-    }
-
-    const statusConfig={
-        paid:{color:'#4CAF50',bg:'#e8f5e9',label:'✅ PAID'},
-        partial:{color:'#f57f17',bg:'#fff8e1',label:'💛 PARTIAL'},
-        unpaid:{color:'#ff4444',bg:'#fff0f0',label:'🔴 UNPAID'},
-        nobill:{color:'#999',bg:'#f5f5f5',label:'📋 No Bill Yet'}
-    };
-
-    container.innerHTML=rows.map(row=>{
-        const {patient:p,visit:v,bill,status}=row;
-        const cfg=statusConfig[status]||statusConfig.nobill;
-        const totalDue=bill?.totalDue||0;
-        const amountPaid=bill?.amountPaid||0;
-        const balance=bill?.balance||0;
-
-        return `<div onclick="openBillingFromList('${p.id}',${row.visitIndex})"
-            style="background:white;margin:8px 15px;border-radius:10px;
-            padding:14px;box-shadow:0 2px 5px rgba(0,0,0,0.08);
-            border-left:4px solid ${cfg.color};cursor:pointer;">
-            <div style="display:flex;justify-content:space-between;align-items:flex-start;">
-                <div style="flex:1;">
-                    <div style="font-weight:bold;font-size:15px;">${safe(p.name)}</div>
-                    <div style="font-family:monospace;font-size:12px;color:#0066cc;">${safe(p.code)}</div>
-                </div>
-                <span style="background:${cfg.bg};color:${cfg.color};padding:4px 10px;
-                    border-radius:12px;font-size:11px;font-weight:bold;white-space:nowrap;">
-                    ${cfg.label}
-                </span>
-            </div>
-            ${v?`<div style="font-size:12px;color:#666;margin-top:6px;">
-                📅 ${safe(v.date)} — ${safe(v.hospitalName||currentHospital.name)}
-                ${v.doctorName?` — Dr. ${safe(v.doctorName)}`:''}
-            </div>`:'<div style="font-size:12px;color:#999;margin-top:6px;">No visits recorded</div>'}
-            ${bill?`<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin-top:8px;text-align:center;">
-                <div style="background:#f8f9fa;border-radius:6px;padding:6px;">
-                    <div style="font-size:10px;color:#666;">Total Due</div>
-                    <div style="font-size:13px;font-weight:bold;color:#333;">₦${totalDue.toLocaleString()}</div>
-                </div>
-                <div style="background:#f8f9fa;border-radius:6px;padding:6px;">
-                    <div style="font-size:10px;color:#666;">Paid</div>
-                    <div style="font-size:13px;font-weight:bold;color:#4CAF50;">₦${amountPaid.toLocaleString()}</div>
-                </div>
-                <div style="background:#f8f9fa;border-radius:6px;padding:6px;">
-                    <div style="font-size:10px;color:#666;">Balance</div>
-                    <div style="font-size:13px;font-weight:bold;color:${balance>0?'#ff4444':'#4CAF50'};">₦${balance.toLocaleString()}</div>
-                </div>
-            </div>`:''}
-            ${bill?.receiptNumber?`<div style="font-size:10px;color:#999;margin-top:5px;font-family:monospace;">${safe(bill.receiptNumber)}</div>`:''}
-        </div>`;
-    }).join('');
-}
-
-window.openBillingFromList=function(patientId,visitIndex){
-    // Find patient and set up billing context
-    const p=patients.find(px=>px.id===patientId);
-    if(!p)return;
-    currentBillingPatientId=patientId;
-    // Navigate to billing view
-    showView('billing');
-    openBilling();
-    // If a specific visit was provided, auto-select it
-    if(visitIndex>=0){
-        setTimeout(()=>selectVisitForBilling(visitIndex),300);
-    }
-};
-
-// ============================================================
-// DAILY CASH RECONCILIATION — Priority Feature 4
-// ============================================================
-window.showDailyReconciliation=function(){
-    const today=new Date().toLocaleDateString('en-GB');
-    const todayRecs=financialRecords.filter(r=>r.date===today);
-    const todayBills=bills.filter(b=>b.date===today);
-
-    // Group by payment method
-    const byMethod={cash:0,transfer:0,pos:0,hmo:0,partial:0,other:0};
-    todayRecs.filter(r=>r.type==='payment').forEach(r=>{
-        const method=(r.paymentMethod||'other').toLowerCase();
-        byMethod[method]=(byMethod[method]||0)+(r.amount||0);
-    });
-
-    const totalCollected=Object.values(byMethod).reduce((s,v)=>s+v,0);
-    const totalBilled=todayBills.reduce((s,b)=>s+(b.totalDue||0),0);
-    const totalOutstanding=todayBills
-        .filter(b=>b.paymentStatus!=='paid')
-        .reduce((s,b)=>s+(b.balance||0),0);
-
-    // Breakdown by type
-    const consultRev=todayRecs.filter(r=>r.type==='consultation').reduce((s,r)=>s+(r.amount||0),0);
-    const labRev=todayRecs.filter(r=>r.type==='lab').reduce((s,r)=>s+(r.amount||0),0);
-    const drugRev=todayRecs.filter(r=>r.type==='drugs').reduce((s,r)=>s+(r.amount||0),0);
-    const bedRev=todayRecs.filter(r=>r.type==='bed_space').reduce((s,r)=>s+(r.amount||0),0);
-
-    const w=window.open('','_blank');
-    w.document.write(`<!DOCTYPE html><html><head><title>Daily Reconciliation — ${today}</title>
-    <style>
-        body{font-family:Arial,sans-serif;padding:20px;max-width:600px;margin:0 auto;}
-        h1{color:#0066cc;font-size:20px;}
-        .card{background:#f8f9fa;border-radius:10px;padding:15px;margin-bottom:15px;}
-        .row{display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #eee;font-size:14px;}
-        .total{font-size:18px;font-weight:bold;color:#0066cc;border-top:2px solid #0066cc;padding-top:10px;margin-top:5px;}
-        .outstanding{color:#ff4444;}
-        @media print{button{display:none;}}
-    </style></head><body>
-    <h1>🏥 MEDITRACK — Daily Reconciliation</h1>
-    <div style="font-size:13px;color:#666;margin-bottom:15px;">${safe(currentHospital.name)} | ${today} | Generated by: ${safe(currentUser.name)}</div>
-
-    <div class="card">
-        <div style="font-weight:bold;color:#0066cc;margin-bottom:10px;">💰 Collections By Payment Method</div>
-        ${byMethod.cash>0?`<div class="row"><span>Cash</span><span>₦${byMethod.cash.toLocaleString()}</span></div>`:''}
-        ${byMethod.transfer>0?`<div class="row"><span>Bank Transfer</span><span>₦${byMethod.transfer.toLocaleString()}</span></div>`:''}
-        ${byMethod.pos>0?`<div class="row"><span>POS / Card</span><span>₦${byMethod.pos.toLocaleString()}</span></div>`:''}
-        ${byMethod.hmo>0?`<div class="row"><span>HMO / Insurance</span><span>₦${byMethod.hmo.toLocaleString()}</span></div>`:''}
-        <div class="row total"><span>TOTAL COLLECTED</span><span>₦${totalCollected.toLocaleString()}</span></div>
-    </div>
-
-    <div class="card">
-        <div style="font-weight:bold;color:#009688;margin-bottom:10px;">📋 Revenue By Service</div>
-        ${consultRev>0?`<div class="row"><span>Consultation Fees</span><span>₦${consultRev.toLocaleString()}</span></div>`:''}
-        ${labRev>0?`<div class="row"><span>Lab Tests</span><span>₦${labRev.toLocaleString()}</span></div>`:''}
-        ${drugRev>0?`<div class="row"><span>Drug Sales</span><span>₦${drugRev.toLocaleString()}</span></div>`:''}
-        ${bedRev>0?`<div class="row"><span>Bed Space</span><span>₦${bedRev.toLocaleString()}</span></div>`:''}
-        <div class="row total"><span>TOTAL BILLED TODAY</span><span>₦${totalBilled.toLocaleString()}</span></div>
-    </div>
-
-    <div class="card">
-        <div style="font-weight:bold;color:#ff4444;margin-bottom:10px;">⚠️ Outstanding Balances</div>
-        <div class="row"><span>Bills issued today</span><span>${todayBills.length}</span></div>
-        <div class="row"><span>Fully paid</span><span>${todayBills.filter(b=>b.paymentStatus==='paid').length}</span></div>
-        <div class="row"><span>Partial payment</span><span>${todayBills.filter(b=>b.paymentStatus==='partial').length}</span></div>
-        <div class="row"><span>Unpaid</span><span>${todayBills.filter(b=>b.paymentStatus==='unpaid').length}</span></div>
-        <div class="row total outstanding"><span>TOTAL OUTSTANDING</span><span>₦${totalOutstanding.toLocaleString()}</span></div>
-    </div>
-
-    <div style="text-align:center;margin:20px 0;">
-        <button onclick="window.print()" style="background:#0066cc;color:white;border:none;padding:12px 30px;border-radius:8px;font-size:16px;cursor:pointer;">🖨️ Print Report</button>
-    </div>
-    <div style="text-align:center;font-size:11px;color:#999;margin-top:15px;">MEDITRACK — ${safe(currentHospital.name)} — ${today}</div>
-    <script>setTimeout(()=>window.print(),500);<\/script>
-    </body></html>`);
-};
-
-// ============================================================
-// DRUG EXPIRY TRACKER — Priority Feature 1
-// ============================================================
-function getDaysUntilExpiry(expiryDate){
-    if(!expiryDate)return null;
-    try{
-        // Support DD/MM/YYYY and YYYY-MM-DD formats
-        let d;
-        if(expiryDate.includes('/')){
-            const[day,month,year]=expiryDate.split('/');
-            d=new Date(year,month-1,day);
-        }else{
-            d=new Date(expiryDate);
-        }
-        const diff=d-new Date();
-        return Math.ceil(diff/(1000*60*60*24));
-    }catch(e){return null;}
-}
-
-function getExpiryBadge(daysLeft){
-    if(daysLeft===null)return'';
-    if(daysLeft<0)return`<span style="background:#ff4444;color:white;padding:2px 6px;border-radius:8px;font-size:10px;font-weight:bold;">❌ EXPIRED</span>`;
-    if(daysLeft<=7)return`<span style="background:#ff4444;color:white;padding:2px 6px;border-radius:8px;font-size:10px;font-weight:bold;">⚠️ Expires in ${daysLeft}d</span>`;
-    if(daysLeft<=30)return`<span style="background:#ff8800;color:white;padding:2px 6px;border-radius:8px;font-size:10px;font-weight:bold;">⏰ Expires in ${daysLeft}d</span>`;
-    return`<span style="background:#e8f5e9;color:#4CAF50;padding:2px 6px;border-radius:8px;font-size:10px;">✅ ${daysLeft}d</span>`;
-}
-
-// Enhanced renderInventory with expiry dates
-const _origRenderInventory=window.renderInventory;
 window.renderInventory=function(){
     const section=document.getElementById('pharmacy-inventory-section');
     if(!section)return;
@@ -3361,6 +2816,338 @@ window.submitLabResult=async function(labId,testType,isStructured){
 
 // Add daily reconciliation button to admin and analytics
 window.openDailyReconciliation=showDailyReconciliation;
+
+
+// Complete renderAdminPanel with diagnostic tools
+function renderAdminPanel(){
+    document.getElementById('admin-hospital-name').textContent=currentHospital.name||'';
+    document.getElementById('admin-hospital-code').textContent=currentHospital.code||'';
+    document.getElementById('admin-hospital-state').textContent=currentHospital.stateName||'';
+    loadStaffList();
+
+    // Security log — filtered to THIS hospital only
+    try{
+        const logs=getSecurityLogForCurrentHospital();
+        const logEl=document.getElementById('security-log');
+        if(logEl){
+            if(!logs.length){
+                logEl.innerHTML='<div style="color:#999;font-size:12px;padding:5px;">No activity recorded yet.</div>';
+            }else{
+                // Color code by event type
+                logEl.innerHTML=logs.slice(0,20).map(l=>{
+                    const isLogin=l.event?.toLowerCase().includes('login');
+                    const isLogout=l.event?.toLowerCase().includes('logout');
+                    const isPatient=l.event?.toLowerCase().includes('patient');
+                    const isBill=l.event?.toLowerCase().includes('bill');
+                    const isStaff=l.event?.toLowerCase().includes('staff');
+                    const isFailed=l.event?.toLowerCase().includes('failed');
+                    const color=isFailed?'#ff4444':isLogin?'#2e7d32':isLogout?'#666':isPatient?'#0066cc':isBill?'#9c27b0':isStaff?'#ff8800':'#333';
+                    const icon=isFailed?'🔴':isLogin?'🟢':isLogout?'⚪':isPatient?'👤':isBill?'💰':isStaff?'👥':'📋';
+                    const timeStr=l.time?new Date(l.time).toLocaleString('en-GB',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'}):'';
+                    return `<div style="padding:5px 0;border-bottom:1px solid #f0f0f0;font-size:12px;display:flex;gap:6px;align-items:flex-start;">
+                        <span>${icon}</span>
+                        <div style="flex:1;">
+                            <div style="color:${color};font-weight:bold;">${safe(l.event||'')}</div>
+                            <div style="color:#999;font-size:11px;">${safe(l.user||'')} ${l.role?'('+safe(l.role)+')':''} — ${timeStr}</div>
+                        </div>
+                    </div>`;
+                }).join('');
+            }
+        }
+    }catch(e){}
+
+    // Server status if on local server
+    if(connectionMode==='local'){
+        localGet('/status').then(status=>{
+            const statusEl=document.getElementById('server-status-admin');
+            if(statusEl){
+                statusEl.innerHTML=`<div style="color:#2e7d32;font-weight:bold;margin-bottom:5px;">🟢 Clinic Server Active</div>
+                <div style="font-size:12px;color:#666;">Patients: ${status.patients} | Pending sync: ${status.pendingSync} | Uptime: ${status.uptime}</div>
+                ${status.connectedStaff?.length?`<div style="font-size:12px;color:#0066cc;margin-top:5px;">
+                Connected now: ${status.connectedStaff.map(s=>safe(s.staff_name||'?')+' ('+safe(s.staff_role||'?')+')').join(', ')}</div>`:''}`;
+            }
+        }).catch(()=>{});
+    }
+
+    // Diagnostic tools section
+    const diagSection=document.getElementById('admin-diagnostics');
+    if(diagSection){
+        diagSection.innerHTML=`
+        <div style="background:#fff8e1;border:1px solid #ffc107;border-radius:10px;padding:15px;margin:10px 15px;">
+            <div style="font-weight:bold;color:#f57f17;margin-bottom:8px;">🔧 Diagnostic Tools</div>
+            <div style="font-size:13px;color:#666;margin-bottom:10px;">If doctor, pharmacy or lab sees 0 patients, use these tools to diagnose and fix.</div>
+            <button onclick="debugPatientLoad()" style="width:100%;background:#0066cc;color:white;border:none;padding:10px;border-radius:8px;cursor:pointer;font-size:13px;margin-bottom:8px;">🔍 Run Diagnosis — Check Firebase Data</button>
+            <button onclick="repairPatientHospitalCodes()" style="width:100%;background:#ff8800;color:white;border:none;padding:10px;border-radius:8px;cursor:pointer;font-size:13px;margin-bottom:8px;">🔧 Repair Tool — Fix Missing Hospital Codes</button>
+            <button onclick="clearSecurityLog()" style="width:100%;background:#f5f5f5;color:#666;border:1px solid #ddd;padding:8px;border-radius:8px;cursor:pointer;font-size:12px;">🗑️ Clear Activity Log</button>
+        </div>`;
+    }
+}
+
+
+// ============================================================
+// BILLING LIST — Outstanding Balance Manager
+// Visible to Admin, Receptionist, Doctor
+// ============================================================
+let currentBillingFilter='all';
+
+window.setBillingFilter=function(filter){
+    currentBillingFilter=filter;
+    ['all','unpaid','partial','paid','nobill'].forEach(f=>{
+        const el=document.getElementById('bl-tab-'+f);
+        if(el)el.classList.toggle('active',f===filter);
+    });
+    renderBillingList();
+};
+
+function renderBillingList(){
+    const today=new Date().toLocaleDateString('en-GB');
+    const searchQ=(document.getElementById('bl-search')?.value||'').toLowerCase().trim();
+
+    // Calculate summary stats
+    const todayCollections=financialRecords
+        .filter(r=>r.date===today&&r.type==='payment')
+        .reduce((s,r)=>s+(r.amount||0),0);
+    const outstanding=bills
+        .filter(b=>b.paymentStatus==='unpaid'||b.paymentStatus==='partial')
+        .reduce((s,b)=>s+(b.balance||0),0);
+    const unpaidCount=bills
+        .filter(b=>b.paymentStatus==='unpaid'||b.paymentStatus==='partial').length;
+
+    const todayEl=document.getElementById('bl-today-collections');
+    const outEl=document.getElementById('bl-outstanding');
+    const countEl=document.getElementById('bl-unpaid-count');
+    if(todayEl)todayEl.textContent='₦'+todayCollections.toLocaleString();
+    if(outEl)outEl.textContent='₦'+outstanding.toLocaleString();
+    if(countEl)countEl.textContent=unpaidCount;
+
+    // Build rows — one row per visit per patient
+    const rows=[];
+
+    patients.forEach(p=>{
+        // Apply search filter
+        if(searchQ){
+            const matches=p.name?.toLowerCase().includes(searchQ)||
+                p.code?.toLowerCase().includes(searchQ)||
+                p.phone?.includes(searchQ);
+            if(!matches)return;
+        }
+
+        if(!p.visits||p.visits.length===0){
+            // Patient with no visits — only show in 'all' or 'nobill' tab
+            if(currentBillingFilter==='all'||currentBillingFilter==='nobill'){
+                rows.push({patient:p,visit:null,visitIndex:-1,bill:null,status:'nobill'});
+            }
+            return;
+        }
+
+        p.visits.forEach((v,visitIndex)=>{
+            // Only show visits at this hospital
+            const isHere=v.hospitalCode===currentHospital.code||
+                v.hospitalName?.trim().toLowerCase()===currentHospital.name?.trim().toLowerCase();
+            if(!isHere)return;
+
+            const bill=bills.find(b=>b.patientId===p.id&&b.visitIndex===visitIndex);
+            const status=bill?.paymentStatus||'nobill';
+
+            // Filter tab
+            if(currentBillingFilter!=='all'&&status!==currentBillingFilter)return;
+
+            rows.push({patient:p,visit:v,visitIndex,bill,status});
+        });
+    });
+
+    // Sort — unpaid and partial float to top, paid sink to bottom
+    const sortOrder={unpaid:0,partial:1,nobill:2,paid:3};
+    rows.sort((a,b)=>{
+        const sa=sortOrder[a.status]??2;
+        const sb=sortOrder[b.status]??2;
+        if(sa!==sb)return sa-sb;
+        // Within same status, sort by visit date descending
+        const da=a.visit?.date||a.patient.createdAt||'';
+        const db2=b.visit?.date||b.patient.createdAt||'';
+        return db2.localeCompare(da);
+    });
+
+    const container=document.getElementById('billing-list-items');
+    if(!container)return;
+
+    if(rows.length===0){
+        container.innerHTML=`<div class="empty-search"><div class="icon">💰</div><p>No billing records found</p></div>`;
+        return;
+    }
+
+    const statusConfig={
+        paid:{color:'#4CAF50',bg:'#e8f5e9',label:'✅ PAID'},
+        partial:{color:'#f57f17',bg:'#fff8e1',label:'💛 PARTIAL'},
+        unpaid:{color:'#ff4444',bg:'#fff0f0',label:'🔴 UNPAID'},
+        nobill:{color:'#999',bg:'#f5f5f5',label:'📋 No Bill Yet'}
+    };
+
+    container.innerHTML=rows.map(row=>{
+        const {patient:p,visit:v,bill,status}=row;
+        const cfg=statusConfig[status]||statusConfig.nobill;
+        const totalDue=bill?.totalDue||0;
+        const amountPaid=bill?.amountPaid||0;
+        const balance=bill?.balance||0;
+
+        return `<div onclick="openBillingFromList('${p.id}',${row.visitIndex})"
+            style="background:white;margin:8px 15px;border-radius:10px;
+            padding:14px;box-shadow:0 2px 5px rgba(0,0,0,0.08);
+            border-left:4px solid ${cfg.color};cursor:pointer;">
+            <div style="display:flex;justify-content:space-between;align-items:flex-start;">
+                <div style="flex:1;">
+                    <div style="font-weight:bold;font-size:15px;">${safe(p.name)}</div>
+                    <div style="font-family:monospace;font-size:12px;color:#0066cc;">${safe(p.code)}</div>
+                </div>
+                <span style="background:${cfg.bg};color:${cfg.color};padding:4px 10px;
+                    border-radius:12px;font-size:11px;font-weight:bold;white-space:nowrap;">
+                    ${cfg.label}
+                </span>
+            </div>
+            ${v?`<div style="font-size:12px;color:#666;margin-top:6px;">
+                📅 ${safe(v.date)} — ${safe(v.hospitalName||currentHospital.name)}
+                ${v.doctorName?` — Dr. ${safe(v.doctorName)}`:''}
+            </div>`:'<div style="font-size:12px;color:#999;margin-top:6px;">No visits recorded</div>'}
+            ${bill?`<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin-top:8px;text-align:center;">
+                <div style="background:#f8f9fa;border-radius:6px;padding:6px;">
+                    <div style="font-size:10px;color:#666;">Total Due</div>
+                    <div style="font-size:13px;font-weight:bold;color:#333;">₦${totalDue.toLocaleString()}</div>
+                </div>
+                <div style="background:#f8f9fa;border-radius:6px;padding:6px;">
+                    <div style="font-size:10px;color:#666;">Paid</div>
+                    <div style="font-size:13px;font-weight:bold;color:#4CAF50;">₦${amountPaid.toLocaleString()}</div>
+                </div>
+                <div style="background:#f8f9fa;border-radius:6px;padding:6px;">
+                    <div style="font-size:10px;color:#666;">Balance</div>
+                    <div style="font-size:13px;font-weight:bold;color:${balance>0?'#ff4444':'#4CAF50'};">₦${balance.toLocaleString()}</div>
+                </div>
+            </div>`:''}
+            ${bill?.receiptNumber?`<div style="font-size:10px;color:#999;margin-top:5px;font-family:monospace;">${safe(bill.receiptNumber)}</div>`:''}
+        </div>`;
+    }).join('');
+}
+
+window.openBillingFromList=function(patientId,visitIndex){
+    // Find patient and set up billing context
+    const p=patients.find(px=>px.id===patientId);
+    if(!p)return;
+    currentBillingPatientId=patientId;
+    // Navigate to billing view
+    showView('billing');
+    openBilling();
+    // If a specific visit was provided, auto-select it
+    if(visitIndex>=0){
+        setTimeout(()=>selectVisitForBilling(visitIndex),300);
+    }
+};
+
+
+
+window.registerPatient=async function(){
+    const name=document.getElementById('reg-name').value.trim();const phone=document.getElementById('reg-phone').value.trim();const dob=document.getElementById('reg-dob').value;const gender=document.getElementById('reg-gender').value;const consent=document.getElementById('reg-consent').checked;const consultationFee=parseFloat(document.getElementById('reg-consultation-fee').value)||0;
+    if(!name||!phone||!dob||!gender){alert('Please fill required fields');return;}
+    if(!consent){alert('Please obtain and confirm patient consent before registering.');return;}
+    const phoneClean=phone.replace(/\s/g,'');
+    if(!/^(070|080|081|090|091)\d{8}$/.test(phoneClean)){if(!confirm('The phone number does not appear to be a valid Nigerian number. Continue anyway?'))return;}
+    const existing=patients.find(p=>p.phone===phoneClean);
+    if(existing){alert(`Patient already registered: ${existing.name} (${existing.code})`);return;}
+    try{
+        setStatus('🔄 Generating patient code...');
+        const code=await generatePatientCode();
+        const newPatient={code,name,phone:phoneClean,dob:new Date(dob).toLocaleDateString('en-GB'),gender,blood:document.getElementById('reg-blood').value,allergy:document.getElementById('reg-allergy').value,hmoCompany:document.getElementById('reg-hmo-company').value,hmo:document.getElementById('reg-hmo').value,hmoPlan:document.getElementById('reg-hmo-plan').value,kin:document.getElementById('reg-kin').value,kinPhone:document.getElementById('reg-kin-phone').value,consultationFee,consentGiven:true,consentDate:new Date().toISOString(),registeredAtHospital:currentHospital.name,registeredBy:currentUser.name,state:currentHospital.state,stateAbbrev:currentHospital.state,stateName:currentHospital.stateName,hospitalAbbrev:currentHospital.abbrev,hospitalCode:currentHospital.code,visits:[],createdAt:new Date().toISOString()};
+        await smartSave('addPatient','patients',newPatient);
+        if(consultationFee>0)await smartSave('addFinancialRecord','financialRecords',{type:'consultation',amount:consultationFee,patientName:name,patientCode:code,hospitalCode:currentHospital.code,hospitalName:currentHospital.name,date:new Date().toLocaleDateString('en-GB'),recordedBy:currentUser.name,createdAt:new Date().toISOString()});
+        await sendSMS(phoneClean,`Welcome to MEDITRACK. Your patient code is: ${code}. Present this at any MEDITRACK clinic for instant access to your health records.`);
+        addSecurityLog(`Patient registered: ${code}`);
+        setStatus(connectionMode==='local'?`🏥 Patient registered — Code: ${code}`:`🟢 Patient registered — Code: ${code}`);
+        const msg=document.getElementById('register-success-msg');msg.textContent=`✅ Registered! Code: ${code}`;msg.style.display='block';
+        ['reg-name','reg-phone','reg-dob','reg-gender','reg-blood','reg-allergy','reg-hmo-company','reg-hmo','reg-hmo-plan','reg-kin','reg-kin-phone','reg-consultation-fee'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+        document.getElementById('reg-consent').checked=false;document.getElementById('phone-validation-msg').textContent='';
+        setTimeout(()=>{msg.style.display='none';showView('dashboard');},3000);
+    }catch(e){setStatus('🔴 Error: '+e.message);}
+}
+
+
+
+
+// ============================================================
+// DAILY CASH RECONCILIATION — Priority Feature 4
+// ============================================================
+window.showDailyReconciliation=function(){
+    const today=new Date().toLocaleDateString('en-GB');
+    const todayRecs=financialRecords.filter(r=>r.date===today);
+    const todayBills=bills.filter(b=>b.date===today);
+
+    // Group by payment method
+    const byMethod={cash:0,transfer:0,pos:0,hmo:0,partial:0,other:0};
+    todayRecs.filter(r=>r.type==='payment').forEach(r=>{
+        const method=(r.paymentMethod||'other').toLowerCase();
+        byMethod[method]=(byMethod[method]||0)+(r.amount||0);
+    });
+
+    const totalCollected=Object.values(byMethod).reduce((s,v)=>s+v,0);
+    const totalBilled=todayBills.reduce((s,b)=>s+(b.totalDue||0),0);
+    const totalOutstanding=todayBills
+        .filter(b=>b.paymentStatus!=='paid')
+        .reduce((s,b)=>s+(b.balance||0),0);
+
+    // Breakdown by type
+    const consultRev=todayRecs.filter(r=>r.type==='consultation').reduce((s,r)=>s+(r.amount||0),0);
+    const labRev=todayRecs.filter(r=>r.type==='lab').reduce((s,r)=>s+(r.amount||0),0);
+    const drugRev=todayRecs.filter(r=>r.type==='drugs').reduce((s,r)=>s+(r.amount||0),0);
+    const bedRev=todayRecs.filter(r=>r.type==='bed_space').reduce((s,r)=>s+(r.amount||0),0);
+
+    const w=window.open('','_blank');
+    w.document.write(`<!DOCTYPE html><html><head><title>Daily Reconciliation — ${today}</title>
+    <style>
+        body{font-family:Arial,sans-serif;padding:20px;max-width:600px;margin:0 auto;}
+        h1{color:#0066cc;font-size:20px;}
+        .card{background:#f8f9fa;border-radius:10px;padding:15px;margin-bottom:15px;}
+        .row{display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #eee;font-size:14px;}
+        .total{font-size:18px;font-weight:bold;color:#0066cc;border-top:2px solid #0066cc;padding-top:10px;margin-top:5px;}
+        .outstanding{color:#ff4444;}
+        @media print{button{display:none;}}
+    </style></head><body>
+    <h1>🏥 MEDITRACK — Daily Reconciliation</h1>
+    <div style="font-size:13px;color:#666;margin-bottom:15px;">${safe(currentHospital.name)} | ${today} | Generated by: ${safe(currentUser.name)}</div>
+
+    <div class="card">
+        <div style="font-weight:bold;color:#0066cc;margin-bottom:10px;">💰 Collections By Payment Method</div>
+        ${byMethod.cash>0?`<div class="row"><span>Cash</span><span>₦${byMethod.cash.toLocaleString()}</span></div>`:''}
+        ${byMethod.transfer>0?`<div class="row"><span>Bank Transfer</span><span>₦${byMethod.transfer.toLocaleString()}</span></div>`:''}
+        ${byMethod.pos>0?`<div class="row"><span>POS / Card</span><span>₦${byMethod.pos.toLocaleString()}</span></div>`:''}
+        ${byMethod.hmo>0?`<div class="row"><span>HMO / Insurance</span><span>₦${byMethod.hmo.toLocaleString()}</span></div>`:''}
+        <div class="row total"><span>TOTAL COLLECTED</span><span>₦${totalCollected.toLocaleString()}</span></div>
+    </div>
+
+    <div class="card">
+        <div style="font-weight:bold;color:#009688;margin-bottom:10px;">📋 Revenue By Service</div>
+        ${consultRev>0?`<div class="row"><span>Consultation Fees</span><span>₦${consultRev.toLocaleString()}</span></div>`:''}
+        ${labRev>0?`<div class="row"><span>Lab Tests</span><span>₦${labRev.toLocaleString()}</span></div>`:''}
+        ${drugRev>0?`<div class="row"><span>Drug Sales</span><span>₦${drugRev.toLocaleString()}</span></div>`:''}
+        ${bedRev>0?`<div class="row"><span>Bed Space</span><span>₦${bedRev.toLocaleString()}</span></div>`:''}
+        <div class="row total"><span>TOTAL BILLED TODAY</span><span>₦${totalBilled.toLocaleString()}</span></div>
+    </div>
+
+    <div class="card">
+        <div style="font-weight:bold;color:#ff4444;margin-bottom:10px;">⚠️ Outstanding Balances</div>
+        <div class="row"><span>Bills issued today</span><span>${todayBills.length}</span></div>
+        <div class="row"><span>Fully paid</span><span>${todayBills.filter(b=>b.paymentStatus==='paid').length}</span></div>
+        <div class="row"><span>Partial payment</span><span>${todayBills.filter(b=>b.paymentStatus==='partial').length}</span></div>
+        <div class="row"><span>Unpaid</span><span>${todayBills.filter(b=>b.paymentStatus==='unpaid').length}</span></div>
+        <div class="row total outstanding"><span>TOTAL OUTSTANDING</span><span>₦${totalOutstanding.toLocaleString()}</span></div>
+    </div>
+
+    <div style="text-align:center;margin:20px 0;">
+        <button onclick="window.print()" style="background:#0066cc;color:white;border:none;padding:12px 30px;border-radius:8px;font-size:16px;cursor:pointer;">🖨️ Print Report</button>
+    </div>
+    <div style="text-align:center;font-size:11px;color:#999;margin-top:15px;">MEDITRACK — ${safe(currentHospital.name)} — ${today}</div>
+    <script>setTimeout(()=>window.print(),500);<\/script>
+    </body></html>`);
+};
+
+
+
 </script>
 </body>
 </html>
