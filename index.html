@@ -698,7 +698,40 @@
     <div style="height:80px;"></div>
 </div>
 
-<!-- NAV BAR -->
+<!-- BILLING LIST VIEW — Outstanding Balance Manager -->
+<div id="billing-list-view" style="display:none;">
+    <div class="section-header">
+        <h2>💰 Billing</h2>
+    </div>
+    <!-- Summary strip -->
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;padding:12px 15px;background:#f0f4f8;">
+        <div style="background:white;border-radius:10px;padding:12px;text-align:center;box-shadow:0 1px 4px rgba(0,0,0,0.1);">
+            <div style="font-size:11px;color:#666;margin-bottom:3px;">Today's Collections</div>
+            <div style="font-size:18px;font-weight:bold;color:#4CAF50;" id="bl-today-collections">₦0</div>
+        </div>
+        <div style="background:white;border-radius:10px;padding:12px;text-align:center;box-shadow:0 1px 4px rgba(0,0,0,0.1);">
+            <div style="font-size:11px;color:#666;margin-bottom:3px;">Outstanding</div>
+            <div style="font-size:18px;font-weight:bold;color:#ff4444;" id="bl-outstanding">₦0</div>
+        </div>
+        <div style="background:white;border-radius:10px;padding:12px;text-align:center;box-shadow:0 1px 4px rgba(0,0,0,0.1);">
+            <div style="font-size:11px;color:#666;margin-bottom:3px;">Unpaid Bills</div>
+            <div style="font-size:18px;font-weight:bold;color:#ff8800;" id="bl-unpaid-count">0</div>
+        </div>
+    </div>
+    <!-- Search -->
+    <div style="padding:10px 15px;background:white;border-bottom:1px solid #eee;">
+        <input type="text" id="bl-search" placeholder="🔍 Search by name, code or phone..." style="width:100%;padding:10px;border:1px solid #ddd;border-radius:8px;font-size:14px;" oninput="renderBillingList()">
+    </div>
+    <!-- Filter tabs -->
+    <div class="tab-bar" style="overflow-x:auto;">
+        <div id="bl-tab-all" class="tab-item active" onclick="setBillingFilter('all')">All</div>
+        <div id="bl-tab-unpaid" class="tab-item" onclick="setBillingFilter('unpaid')">🔴 Unpaid</div>
+        <div id="bl-tab-partial" class="tab-item" onclick="setBillingFilter('partial')">💛 Partial</div>
+        <div id="bl-tab-paid" class="tab-item" onclick="setBillingFilter('paid')">✅ Paid</div>
+        <div id="bl-tab-nobill" class="tab-item" onclick="setBillingFilter('nobill')">📋 No Bill Yet</div>
+    </div>
+    <div id="billing-list-items" style="padding-bottom:80px;"></div>
+</div>
 <div class="nav-bar" id="nav-bar" style="display:none;">
     <div class="nav-item active" id="nav-dashboard" onclick="showView('dashboard')">🏠<br><span style="font-size:9px;">Home</span></div>
     <div class="nav-item" id="nav-patients" onclick="showView('patients')">🔍<br><span style="font-size:9px;">Search</span></div>
@@ -710,8 +743,10 @@
 <!-- MORE MENU -->
 <div id="more-menu" style="display:none;position:fixed;bottom:65px;right:0;background:white;border:1px solid #ddd;border-radius:10px 0 0 10px;padding:8px;z-index:200;box-shadow:-2px -2px 10px rgba(0,0,0,0.1);min-width:160px;">
     <div onclick="showView('doctor');toggleMore();" style="padding:10px 15px;cursor:pointer;font-size:14px;">👨‍⚕️ Doctor</div>
+    <div onclick="showView('billing-list');toggleMore();" style="padding:10px 15px;cursor:pointer;font-size:14px;" id="billing-list-menu-item">💰 Billing</div>
     <div onclick="showView('pharmacy');toggleMore();" style="padding:10px 15px;cursor:pointer;font-size:14px;">💊 Pharmacy</div>
     <div onclick="showView('lab');toggleMore();" style="padding:10px 15px;cursor:pointer;font-size:14px;">🔬 Lab</div>
+    <div onclick="showView('billing-list');toggleMore();" id="billing-list-menu-item" style="padding:10px 15px;cursor:pointer;font-size:14px;display:none;">💰 Billing</div>
     <div onclick="showView('analytics');toggleMore();" style="padding:10px 15px;cursor:pointer;font-size:14px;">📊 Analytics</div>
     <div id="admin-menu-item" onclick="showView('admin');toggleMore();" style="padding:10px 15px;cursor:pointer;font-size:14px;display:none;">⚙️ Admin</div>
 </div>
@@ -726,7 +761,7 @@ const db=getFirestore(app);
 
 const stateNames={AB:'Abia',AD:'Adamawa',AK:'Akwa Ibom',AN:'Anambra',BA:'Bauchi',BY:'Bayelsa',BE:'Benue',BO:'Borno',CR:'Cross River',DE:'Delta',EB:'Ebonyi',ED:'Edo',EK:'Ekiti',EN:'Enugu',FC:'FCT Abuja',GO:'Gombe',IM:'Imo',JI:'Jigawa',KD:'Kaduna',KN:'Kano',KT:'Katsina',KE:'Kebbi',KO:'Kogi',KW:'Kwara',LA:'Lagos',NA:'Nasarawa',NI:'Niger',OG:'Ogun',ON:'Ondo',OS:'Osun',OY:'Oyo',PL:'Plateau',RI:'Rivers',SO:'Sokoto',TA:'Taraba',YO:'Yobe',ZA:'Zamfara'};
 const drugWarnings={'penicillin':['amoxicillin','ampicillin','amoxil','augmentin','flucloxacillin'],'aspirin':['ibuprofen','diclofenac','naproxen','indomethacin'],'sulfa':['septrin','cotrimoxazole','trimethoprim'],'codeine':['tramadol','morphine','oxycodone','pethidine'],'ibuprofen':['aspirin','diclofenac','naproxen'],'metformin':['alcohol','contrast'],'warfarin':['aspirin','ibuprofen','naproxen','diclofenac'],'metronidazole':['alcohol','warfarin'],'paracetamol':['alcohol'],'rifampicin':['contraceptives','warfarin']};
-const rolePermissions={admin:{views:['dashboard','patients','register','nurse','doctor','doctor-form','post-result','pharmacy','lab','analytics','admin','emergency','detail','share','referral','referral-preview','billing'],nav:['dashboard','patients','register','nurse','more']},receptionist:{views:['dashboard','patients','register','emergency','detail','share','billing'],nav:['dashboard','patients','register']},nurse:{views:['dashboard','nurse','patients','emergency','detail'],nav:['dashboard','nurse','patients']},doctor:{views:['dashboard','doctor','doctor-form','post-result','patients','emergency','detail','share','referral','referral-preview','billing'],nav:['dashboard','patients','more']},pharmacist:{views:['dashboard','pharmacy','patients','emergency','detail'],nav:['dashboard','patients','more']},lab:{views:['dashboard','lab','patients','emergency','detail'],nav:['dashboard','patients','more']}};
+const rolePermissions={admin:{views:['dashboard','patients','register','nurse','doctor','doctor-form','post-result','pharmacy','lab','analytics','admin','emergency','detail','share','referral','referral-preview','billing','billing-list'],nav:['dashboard','patients','register','nurse','more']},receptionist:{views:['dashboard','patients','register','emergency','detail','share','billing','billing-list'],nav:['dashboard','patients','register']},nurse:{views:['dashboard','nurse','patients','emergency','detail'],nav:['dashboard','nurse','patients']},doctor:{views:['dashboard','doctor','doctor-form','post-result','patients','emergency','detail','share','referral','referral-preview','billing','billing-list'],nav:['dashboard','patients','more']},pharmacist:{views:['dashboard','pharmacy','patients','emergency','detail'],nav:['dashboard','patients','more']},lab:{views:['dashboard','lab','patients','emergency','detail'],nav:['dashboard','patients','more']}};
 
 let patients=[],prescriptions=[],labRequests=[],pharmacyFlags=[],referrals=[],financialRecords=[],inventory=[],bills=[];
 let currentHospital=null,currentUser=null;
@@ -905,6 +940,26 @@ function showNotification(title,body,color){
     document.body.appendChild(notif);
     setTimeout(()=>{if(notif.parentNode)notif.remove();},6000);
     if(navigator.vibrate)navigator.vibrate([200,100,200]);
+}
+
+function playAlertSound(){
+    try{
+        const ctx=new(window.AudioContext||window.webkitAudioContext)();
+        [0,0.25].forEach((delay,i)=>{
+            const osc=ctx.createOscillator();
+            const gain=ctx.createGain();
+            osc.connect(gain);
+            gain.connect(ctx.destination);
+            osc.frequency.value=i===0?880:1100;
+            osc.type='sine';
+            gain.gain.setValueAtTime(0,ctx.currentTime+delay);
+            gain.gain.linearRampToValueAtTime(0.4,ctx.currentTime+delay+0.02);
+            gain.gain.exponentialRampToValueAtTime(0.001,ctx.currentTime+delay+0.4);
+            osc.start(ctx.currentTime+delay);
+            osc.stop(ctx.currentTime+delay+0.5);
+        });
+    }catch(e){}
+    if(navigator.vibrate)navigator.vibrate([300,100,300]);
 }
 
 function updateConnectedStaffDisplay(staffList){
@@ -1092,10 +1147,26 @@ function loadFromCache(k){try{const d=localStorage.getItem('mt_'+k);return d?JSO
 
 async function smartSave(type,collectionName,data){
     const tempId='local_'+Date.now()+'_'+Math.random().toString(36).substr(2,5);
-    // Use local server if available
-    if(connectionMode==='local'){
+
+    // Check if this is an external patient (registered at different hospital)
+    // External patient records must ALWAYS go to Firebase directly
+    // The local server only knows about its own hospital's patients
+    const isExternalPatient=(type==='updatePatient')&&data.id&&
+        (()=>{const p=patients.find(px=>px.id===data.id);
+              return p&&p.hospitalCode&&p.hospitalCode!==currentHospital.code;})();
+
+    // Use local server ONLY for this hospital's own patients
+    if(connectionMode==='local'&&!isExternalPatient){
         try{
-            const endpointMap={'addPatient':{method:'POST',url:'/api/patients'},'updatePatient':{method:'PUT',url:`/api/patients/${data.id}`},'addPrescription':{method:'POST',url:'/api/prescriptions'},'updateLabRequest':{method:'PUT',url:`/api/lab-requests/${data.id}`},'addLabRequest':{method:'POST',url:'/api/lab-requests'},'addFinancialRecord':{method:'POST',url:'/api/financial-records'},'addPharmacyFlag':{method:'POST',url:'/api/pharmacy-flags'}};
+            const endpointMap={
+                'addPatient':{method:'POST',url:'/api/patients'},
+                'updatePatient':{method:'PUT',url:`/api/patients/${data.id}`},
+                'addPrescription':{method:'POST',url:'/api/prescriptions'},
+                'updateLabRequest':{method:'PUT',url:`/api/lab-requests/${data.id}`},
+                'addLabRequest':{method:'POST',url:'/api/lab-requests'},
+                'addFinancialRecord':{method:'POST',url:'/api/financial-records'},
+                'addPharmacyFlag':{method:'POST',url:'/api/pharmacy-flags'},
+            };
             const endpoint=endpointMap[type];
             if(endpoint){
                 let result;
@@ -1104,14 +1175,47 @@ async function smartSave(type,collectionName,data){
                 applyToLocalCache(type,{id:result.id||data.id||tempId,...data});
                 return result.id||data.id||tempId;
             }
-        }catch(e){console.error('Local server save failed:',e.message);}
+        }catch(e){
+            console.error('Local server save failed:',e.message);
+            // Fall through to Firebase
+        }
     }
-    // Firebase fallback
-    if(!isOnline){const localData={id:tempId,...data};queueOfflineAction(type,localData);return tempId;}
-    try{
-        if(type.startsWith('add')){const ref=await addDoc(collection(db,collectionName),data);applyToLocalCache(type,{id:ref.id,...data});return ref.id;}
-        else{const{id,...updateData}=data;await updateDoc(doc(db,collectionName,id),updateData);applyToLocalCache(type,data);return id;}
-    }catch(e){const localData={id:tempId,...data};queueOfflineAction(type,localData);return tempId;}
+
+    // Firebase path — used for:
+    // 1. External patient updates (always)
+    // 2. When local server is unavailable
+    // 3. When connectionMode is firebase
+    if(!isOnline&&!isExternalPatient){
+        const localData={id:tempId,...data};
+        queueOfflineAction(type,localData);
+        return tempId;
+    }
+
+    if(isOnline){
+        try{
+            if(type.startsWith('add')){
+                const ref=await addDoc(collection(db,collectionName),data);
+                applyToLocalCache(type,{id:ref.id,...data});
+                return ref.id;
+            }else{
+                const{id,...updateData}=data;
+                await updateDoc(doc(db,collectionName,id),updateData);
+                applyToLocalCache(type,data);
+                return id;
+            }
+        }catch(e){
+            if(!isExternalPatient){
+                const localData={id:tempId,...data};
+                queueOfflineAction(type,localData);
+            }else{
+                console.error('External patient Firebase update failed:',e.message);
+                throw e; // Surface the error for external patients
+            }
+            return tempId;
+        }
+    }
+
+    return tempId;
 }
 
 window.updateHospitalCodePreview=function(){const abbrev=document.getElementById('reg-hospital-abbrev').value.toUpperCase().replace(/[^A-Z]/g,'').substr(0,4);const state=document.getElementById('reg-hospital-state').value;const preview=document.getElementById('hospital-code-preview');if(state&&abbrev){preview.style.display='block';preview.textContent=`HOS-${state}-${abbrev}-001 (preview)`;}else preview.style.display='none';}
@@ -1188,6 +1292,11 @@ function initializeMainApp(){
     const perm=rolePermissions[currentUser.role]||rolePermissions.admin;
     ['dashboard','patients','register','nurse','more'].forEach(n=>{const el=document.getElementById('nav-'+n);if(el)el.style.display=perm.nav.includes(n)?'flex':'none';});
     if(currentUser.role==='admin')document.getElementById('admin-menu-item').style.display='flex';
+    // Show billing nav only for admin, receptionist, doctor
+    const blItem=document.getElementById('billing-list-menu-item');
+    if(blItem){
+        blItem.style.display=['admin','receptionist','doctor'].includes(currentUser.role)?'block':'none';
+    }
     updateNextCodePreview();
     loadOfflineQueue();
     resetActivity();
@@ -1437,10 +1546,19 @@ function loadAllDataFirebase(){
             // because first snap just replays what quickLoad already got
             // But if quickLoad did NOT run (e.g. cache fallback), always process
             if(initialLoadComplete && pSnapCount===1){
-                // This is the initial replay — skip to avoid overwriting quickLoad
-                // UNLESS patients array is empty (quickLoad got nothing)
                 if(patients.length>0)return;
             }
+
+            // Count pending before update to detect new patient arrivals
+            const prevPending=patients.reduce((n,p)=>{
+                if(!p.visits)return n;
+                return n+p.visits.filter(v=>{
+                    const here=v.hospitalCode===currentHospital.code||
+                        v.hospitalName?.trim().toLowerCase()===currentHospital.name?.trim().toLowerCase();
+                    return here&&v.status==='pending-doctor';
+                }).length;
+            },0);
+
             patients=[];
             snap.forEach(d=>patients.push({id:d.id,...d.data()}));
             patients.sort((a,b)=>new Date(b.createdAt||0)-new Date(a.createdAt||0));
@@ -1448,6 +1566,36 @@ function loadAllDataFirebase(){
             setStatus('🟢 '+currentHospital.name+' — '+patients.length+' patients');
             updateDashboard();
             renderPendingVisits();
+
+            // Alert doctor when new patient arrives — works even without WebSocket
+            if(pSnapCount>1){
+                const newPending=patients.reduce((n,p)=>{
+                    if(!p.visits)return n;
+                    return n+p.visits.filter(v=>{
+                        const here=v.hospitalCode===currentHospital.code||
+                            v.hospitalName?.trim().toLowerCase()===currentHospital.name?.trim().toLowerCase();
+                        return here&&v.status==='pending-doctor';
+                    }).length;
+                },0);
+                if(newPending>prevPending&&
+                    (currentUser?.role==='doctor'||currentUser?.role==='admin')){
+                    // Find newly arrived patient name
+                    let newName='New patient';
+                    const threshold=Date.now()-30000;
+                    patients.forEach(p=>{
+                        (p.visits||[]).forEach(v=>{
+                            const here=v.hospitalCode===currentHospital.code||
+                                v.hospitalName?.trim().toLowerCase()===currentHospital.name?.trim().toLowerCase();
+                            const isNew=v.visitTimestamp&&new Date(v.visitTimestamp).getTime()>threshold;
+                            if(here&&v.status==='pending-doctor'&&isNew)newName=p.name;
+                        });
+                    });
+                    showNotification('🔔 New Patient Waiting',
+                        newName+' is ready for review','orange',false);
+                    playAlertSound();
+                }
+            }
+
             if(document.getElementById('doctor-view')?.style.display!=='none'){
                 const lrList=document.getElementById('lab-results-list');
                 if(lrList?.style.display!=='none')renderLabResults();
@@ -1518,7 +1666,6 @@ function loadAllDataFirebase(){
     ));
 
     // VISITING PATIENTS — external patients who have visited this hospital
-    // When a new external patient is added, fetch their full record and add to patients array
     _activeListeners.push(onSnapshot(
         query(collection(db,'visitingPatients'),where('hospitalCode','==',currentHospital.code)),
         async snap=>{
@@ -1526,34 +1673,43 @@ function loadAllDataFirebase(){
             snap.forEach(d=>visitingIds.push(d.data().patientId));
             if(visitingIds.length===0)return;
 
-            // Fetch any visiting patients not already in patients array
-            const missing=visitingIds.filter(id=>!patients.find(p=>p.id===id));
-            if(missing.length===0)return;
-
             try{
-                // Fetch in batches of 10
-                for(let i=0;i<missing.length;i+=10){
-                    const batch=missing.slice(i,i+10);
+                // Always re-fetch ALL visiting patients on any change
+                // Because their visits may have been updated since last load
+                // (e.g. nurse just submitted vitals — we need the new visit data)
+                const freshPatients=[];
+                for(let i=0;i<visitingIds.length;i+=10){
+                    const batch=visitingIds.slice(i,i+10);
                     const extSnap=await getDocs(query(
                         collection(db,'patients'),
                         where('__name__','in',batch)
                     ));
-                    extSnap.forEach(d=>{
-                        const data={id:d.id,...d.data()};
-                        if(!patients.find(p=>p.id===data.id)){
-                            patients.push(data);
-                        }
-                    });
+                    extSnap.forEach(d=>freshPatients.push({id:d.id,...d.data()}));
                 }
-                // Re-sort and refresh views
+
+                // Merge fresh external patients into patients array
+                // Replace existing entries with fresh data (visits may have changed)
+                freshPatients.forEach(freshP=>{
+                    const existingIdx=patients.findIndex(p=>p.id===freshP.id);
+                    if(existingIdx>=0){
+                        patients[existingIdx]=freshP; // Update with fresh data
+                    }else{
+                        patients.push(freshP); // Add new
+                    }
+                });
+
                 patients.sort((a,b)=>new Date(b.createdAt||0)-new Date(a.createdAt||0));
                 saveToCache('patients_'+currentHospital.code,patients);
                 updateDashboard();
-                // This is the key — doctor page updates when external patient arrives
+
+                // Always re-render doctor view — this is the key for real-time
                 if(document.getElementById('doctor-view')?.style.display!=='none'){
                     renderPendingVisits();
                 }
-                console.log('External visiting patients loaded:',missing.length);
+                if(document.getElementById('pharmacy-view')?.style.display!=='none'){
+                    renderPharmacyPending();
+                }
+                console.log('Visiting patients refreshed:',freshPatients.length);
             }catch(e){
                 console.warn('Visiting patients load error:',e.message);
             }
@@ -1656,7 +1812,7 @@ function updateDashboard(){
 window.showView=function(view){
     const perm=rolePermissions[currentUser?.role]||rolePermissions.admin;
     if(currentUser&&!perm.views.includes(view)){alert('You do not have permission to access this section.');return;}
-    const allViews=['dashboard','patients','emergency','detail','share','referral','referral-preview','register','nurse','doctor','doctor-form','post-result','pharmacy','lab','analytics','admin','billing'];
+    const allViews=['dashboard','patients','emergency','detail','share','referral','referral-preview','register','nurse','doctor','doctor-form','post-result','pharmacy','lab','analytics','admin','billing','billing-list'];
     allViews.forEach(v=>{const el=document.getElementById(v+'-view');if(el)el.style.display='none';});
     ['dashboard','patients','register','nurse','more'].forEach(n=>{const el=document.getElementById('nav-'+n);if(el)el.classList.remove('active');});
     const el=document.getElementById(view+'-view');if(el)el.style.display='block';
@@ -1669,6 +1825,7 @@ window.showView=function(view){
     else if(view==='lab'){document.getElementById('nav-more')?.classList.add('active');renderLabPending();}
     else if(view==='analytics'){document.getElementById('nav-more')?.classList.add('active');renderAnalytics('daily');}
     else if(view==='admin'){document.getElementById('nav-more')?.classList.add('active');renderAdminPanel();}
+    else if(view==='billing-list'){document.getElementById('nav-more')?.classList.add('active');renderBillingList();}
 }
 
 window.toggleMore=function(){const m=document.getElementById('more-menu');m.style.display=m.style.display==='none'?'block':'none';}
@@ -2355,7 +2512,8 @@ function renderAnalytics(tab){if(tab==='daily')renderDailyAnalytics();else if(ta
 function renderDailyAnalytics(){const container=document.getElementById('analytics-daily');const dailyCounts={};patients.forEach(p=>{if(p.visits)p.visits.forEach(v=>{if(v.hospitalName===currentHospital.name)dailyCounts[v.date]=(dailyCounts[v.date]||0)+1;});});const sorted=Object.entries(dailyCounts).sort((a,b)=>{const da=a[0].split('/').reverse().join('-');const db2=b[0].split('/').reverse().join('-');return new Date(db2)-new Date(da);}).slice(0,14);const max=Math.max(...sorted.map(d=>d[1]),1);if(!sorted.length){container.innerHTML='<div class="empty-search"><div class="icon">📅</div><p>No visit data yet</p></div>';return;}container.innerHTML='<div style="padding:15px;"><div style="font-weight:bold;color:#333;margin-bottom:15px;">Patient Visits — Last 14 Days</div>';sorted.forEach(([date,count])=>{const width=Math.round(count/max*100);container.innerHTML+=`<div style="margin-bottom:10px;"><div class="chart-label">${safe(date)} — ${count} patient${count>1?'s':''}</div><div class="chart-bar"><div class="chart-bar-fill" style="width:${width}%;">${count}</div></div></div>`;});container.innerHTML+='</div>';}
 function renderConditionsAnalytics(){const container=document.getElementById('analytics-conditions');const conditions={};patients.forEach(p=>{if(p.visits)p.visits.forEach(v=>{if(v.hospitalName===currentHospital.name&&v.diagnosis){const d=v.diagnosis.toLowerCase();conditions[d]=(conditions[d]||0)+1;}});});const sorted=Object.entries(conditions).sort((a,b)=>b[1]-a[1]).slice(0,10);const max=Math.max(...sorted.map(d=>d[1]),1);if(!sorted.length){container.innerHTML='<div class="empty-search"><div class="icon">🩺</div><p>No diagnosis data yet</p></div>';return;}container.innerHTML='<div style="padding:15px;"><div style="font-weight:bold;color:#333;margin-bottom:15px;">Top 10 Conditions</div>';sorted.forEach(([cond,count])=>{const width=Math.round(count/max*100);container.innerHTML+=`<div style="margin-bottom:10px;"><div class="chart-label">${safe(cond.charAt(0).toUpperCase()+cond.slice(1))} — ${count}</div><div class="chart-bar"><div class="chart-bar-fill" style="width:${width}%;background:#00aa55;">${count}</div></div></div>`;});container.innerHTML+='</div>';}
 function renderStaffAnalytics(){const container=document.getElementById('analytics-staff');const staffActivity={};patients.forEach(p=>{if(p.visits)p.visits.forEach(v=>{if(v.hospitalName===currentHospital.name){if(v.doctorName){if(!staffActivity[v.doctorName])staffActivity[v.doctorName]={role:'Doctor',count:0,patients:[]};staffActivity[v.doctorName].count++;staffActivity[v.doctorName].patients.push({name:p.name,code:p.code,date:v.date,diagnosis:v.diagnosis||'',medications:v.medications||''});}if(v.nurseName){if(!staffActivity[v.nurseName])staffActivity[v.nurseName]={role:'Nurse',count:0,patients:[]};staffActivity[v.nurseName].count++;staffActivity[v.nurseName].patients.push({name:p.name,code:p.code,date:v.date,diagnosis:'',medications:''});}}});});const sorted=Object.entries(staffActivity).sort((a,b)=>b[1].count-a[1].count);if(!sorted.length){container.innerHTML='<div class="empty-search"><div class="icon">👨‍⚕️</div><p>No staff activity yet</p></div>';return;}container.innerHTML='<div style="padding:15px;"><div style="font-weight:bold;color:#333;margin-bottom:15px;">Staff Activity</div>';sorted.forEach(([name,data])=>{const recent=data.patients.slice(-5).reverse();container.innerHTML+=`<div style="background:white;border-radius:10px;padding:15px;margin-bottom:12px;box-shadow:0 2px 5px rgba(0,0,0,0.08);"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;"><div><div style="font-weight:bold;font-size:16px;">${safe(name)}</div><div style="font-size:12px;color:#666;">${safe(data.role)}</div></div><div style="text-align:center;background:#e8f4fd;padding:8px 15px;border-radius:8px;"><div style="font-size:24px;font-weight:bold;color:#0066cc;">${data.count}</div><div style="font-size:11px;color:#666;">Total</div></div></div><div style="font-size:12px;font-weight:bold;color:#666;margin-bottom:6px;">Recent Patients:</div>${recent.map(pat=>`<div style="background:#f8f9fa;border-radius:6px;padding:8px;margin-bottom:5px;font-size:12px;"><div style="font-weight:bold;">${safe(pat.name)} <span style="font-family:monospace;">(${safe(pat.code)})</span></div><div style="color:#666;">📅 ${safe(pat.date)}${pat.diagnosis?' — '+safe(pat.diagnosis):''}</div>${pat.medications?`<div style="color:#555;">💊 ${safe(pat.medications)}</div>`:''}</div>`).join('')}</div>`;});container.innerHTML+='</div>';}
-function renderFinanceAnalytics(){const container=document.getElementById('analytics-finance');const today=new Date().toLocaleDateString('en-GB');const todayRecs=financialRecords.filter(r=>r.date===today);const consultRev=todayRecs.filter(r=>r.type==='consultation').reduce((s,r)=>s+(r.amount||0),0);const labRev=todayRecs.filter(r=>r.type==='lab').reduce((s,r)=>s+(r.amount||0),0);const drugRev=todayRecs.filter(r=>r.type==='drugs').reduce((s,r)=>s+(r.amount||0),0);const bedRev=todayRecs.filter(r=>r.type==='bed_space').reduce((s,r)=>s+(r.amount||0),0);const paymentRev=todayRecs.filter(r=>r.type==='payment').reduce((s,r)=>s+(r.amount||0),0);const totalToday=consultRev+labRev+drugRev+bedRev+paymentRev;const allTime=financialRecords.reduce((s,r)=>s+(r.amount||0),0);const unpaidBills=bills.filter(b=>b.paymentStatus==='unpaid'||b.paymentStatus==='partial');const totalOutstanding=unpaidBills.reduce((s,b)=>s+(b.balance||0),0);container.innerHTML=`<div style="padding:15px;"><div style="font-weight:bold;color:#333;margin-bottom:10px;">💰 Today's Revenue — ${today}</div><div style="background:white;border-radius:10px;padding:15px;margin-bottom:15px;box-shadow:0 2px 5px rgba(0,0,0,0.1);">${consultRev>0?`<div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #f5f5f5;font-size:14px;"><span>Consultation Fees</span><span style="color:#0066cc;font-weight:bold;">₦${consultRev.toLocaleString()}</span></div>`:''} ${labRev>0?`<div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #f5f5f5;font-size:14px;"><span>Lab Tests</span><span style="color:#009688;font-weight:bold;">₦${labRev.toLocaleString()}</span></div>`:''} ${drugRev>0?`<div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #f5f5f5;font-size:14px;"><span>Drug Sales</span><span style="color:#9c27b0;font-weight:bold;">₦${drugRev.toLocaleString()}</span></div>`:''} ${bedRev>0?`<div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #f5f5f5;font-size:14px;"><span>Bed Space</span><span style="color:#ff8800;font-weight:bold;">₦${bedRev.toLocaleString()}</span></div>`:''} ${paymentRev>0?`<div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #f5f5f5;font-size:14px;"><span>Payments Received</span><span style="color:#00aa55;font-weight:bold;">₦${paymentRev.toLocaleString()}</span></div>`:''}<div style="display:flex;justify-content:space-between;padding:12px 0;font-size:16px;font-weight:bold;color:#0066cc;border-top:2px solid #0066cc;margin-top:5px;"><span>Total Today</span><span>₦${totalToday.toLocaleString()}</span></div></div><div style="background:white;border-radius:10px;padding:15px;margin-bottom:15px;box-shadow:0 2px 5px rgba(0,0,0,0.1);"><div style="font-size:13px;color:#666;margin-bottom:5px;">All-Time Revenue</div><div style="font-size:28px;font-weight:bold;color:#0066cc;">₦${allTime.toLocaleString()}</div></div>${totalOutstanding>0?`<div style="background:#fff0f0;border:2px solid #ff4444;border-radius:10px;padding:15px;"><div style="font-size:13px;color:#ff4444;font-weight:bold;margin-bottom:5px;">🔴 Outstanding Balances</div><div style="font-size:24px;font-weight:bold;color:#ff4444;">₦${totalOutstanding.toLocaleString()}</div><div style="font-size:12px;color:#666;margin-top:3px;">${unpaidBills.length} unpaid/partial bill${unpaidBills.length>1?'s':''}</div></div>`:''}</div>`;}
+function renderFinanceAnalytics(){const container=document.getElementById('analytics-finance');const today=new Date().toLocaleDateString('en-GB');const todayRecs=financialRecords.filter(r=>r.date===today);const consultRev=todayRecs.filter(r=>r.type==='consultation').reduce((s,r)=>s+(r.amount||0),0);const labRev=todayRecs.filter(r=>r.type==='lab').reduce((s,r)=>s+(r.amount||0),0);const drugRev=todayRecs.filter(r=>r.type==='drugs').reduce((s,r)=>s+(r.amount||0),0);const bedRev=todayRecs.filter(r=>r.type==='bed_space').reduce((s,r)=>s+(r.amount||0),0);const paymentRev=todayRecs.filter(r=>r.type==='payment').reduce((s,r)=>s+(r.amount||0),0);const totalToday=consultRev+labRev+drugRev+bedRev+paymentRev;const allTime=financialRecords.reduce((s,r)=>s+(r.amount||0),0);const unpaidBills=bills.filter(b=>b.paymentStatus==='unpaid'||b.paymentStatus==='partial');const totalOutstanding=unpaidBills.reduce((s,b)=>s+(b.balance||0),0);container.innerHTML=`<div style="padding:15px;"><div style="font-weight:bold;color:#333;margin-bottom:10px;">💰 Today's Revenue — ${today}</div><div style="background:white;border-radius:10px;padding:15px;margin-bottom:15px;box-shadow:0 2px 5px rgba(0,0,0,0.1);">${consultRev>0?`<div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #f5f5f5;font-size:14px;"><span>Consultation Fees</span><span style="color:#0066cc;font-weight:bold;">₦${consultRev.toLocaleString()}</span></div>`:''} ${labRev>0?`<div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #f5f5f5;font-size:14px;"><span>Lab Tests</span><span style="color:#009688;font-weight:bold;">₦${labRev.toLocaleString()}</span></div>`:''} ${drugRev>0?`<div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #f5f5f5;font-size:14px;"><span>Drug Sales</span><span style="color:#9c27b0;font-weight:bold;">₦${drugRev.toLocaleString()}</span></div>`:''} ${bedRev>0?`<div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #f5f5f5;font-size:14px;"><span>Bed Space</span><span style="color:#ff8800;font-weight:bold;">₦${bedRev.toLocaleString()}</span></div>`:''} ${paymentRev>0?`<div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #f5f5f5;font-size:14px;"><span>Payments Received</span><span style="color:#00aa55;font-weight:bold;">₦${paymentRev.toLocaleString()}</span></div>`:''}<div style="display:flex;justify-content:space-between;padding:12px 0;font-size:16px;font-weight:bold;color:#0066cc;border-top:2px solid #0066cc;margin-top:5px;"><span>Total Today</span><span>₦${totalToday.toLocaleString()}</span></div></div><div style="background:white;border-radius:10px;padding:15px;margin-bottom:15px;box-shadow:0 2px 5px rgba(0,0,0,0.1);"><div style="font-size:13px;color:#666;margin-bottom:5px;">All-Time Revenue</div><div style="font-size:28px;font-weight:bold;color:#0066cc;">₦${allTime.toLocaleString()}</div></div>${totalOutstanding>0?`<div style="background:#fff0f0;border:2px solid #ff4444;border-radius:10px;padding:15px;"><div style="font-size:13px;color:#ff4444;font-weight:bold;margin-bottom:5px;">🔴 Outstanding Balances</div><div style="font-size:24px;font-weight:bold;color:#ff4444;">₦${totalOutstanding.toLocaleString()}</div><div style="font-size:12px;color:#666;margin-top:3px;">${unpaidBills.length} unpaid/partial bill${unpaidBills.length>1?'s':''}</div></div>`:''}</div>`;
+container.innerHTML+=`<div style="padding:0 15px 15px;"><button onclick="showDailyReconciliation()" style="width:100%;background:#0066cc;color:white;border:none;padding:14px;border-radius:10px;font-size:15px;font-weight:bold;cursor:pointer;margin-bottom:10px;">🖨️ Print Daily Reconciliation</button><button onclick="showView('billing-list')" style="width:100%;background:#00aa55;color:white;border:none;padding:12px;border-radius:10px;font-size:14px;cursor:pointer;">💰 Manage Bills</button></div>`;}
 
 
 // ADMIN — see renderAdminPanel defined below with diagnostic tools
@@ -2566,6 +2724,643 @@ function renderAdminPanel(){
             <button onclick="clearSecurityLog()" style="width:100%;background:#f5f5f5;color:#666;border:1px solid #ddd;padding:8px;border-radius:8px;cursor:pointer;font-size:12px;">🗑️ Clear Activity Log</button>
         </div>`;
     }
-}</script>
+}
+
+// ============================================================
+// BILLING LIST — Outstanding Balance Manager
+// Visible to Admin, Receptionist, Doctor
+// ============================================================
+let currentBillingFilter='all';
+
+window.setBillingFilter=function(filter){
+    currentBillingFilter=filter;
+    ['all','unpaid','partial','paid','nobill'].forEach(f=>{
+        const el=document.getElementById('bl-tab-'+f);
+        if(el)el.classList.toggle('active',f===filter);
+    });
+    renderBillingList();
+};
+
+function renderBillingList(){
+    const today=new Date().toLocaleDateString('en-GB');
+    const searchQ=(document.getElementById('bl-search')?.value||'').toLowerCase().trim();
+
+    // Calculate summary stats
+    const todayCollections=financialRecords
+        .filter(r=>r.date===today&&r.type==='payment')
+        .reduce((s,r)=>s+(r.amount||0),0);
+    const outstanding=bills
+        .filter(b=>b.paymentStatus==='unpaid'||b.paymentStatus==='partial')
+        .reduce((s,b)=>s+(b.balance||0),0);
+    const unpaidCount=bills
+        .filter(b=>b.paymentStatus==='unpaid'||b.paymentStatus==='partial').length;
+
+    const todayEl=document.getElementById('bl-today-collections');
+    const outEl=document.getElementById('bl-outstanding');
+    const countEl=document.getElementById('bl-unpaid-count');
+    if(todayEl)todayEl.textContent='₦'+todayCollections.toLocaleString();
+    if(outEl)outEl.textContent='₦'+outstanding.toLocaleString();
+    if(countEl)countEl.textContent=unpaidCount;
+
+    // Build rows — one row per visit per patient
+    const rows=[];
+
+    patients.forEach(p=>{
+        // Apply search filter
+        if(searchQ){
+            const matches=p.name?.toLowerCase().includes(searchQ)||
+                p.code?.toLowerCase().includes(searchQ)||
+                p.phone?.includes(searchQ);
+            if(!matches)return;
+        }
+
+        if(!p.visits||p.visits.length===0){
+            // Patient with no visits — only show in 'all' or 'nobill' tab
+            if(currentBillingFilter==='all'||currentBillingFilter==='nobill'){
+                rows.push({patient:p,visit:null,visitIndex:-1,bill:null,status:'nobill'});
+            }
+            return;
+        }
+
+        p.visits.forEach((v,visitIndex)=>{
+            // Only show visits at this hospital
+            const isHere=v.hospitalCode===currentHospital.code||
+                v.hospitalName?.trim().toLowerCase()===currentHospital.name?.trim().toLowerCase();
+            if(!isHere)return;
+
+            const bill=bills.find(b=>b.patientId===p.id&&b.visitIndex===visitIndex);
+            const status=bill?.paymentStatus||'nobill';
+
+            // Filter tab
+            if(currentBillingFilter!=='all'&&status!==currentBillingFilter)return;
+
+            rows.push({patient:p,visit:v,visitIndex,bill,status});
+        });
+    });
+
+    // Sort — unpaid and partial float to top, paid sink to bottom
+    const sortOrder={unpaid:0,partial:1,nobill:2,paid:3};
+    rows.sort((a,b)=>{
+        const sa=sortOrder[a.status]??2;
+        const sb=sortOrder[b.status]??2;
+        if(sa!==sb)return sa-sb;
+        // Within same status, sort by visit date descending
+        const da=a.visit?.date||a.patient.createdAt||'';
+        const db2=b.visit?.date||b.patient.createdAt||'';
+        return db2.localeCompare(da);
+    });
+
+    const container=document.getElementById('billing-list-items');
+    if(!container)return;
+
+    if(rows.length===0){
+        container.innerHTML=`<div class="empty-search"><div class="icon">💰</div><p>No billing records found</p></div>`;
+        return;
+    }
+
+    const statusConfig={
+        paid:{color:'#4CAF50',bg:'#e8f5e9',label:'✅ PAID'},
+        partial:{color:'#f57f17',bg:'#fff8e1',label:'💛 PARTIAL'},
+        unpaid:{color:'#ff4444',bg:'#fff0f0',label:'🔴 UNPAID'},
+        nobill:{color:'#999',bg:'#f5f5f5',label:'📋 No Bill Yet'}
+    };
+
+    container.innerHTML=rows.map(row=>{
+        const {patient:p,visit:v,bill,status}=row;
+        const cfg=statusConfig[status]||statusConfig.nobill;
+        const totalDue=bill?.totalDue||0;
+        const amountPaid=bill?.amountPaid||0;
+        const balance=bill?.balance||0;
+
+        return `<div onclick="openBillingFromList('${p.id}',${row.visitIndex})"
+            style="background:white;margin:8px 15px;border-radius:10px;
+            padding:14px;box-shadow:0 2px 5px rgba(0,0,0,0.08);
+            border-left:4px solid ${cfg.color};cursor:pointer;">
+            <div style="display:flex;justify-content:space-between;align-items:flex-start;">
+                <div style="flex:1;">
+                    <div style="font-weight:bold;font-size:15px;">${safe(p.name)}</div>
+                    <div style="font-family:monospace;font-size:12px;color:#0066cc;">${safe(p.code)}</div>
+                </div>
+                <span style="background:${cfg.bg};color:${cfg.color};padding:4px 10px;
+                    border-radius:12px;font-size:11px;font-weight:bold;white-space:nowrap;">
+                    ${cfg.label}
+                </span>
+            </div>
+            ${v?`<div style="font-size:12px;color:#666;margin-top:6px;">
+                📅 ${safe(v.date)} — ${safe(v.hospitalName||currentHospital.name)}
+                ${v.doctorName?` — Dr. ${safe(v.doctorName)}`:''}
+            </div>`:'<div style="font-size:12px;color:#999;margin-top:6px;">No visits recorded</div>'}
+            ${bill?`<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin-top:8px;text-align:center;">
+                <div style="background:#f8f9fa;border-radius:6px;padding:6px;">
+                    <div style="font-size:10px;color:#666;">Total Due</div>
+                    <div style="font-size:13px;font-weight:bold;color:#333;">₦${totalDue.toLocaleString()}</div>
+                </div>
+                <div style="background:#f8f9fa;border-radius:6px;padding:6px;">
+                    <div style="font-size:10px;color:#666;">Paid</div>
+                    <div style="font-size:13px;font-weight:bold;color:#4CAF50;">₦${amountPaid.toLocaleString()}</div>
+                </div>
+                <div style="background:#f8f9fa;border-radius:6px;padding:6px;">
+                    <div style="font-size:10px;color:#666;">Balance</div>
+                    <div style="font-size:13px;font-weight:bold;color:${balance>0?'#ff4444':'#4CAF50'};">₦${balance.toLocaleString()}</div>
+                </div>
+            </div>`:''}
+            ${bill?.receiptNumber?`<div style="font-size:10px;color:#999;margin-top:5px;font-family:monospace;">${safe(bill.receiptNumber)}</div>`:''}
+        </div>`;
+    }).join('');
+}
+
+window.openBillingFromList=function(patientId,visitIndex){
+    // Find patient and set up billing context
+    const p=patients.find(px=>px.id===patientId);
+    if(!p)return;
+    currentBillingPatientId=patientId;
+    // Navigate to billing view
+    showView('billing');
+    openBilling();
+    // If a specific visit was provided, auto-select it
+    if(visitIndex>=0){
+        setTimeout(()=>selectVisitForBilling(visitIndex),300);
+    }
+};
+
+// ============================================================
+// DAILY CASH RECONCILIATION — Priority Feature 4
+// ============================================================
+window.showDailyReconciliation=function(){
+    const today=new Date().toLocaleDateString('en-GB');
+    const todayRecs=financialRecords.filter(r=>r.date===today);
+    const todayBills=bills.filter(b=>b.date===today);
+
+    // Group by payment method
+    const byMethod={cash:0,transfer:0,pos:0,hmo:0,partial:0,other:0};
+    todayRecs.filter(r=>r.type==='payment').forEach(r=>{
+        const method=(r.paymentMethod||'other').toLowerCase();
+        byMethod[method]=(byMethod[method]||0)+(r.amount||0);
+    });
+
+    const totalCollected=Object.values(byMethod).reduce((s,v)=>s+v,0);
+    const totalBilled=todayBills.reduce((s,b)=>s+(b.totalDue||0),0);
+    const totalOutstanding=todayBills
+        .filter(b=>b.paymentStatus!=='paid')
+        .reduce((s,b)=>s+(b.balance||0),0);
+
+    // Breakdown by type
+    const consultRev=todayRecs.filter(r=>r.type==='consultation').reduce((s,r)=>s+(r.amount||0),0);
+    const labRev=todayRecs.filter(r=>r.type==='lab').reduce((s,r)=>s+(r.amount||0),0);
+    const drugRev=todayRecs.filter(r=>r.type==='drugs').reduce((s,r)=>s+(r.amount||0),0);
+    const bedRev=todayRecs.filter(r=>r.type==='bed_space').reduce((s,r)=>s+(r.amount||0),0);
+
+    const w=window.open('','_blank');
+    w.document.write(`<!DOCTYPE html><html><head><title>Daily Reconciliation — ${today}</title>
+    <style>
+        body{font-family:Arial,sans-serif;padding:20px;max-width:600px;margin:0 auto;}
+        h1{color:#0066cc;font-size:20px;}
+        .card{background:#f8f9fa;border-radius:10px;padding:15px;margin-bottom:15px;}
+        .row{display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #eee;font-size:14px;}
+        .total{font-size:18px;font-weight:bold;color:#0066cc;border-top:2px solid #0066cc;padding-top:10px;margin-top:5px;}
+        .outstanding{color:#ff4444;}
+        @media print{button{display:none;}}
+    </style></head><body>
+    <h1>🏥 MEDITRACK — Daily Reconciliation</h1>
+    <div style="font-size:13px;color:#666;margin-bottom:15px;">${safe(currentHospital.name)} | ${today} | Generated by: ${safe(currentUser.name)}</div>
+
+    <div class="card">
+        <div style="font-weight:bold;color:#0066cc;margin-bottom:10px;">💰 Collections By Payment Method</div>
+        ${byMethod.cash>0?`<div class="row"><span>Cash</span><span>₦${byMethod.cash.toLocaleString()}</span></div>`:''}
+        ${byMethod.transfer>0?`<div class="row"><span>Bank Transfer</span><span>₦${byMethod.transfer.toLocaleString()}</span></div>`:''}
+        ${byMethod.pos>0?`<div class="row"><span>POS / Card</span><span>₦${byMethod.pos.toLocaleString()}</span></div>`:''}
+        ${byMethod.hmo>0?`<div class="row"><span>HMO / Insurance</span><span>₦${byMethod.hmo.toLocaleString()}</span></div>`:''}
+        <div class="row total"><span>TOTAL COLLECTED</span><span>₦${totalCollected.toLocaleString()}</span></div>
+    </div>
+
+    <div class="card">
+        <div style="font-weight:bold;color:#009688;margin-bottom:10px;">📋 Revenue By Service</div>
+        ${consultRev>0?`<div class="row"><span>Consultation Fees</span><span>₦${consultRev.toLocaleString()}</span></div>`:''}
+        ${labRev>0?`<div class="row"><span>Lab Tests</span><span>₦${labRev.toLocaleString()}</span></div>`:''}
+        ${drugRev>0?`<div class="row"><span>Drug Sales</span><span>₦${drugRev.toLocaleString()}</span></div>`:''}
+        ${bedRev>0?`<div class="row"><span>Bed Space</span><span>₦${bedRev.toLocaleString()}</span></div>`:''}
+        <div class="row total"><span>TOTAL BILLED TODAY</span><span>₦${totalBilled.toLocaleString()}</span></div>
+    </div>
+
+    <div class="card">
+        <div style="font-weight:bold;color:#ff4444;margin-bottom:10px;">⚠️ Outstanding Balances</div>
+        <div class="row"><span>Bills issued today</span><span>${todayBills.length}</span></div>
+        <div class="row"><span>Fully paid</span><span>${todayBills.filter(b=>b.paymentStatus==='paid').length}</span></div>
+        <div class="row"><span>Partial payment</span><span>${todayBills.filter(b=>b.paymentStatus==='partial').length}</span></div>
+        <div class="row"><span>Unpaid</span><span>${todayBills.filter(b=>b.paymentStatus==='unpaid').length}</span></div>
+        <div class="row total outstanding"><span>TOTAL OUTSTANDING</span><span>₦${totalOutstanding.toLocaleString()}</span></div>
+    </div>
+
+    <div style="text-align:center;margin:20px 0;">
+        <button onclick="window.print()" style="background:#0066cc;color:white;border:none;padding:12px 30px;border-radius:8px;font-size:16px;cursor:pointer;">🖨️ Print Report</button>
+    </div>
+    <div style="text-align:center;font-size:11px;color:#999;margin-top:15px;">MEDITRACK — ${safe(currentHospital.name)} — ${today}</div>
+    <script>setTimeout(()=>window.print(),500);<\/script>
+    </body></html>`);
+};
+
+// ============================================================
+// DRUG EXPIRY TRACKER — Priority Feature 1
+// ============================================================
+function getDaysUntilExpiry(expiryDate){
+    if(!expiryDate)return null;
+    try{
+        // Support DD/MM/YYYY and YYYY-MM-DD formats
+        let d;
+        if(expiryDate.includes('/')){
+            const[day,month,year]=expiryDate.split('/');
+            d=new Date(year,month-1,day);
+        }else{
+            d=new Date(expiryDate);
+        }
+        const diff=d-new Date();
+        return Math.ceil(diff/(1000*60*60*24));
+    }catch(e){return null;}
+}
+
+function getExpiryBadge(daysLeft){
+    if(daysLeft===null)return'';
+    if(daysLeft<0)return`<span style="background:#ff4444;color:white;padding:2px 6px;border-radius:8px;font-size:10px;font-weight:bold;">❌ EXPIRED</span>`;
+    if(daysLeft<=7)return`<span style="background:#ff4444;color:white;padding:2px 6px;border-radius:8px;font-size:10px;font-weight:bold;">⚠️ Expires in ${daysLeft}d</span>`;
+    if(daysLeft<=30)return`<span style="background:#ff8800;color:white;padding:2px 6px;border-radius:8px;font-size:10px;font-weight:bold;">⏰ Expires in ${daysLeft}d</span>`;
+    return`<span style="background:#e8f5e9;color:#4CAF50;padding:2px 6px;border-radius:8px;font-size:10px;">✅ ${daysLeft}d</span>`;
+}
+
+// Enhanced renderInventory with expiry dates
+const _origRenderInventory=window.renderInventory;
+window.renderInventory=function(){
+    const section=document.getElementById('pharmacy-inventory-section');
+    if(!section)return;
+
+    // Check for expiring drugs and show alert
+    const expiring=inventory.filter(i=>{
+        const d=getDaysUntilExpiry(i.expiryDate);
+        return d!==null&&d<=30;
+    });
+    if(expiring.length>0){
+        const expired=expiring.filter(i=>getDaysUntilExpiry(i.expiryDate)<0);
+        section.innerHTML=`<div style="background:#fff0f0;border:2px solid #ff4444;border-radius:10px;padding:12px;margin:10px 15px;">
+            <div style="font-weight:bold;color:#ff4444;margin-bottom:5px;">⚠️ Drug Expiry Alert</div>
+            ${expired.length>0?`<div style="font-size:13px;color:#ff4444;">${expired.length} drug(s) EXPIRED — remove from dispensing immediately</div>`:''}
+            ${expiring.filter(i=>getDaysUntilExpiry(i.expiryDate)>=0).length>0?`<div style="font-size:13px;color:#ff8800;margin-top:3px;">${expiring.filter(i=>getDaysUntilExpiry(i.expiryDate)>=0).length} drug(s) expiring within 30 days</div>`:''}
+        </div>`;
+    }else{
+        section.innerHTML='';
+    }
+
+    section.innerHTML+=`<div style="padding:15px;">
+    <div style="font-weight:bold;color:#333;margin-bottom:15px;">Drug Inventory</div>
+    <div style="background:white;border-radius:10px;padding:15px;margin-bottom:15px;box-shadow:0 2px 5px rgba(0,0,0,0.1);">
+        <div style="font-weight:bold;color:#0066cc;margin-bottom:10px;">➕ Add / Update Drug Stock</div>
+        <div class="form-group"><label>Drug Name *</label><input type="text" id="inv-drug-name" placeholder="e.g. Paracetamol 500mg"></div>
+        <div class="form-group"><label>Quantity (units) *</label><input type="number" id="inv-quantity" placeholder="e.g. 500"></div>
+        <div class="form-group"><label>Unit Price (₦) *</label><input type="number" id="inv-price" placeholder="e.g. 50"></div>
+        <div class="form-group"><label>Expiry Date</label><input type="date" id="inv-expiry" placeholder="DD/MM/YYYY"></div>
+        <div class="form-group"><label>Reorder Alert Level</label><input type="number" id="inv-reorder" placeholder="e.g. 50"></div>
+        <button onclick="addToInventory()" style="background:#0066cc;color:white;border:none;padding:12px;border-radius:8px;cursor:pointer;font-size:14px;width:100%;">Add to Inventory</button>
+    </div>`;
+
+    if(!inventory.length){
+        section.innerHTML+='<p style="text-align:center;color:#999;padding:20px;">No drugs in inventory yet.</p>';
+    }else{
+        section.innerHTML+=`<div style="padding:0 0 5px;">
+            <span style="font-size:13px;font-weight:bold;color:#333;">${inventory.length} Drug(s) in Stock</span>
+            <button onclick="showDrugExpiryReport()" style="float:right;background:#ff8800;color:white;border:none;padding:4px 10px;border-radius:6px;font-size:11px;cursor:pointer;">📋 Expiry Report</button>
+        </div>`;
+        // Sort: expired first, then by days until expiry, then low stock
+        const sorted=[...inventory].sort((a,b)=>{
+            const da=getDaysUntilExpiry(a.expiryDate)??9999;
+            const db2=getDaysUntilExpiry(b.expiryDate)??9999;
+            if(da!==db2)return da-db2;
+            return a.quantity-b.quantity;
+        });
+        sorted.forEach(item=>{
+            const isLow=item.quantity<=item.reorderLevel;
+            const daysLeft=getDaysUntilExpiry(item.expiryDate);
+            const isExpired=daysLeft!==null&&daysLeft<0;
+            const borderColor=isExpired?'#ff4444':isLow?'#ff4444':'#4CAF50';
+            section.innerHTML+=`<div class="inventory-card" style="border-left:4px solid ${borderColor};margin:8px 0;">
+                <div>
+                    <div class="inventory-name">${safe(item.name)}</div>
+                    <div style="font-size:12px;color:#666;">Unit Price: ₦${item.unitPrice?.toLocaleString()||0}</div>
+                    <div style="font-size:12px;color:#666;">Reorder at: ${item.reorderLevel} units</div>
+                    ${item.expiryDate?`<div style="font-size:12px;color:#666;margin-top:2px;">Expiry: ${safe(item.expiryDate)} ${getExpiryBadge(daysLeft)}</div>`:'<div style="font-size:11px;color:#999;">No expiry date set</div>'}
+                    ${isLow?'<div style="font-size:11px;color:#ff4444;font-weight:bold;margin-top:2px;">🔴 LOW STOCK</div>':''}
+                    ${isExpired?'<div style="font-size:11px;color:#ff4444;font-weight:bold;margin-top:2px;">❌ DO NOT DISPENSE — EXPIRED</div>':''}
+                </div>
+                <div style="text-align:center;">
+                    <div class="inventory-qty ${isLow?'low':'ok'}">${item.quantity}</div>
+                    <div style="font-size:11px;color:#666;">units</div>
+                    <button onclick="updateStock('${item.id}')" style="background:#0066cc;color:white;border:none;padding:4px 8px;border-radius:6px;cursor:pointer;font-size:11px;margin-top:5px;display:block;width:100%;">Update</button>
+                    <button onclick="setExpiryDate('${item.id}')" style="background:#ff8800;color:white;border:none;padding:3px 8px;border-radius:6px;cursor:pointer;font-size:10px;margin-top:3px;display:block;width:100%;">Set Expiry</button>
+                </div>
+            </div>`;
+        });
+    }
+    section.innerHTML+='</div>';
+};
+
+window.setExpiryDate=async function(itemId){
+    const item=inventory.find(i=>i.id===itemId);
+    if(!item)return;
+    const expiry=prompt(`Set expiry date for ${item.name}\nFormat: YYYY-MM-DD\nCurrent: ${item.expiryDate||'Not set'}`);
+    if(!expiry)return;
+    try{
+        if(connectionMode==='local'){
+            await localPut(`/api/inventory/${itemId}`,{
+                quantity:item.quantity,unitPrice:item.unitPrice,
+                reorderLevel:item.reorderLevel,expiryDate:expiry
+            });
+        }else{
+            await updateDoc(doc(db,'inventory',itemId),{
+                expiryDate:expiry,updatedAt:new Date().toISOString()
+            });
+        }
+        const idx=inventory.findIndex(i=>i.id===itemId);
+        if(idx>=0)inventory[idx].expiryDate=expiry;
+        window.renderInventory();
+    }catch(e){alert('Error: '+e.message);}
+};
+
+window.showDrugExpiryReport=function(){
+    const expiring=inventory.filter(i=>getDaysUntilExpiry(i.expiryDate)!==null)
+        .sort((a,b)=>(getDaysUntilExpiry(a.expiryDate)||9999)-(getDaysUntilExpiry(b.expiryDate)||9999));
+    const today=new Date().toLocaleDateString('en-GB');
+    const w=window.open('','_blank');
+    w.document.write(`<!DOCTYPE html><html><head><title>Drug Expiry Report</title>
+    <style>body{font-family:Arial,sans-serif;padding:20px;}table{width:100%;border-collapse:collapse;}th{background:#0066cc;color:white;padding:8px;text-align:left;}td{padding:8px;border-bottom:1px solid #eee;}tr.expired{background:#fff0f0;}tr.expiring{background:#fff8e1;}@media print{button{display:none;}}</style>
+    </head><body>
+    <h2>💊 Drug Expiry Report — ${safe(currentHospital.name)}</h2>
+    <p style="color:#666;font-size:13px;">Generated: ${today}</p>
+    <table>
+        <tr><th>Drug Name</th><th>Qty</th><th>Expiry Date</th><th>Status</th></tr>
+        ${expiring.map(item=>{
+            const d=getDaysUntilExpiry(item.expiryDate);
+            const cls=d<0?'expired':d<=30?'expiring':'';
+            const status=d<0?'❌ EXPIRED':d<=7?`⚠️ ${d}d left`:d<=30?`⏰ ${d}d left`:`✅ ${d}d left`;
+            return `<tr class="${cls}"><td>${safe(item.name)}</td><td>${item.quantity}</td><td>${safe(item.expiryDate||'')}</td><td>${status}</td></tr>`;
+        }).join('')}
+        ${inventory.filter(i=>!i.expiryDate).map(item=>`<tr><td>${safe(item.name)}</td><td>${item.quantity}</td><td style="color:#999;">Not set</td><td style="color:#999;">—</td></tr>`).join('')}
+    </table>
+    <button onclick="window.print()" style="margin-top:20px;background:#0066cc;color:white;border:none;padding:10px 25px;border-radius:8px;cursor:pointer;font-size:14px;">🖨️ Print</button>
+    <script>setTimeout(()=>window.print(),500);<\/script>
+    </body></html>`);
+};
+
+// Override addToInventory to include expiry date
+window.addToInventory=async function(){
+    const name=document.getElementById('inv-drug-name').value.trim();
+    const quantity=parseInt(document.getElementById('inv-quantity').value)||0;
+    const unitPrice=parseFloat(document.getElementById('inv-price').value)||0;
+    const expiryDate=document.getElementById('inv-expiry').value||'';
+    const reorderLevel=parseInt(document.getElementById('inv-reorder').value)||20;
+    if(!name||!quantity){alert('Please enter drug name and quantity');return;}
+
+    // Warn if expiry is in the past
+    if(expiryDate){
+        const d=getDaysUntilExpiry(expiryDate);
+        if(d!==null&&d<0){
+            if(!confirm(`⚠️ Warning: This drug has already expired (${expiryDate}).\nAre you sure you want to add it?`))return;
+        }
+    }
+    try{
+        const existing=inventory.find(i=>i.name?.toLowerCase()===name.toLowerCase());
+        if(existing){
+            const updates={quantity:existing.quantity+quantity,unitPrice,reorderLevel};
+            if(expiryDate)updates.expiryDate=expiryDate;
+            if(connectionMode==='local'){await localPut(`/api/inventory/${existing.id}`,updates);}
+            else{await updateDoc(doc(db,'inventory',existing.id),{...updates,updatedAt:new Date().toISOString()});}
+            alert(`✅ Added ${quantity} units. Total: ${existing.quantity+quantity}`);
+        }else{
+            const invData={name,quantity,unitPrice,reorderLevel,expiryDate,
+                hospitalCode:currentHospital.code,hospitalName:currentHospital.name,
+                createdAt:new Date().toISOString()};
+            if(connectionMode==='local'){await localPost('/api/inventory',invData);}
+            else{await addDoc(collection(db,'inventory'),invData);}
+            alert(`✅ ${name} added to inventory`);
+        }
+        ['inv-drug-name','inv-quantity','inv-price','inv-reorder','inv-expiry'].forEach(id=>{
+            const el=document.getElementById(id);if(el)el.value='';
+        });
+        window.renderInventory();
+    }catch(e){alert('Error: '+e.message);}
+};
+
+// ============================================================
+// LAB REFERENCE RANGES — Priority Feature 2
+// ============================================================
+const LAB_REFERENCE_RANGES={
+    'Malaria Parasite Test':{fields:[{name:'RDT Result',type:'select',options:['Negative','Positive — P. falciparum','Positive — P. vivax','Positive — Mixed']},{name:'Parasite Density',type:'text',placeholder:'e.g. +, ++, +++',normal:'Negative'}]},
+    'Full Blood Count':{fields:[
+        {name:'Haemoglobin (g/dL)',type:'number',min:12,max:17,unit:'g/dL',normalM:'13.5–17.5',normalF:'12.0–15.5'},
+        {name:'WBC (×10³/µL)',type:'number',min:4.5,max:11,unit:'×10³/µL',normal:'4.5–11.0'},
+        {name:'Platelets (×10³/µL)',type:'number',min:150,max:400,unit:'×10³/µL',normal:'150–400'},
+        {name:'PCV (%)',type:'number',min:36,max:50,unit:'%',normal:'36–50'},
+        {name:'MCV (fL)',type:'number',min:80,max:100,unit:'fL',normal:'80–100'},
+    ]},
+    'Blood Glucose':{fields:[
+        {name:'Fasting Glucose (mmol/L)',type:'number',min:3.9,max:5.6,unit:'mmol/L',normal:'3.9–5.6 (fasting)'},
+        {name:'Random Glucose (mmol/L)',type:'number',min:0,max:7.8,unit:'mmol/L',normal:'< 7.8 (random)'},
+    ]},
+    'Urinalysis':{fields:[
+        {name:'Protein',type:'select',options:['Negative','Trace','+','++','+++']},
+        {name:'Glucose',type:'select',options:['Negative','Trace','+','++','+++']},
+        {name:'Nitrites',type:'select',options:['Negative','Positive']},
+        {name:'Leucocytes',type:'select',options:['Negative','Trace','+','++','+++']},
+        {name:'pH',type:'number',min:4.5,max:8,unit:'',normal:'4.5–8.0'},
+        {name:'Blood',type:'select',options:['Negative','Trace','+','++','+++']}
+    ]},
+    'Widal Test':{fields:[
+        {name:'O Antigen',type:'select',options:['Negative','1:20','1:40','1:80','1:160','1:320','≥1:640']},
+        {name:'H Antigen',type:'select',options:['Negative','1:20','1:40','1:80','1:160','1:320','≥1:640']},
+        {name:'AH Antigen',type:'select',options:['Negative','1:20','1:40','1:80','1:160','1:320','≥1:640']},
+        {name:'BH Antigen',type:'select',options:['Negative','1:20','1:40','1:80','1:160','1:320','≥1:640']},
+    ]},
+    'HIV Screening':{fields:[{name:'HIV 1 & 2 Result',type:'select',options:['Non-Reactive','Reactive — confirm with 2nd test'],normal:'Non-Reactive'}]},
+    'Pregnancy Test':{fields:[{name:'hCG Result',type:'select',options:['Negative','Positive']}]},
+    'Hepatitis B':{fields:[{name:'HBsAg Result',type:'select',options:['Non-Reactive','Reactive'],normal:'Non-Reactive'}]},
+    'Liver Function Test':{fields:[
+        {name:'ALT (U/L)',type:'number',min:7,max:56,unit:'U/L',normal:'7–56'},
+        {name:'AST (U/L)',type:'number',min:10,max:40,unit:'U/L',normal:'10–40'},
+        {name:'ALP (U/L)',type:'number',min:44,max:147,unit:'U/L',normal:'44–147'},
+        {name:'Total Bilirubin (µmol/L)',type:'number',min:0,max:21,unit:'µmol/L',normal:'< 21'},
+        {name:'Total Protein (g/L)',type:'number',min:60,max:80,unit:'g/L',normal:'60–80'},
+        {name:'Albumin (g/L)',type:'number',min:35,max:50,unit:'g/L',normal:'35–50'},
+    ]},
+    'Kidney Function Test':{fields:[
+        {name:'Creatinine (µmol/L)',type:'number',min:62,max:115,unit:'µmol/L',normal:'62–115'},
+        {name:'Urea (mmol/L)',type:'number',min:2.5,max:7.5,unit:'mmol/L',normal:'2.5–7.5'},
+        {name:'Sodium (mmol/L)',type:'number',min:136,max:145,unit:'mmol/L',normal:'136–145'},
+        {name:'Potassium (mmol/L)',type:'number',min:3.5,max:5,unit:'mmol/L',normal:'3.5–5.0'},
+        {name:'Chloride (mmol/L)',type:'number',min:98,max:107,unit:'mmol/L',normal:'98–107'},
+    ]},
+    'Blood Culture':{fields:[{name:'Culture Result',type:'text',placeholder:'e.g. No growth after 5 days / E. coli isolated',normal:'No growth'}]},
+    'Stool Analysis':{fields:[
+        {name:'Macroscopy',type:'text',placeholder:'e.g. Formed, brown'},
+        {name:'Ova/Cysts',type:'select',options:['Not seen','Ascaris lumbricoides','Hookworm','E. histolytica','Giardia','Other']},
+        {name:'Occult Blood',type:'select',options:['Negative','Positive']},
+        {name:'RBCs/HPF',type:'text',placeholder:'e.g. 0-2'},
+        {name:'WBCs/HPF',type:'text',placeholder:'e.g. 0-2'}
+    ]}
+};
+
+// Enhanced renderLabPending with structured result fields
+function renderLabPending(){
+    const list=document.getElementById('lab-pending-list');
+    if(!list)return;
+    const pending=labRequests.filter(l=>l.status==='pending');
+    if(!pending.length){
+        list.innerHTML='<div class="empty-search"><div class="icon">🔬</div><p>No pending lab requests</p></div>';
+        return;
+    }
+    list.innerHTML=`<div class="section-title">${pending.length} PENDING REQUEST(S)</div>`;
+    pending.forEach(l=>{
+        const hasTemplate=LAB_REFERENCE_RANGES[l.testType];
+        const fieldsHtml=hasTemplate?
+            hasTemplate.fields.map((f,fi)=>{
+                const fieldId=`lab-field-${l.id}-${fi}`;
+                if(f.type==='select'){
+                    return `<div class="form-group" style="margin-bottom:8px;">
+                        <label style="font-size:12px;color:#666;">${safe(f.name)}</label>
+                        <select id="${fieldId}" style="width:100%;padding:8px;border:1px solid #ddd;border-radius:6px;font-size:13px;">
+                            <option value="">Select...</option>
+                            ${(f.options||[]).map(o=>`<option value="${safe(o)}">${safe(o)}</option>`).join('')}
+                        </select>
+                    </div>`;
+                }
+                return `<div class="form-group" style="margin-bottom:8px;">
+                    <label style="font-size:12px;color:#666;">${safe(f.name)}${f.normal?` <span style="color:#4CAF50;">(Normal: ${safe(f.normal||f.normalM||'')})</span>`:''}</label>
+                    <input type="${f.type||'text'}" id="${fieldId}" placeholder="${safe(f.placeholder||f.unit||'')}" style="width:100%;padding:8px;border:1px solid #ddd;border-radius:6px;font-size:13px;">
+                </div>`;
+            }).join('')
+            :'';
+
+        list.innerHTML+=`<div class="lab-full-card">
+            <div class="lab-card-header">
+                <div style="font-size:16px;font-weight:bold;">${safe(l.patientName)}</div>
+                <div style="font-size:12px;opacity:0.8;font-family:monospace;">${safe(l.patientCode)} — Dr. ${safe(l.doctorName)}</div>
+            </div>
+            <div class="lab-card-body">
+                <div style="font-size:15px;font-weight:bold;margin-bottom:5px;">🔬 ${safe(l.testType)}</div>
+                ${l.urgency==='urgent'?'<div style="color:red;font-weight:bold;font-size:13px;margin-bottom:5px;">🔴 URGENT</div>':'<div style="color:#009688;font-size:13px;margin-bottom:5px;">🟢 Routine</div>'}
+                ${l.reason?`<div style="font-size:13px;color:#555;margin-bottom:8px;">Reason: ${safe(l.reason)}</div>`:''}
+                <div style="font-size:12px;color:#666;margin-bottom:10px;">📅 ${safe(l.date)}</div>
+                ${hasTemplate?
+                    `<div style="background:#e8f4fd;border:1px solid #0066cc;border-radius:8px;padding:12px;margin-bottom:10px;">
+                        <div style="font-size:12px;font-weight:bold;color:#0066cc;margin-bottom:10px;">📋 Enter Results</div>
+                        ${fieldsHtml}
+                    </div>`
+                    :`<div class="form-group">
+                        <label style="font-size:13px;">Test Result *</label>
+                        <input type="text" id="result-${l.id}" placeholder="Enter result..." style="width:100%;padding:10px;border:1px solid #ddd;border-radius:8px;font-size:14px;">
+                    </div>`
+                }
+                <div style="display:flex;gap:8px;margin-bottom:10px;">
+                    <input type="number" id="lab-cost-${l.id}" placeholder="Test cost (₦)" style="flex:1;padding:10px;border:1px solid #ddd;border-radius:8px;font-size:14px;">
+                    <button style="background:#009688;color:white;border:none;padding:10px 15px;border-radius:8px;cursor:pointer;font-size:13px;" onclick="submitLabResult('${l.id}','${l.testType}',${!!hasTemplate})">📤 Submit</button>
+                </div>
+            </div>
+        </div>`;
+    });
+}
+
+// Enhanced submitLabResult to handle structured results with reference ranges
+window.submitLabResult=async function(labId,testType,isStructured){
+    const cost=parseFloat(document.getElementById('lab-cost-'+labId).value)||0;
+    let resultText='';
+    let criticalAlert=false;
+
+    if(isStructured&&testType&&LAB_REFERENCE_RANGES[testType]){
+        const template=LAB_REFERENCE_RANGES[testType];
+        const parts=[];
+        template.fields.forEach((f,fi)=>{
+            const val=document.getElementById(`lab-field-${labId}-${fi}`)?.value;
+            if(val){
+                let line=`${f.name}: ${val}`;
+                // Check if numeric value is outside normal range
+                if(f.type==='number'&&f.min!==undefined&&f.max!==undefined){
+                    const num=parseFloat(val);
+                    if(!isNaN(num)){
+                        if(num<f.min||num>f.max){
+                            line+=` ⚠️ ABNORMAL (Normal: ${f.normal||f.normalM||''})`;
+                            // Critical values
+                            if((f.name.includes('Potassium')&&(num>6||num<2.5))||
+                               (f.name.includes('Haemoglobin')&&num<6)||
+                               (f.name.includes('Glucose')&&num>20)||
+                               (f.name.includes('Sodium')&&(num>155||num<120))){
+                                line+=' 🚨 CRITICAL';
+                                criticalAlert=true;
+                            }
+                        }else{
+                            line+=` (Normal)`;
+                        }
+                    }
+                }
+                parts.push(line);
+            }
+        });
+        resultText=parts.join(' | ');
+        if(!resultText){alert('Please enter at least one result value');return;}
+    }else{
+        resultText=document.getElementById('result-'+labId)?.value.trim();
+        if(!resultText){alert('Please enter test result');return;}
+    }
+
+    // Show critical value alert
+    if(criticalAlert){
+        alert('🚨 CRITICAL VALUE DETECTED\n\nOne or more results are dangerously outside normal range.\n\nThe doctor will be notified immediately.\n\nDo NOT delay reporting this result.');
+    }
+
+    try{
+        setStatus('🔄 Submitting result...');
+        const lab=labRequests.find(l=>l.id===labId);
+        const updateData={
+            id:labId,status:'completed',result:resultText,
+            testCost:cost,completedBy:currentUser.name,
+            completedAt:new Date().toISOString(),
+            isCritical:criticalAlert
+        };
+
+        if(connectionMode==='local'){await localPut(`/api/lab-requests/${labId}`,updateData);}
+        else{await smartSave('updateLabRequest','labRequests',updateData);}
+
+        if(lab){
+            const patient=patients.find(p=>p.id===lab.patientId);
+            if(patient?.visits){
+                const updatedVisits=patient.visits.map(v=>{
+                    if(v.hospitalName===lab.hospitalName&&v.doctorName===lab.doctorName){
+                        return{...v,labResult:{
+                            testType:lab.testType,result:resultText,
+                            completedBy:currentUser.name,
+                            completedAt:new Date().toLocaleDateString('en-GB'),
+                            isCritical:criticalAlert
+                        }};
+                    }
+                    return v;
+                });
+                await smartSave('updatePatient','patients',{id:patient.id,visits:updatedVisits});
+            }
+        }
+
+        if(cost>0&&lab){
+            await smartSave('addFinancialRecord','financialRecords',{
+                type:'lab',amount:cost,testType:lab.testType,
+                patientCode:lab.patientCode,patientName:lab.patientName,
+                hospitalCode:currentHospital.code,hospitalName:currentHospital.name,
+                date:new Date().toLocaleDateString('en-GB'),
+                recordedBy:currentUser.name,createdAt:new Date().toISOString()
+            });
+        }
+
+        const statusMsg=criticalAlert?
+            '🚨 Critical result submitted — doctor notified':'🟢 Result submitted';
+        setStatus(statusMsg);
+        if(document.getElementById('lab-view')?.style.display!=='none')renderLabPending();
+    }catch(e){setStatus('🔴 Error: '+e.message);}
+};
+
+// Add daily reconciliation button to admin and analytics
+window.openDailyReconciliation=showDailyReconciliation;
+</script>
 </body>
 </html>
