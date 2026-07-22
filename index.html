@@ -247,7 +247,13 @@
     <div class="dashboard-card"><div><div class="dashboard-number" id="dash-today">0</div><div class="dashboard-label">Visits Today</div></div><div class="dashboard-icon">📅</div></div>
     <div class="dashboard-card"><div><div class="dashboard-number" id="dash-pending">0</div><div class="dashboard-label">Pending Doctor Reviews</div></div><div class="dashboard-icon">⏳</div></div>
     <div class="dashboard-card"><div><div class="dashboard-number" id="dash-lab">0</div><div class="dashboard-label">Lab Results Ready</div></div><div class="dashboard-icon">🔬</div></div>
-    <div class="dashboard-card" id="dash-unpaid-card" style="display:none;"><div><div class="dashboard-number" id="dash-unpaid">0</div><div class="dashboard-label">Unpaid Bills Today</div></div><div class="dashboard-icon">💳</div></div>
+    <div class="dashboard-card" id="dash-unpaid-card" style="display:none;cursor:pointer;" onclick="showView('billing-list');setBillingFilter('unpaid')"><div><div class="dashboard-number" id="dash-unpaid">0</div><div class="dashboard-label">Unpaid Bills Today</div></div><div class="dashboard-icon">💳</div></div>
+    <!-- Ready to discharge / collect payment section -->
+    <div id="dash-ready-to-pay" style="display:none;margin:8px 15px;background:linear-gradient(135deg,#00aa55,#007a3d);border-radius:10px;padding:15px;color:white;">
+        <div style="font-weight:bold;font-size:14px;margin-bottom:8px;">⚡ Ready for Payment</div>
+        <div id="dash-ready-to-pay-list"></div>
+        <button onclick="showView('billing-list');setBillingFilter('unpaid')" style="width:100%;background:rgba(255,255,255,0.2);border:1px solid rgba(255,255,255,0.4);color:white;padding:8px;border-radius:8px;cursor:pointer;font-size:13px;margin-top:10px;">View All Unpaid Bills →</button>
+    </div>
     <div class="dashboard-card" id="dash-admitted-card" style="display:none;"><div><div class="dashboard-number" id="dash-admitted">0</div><div class="dashboard-label">Admitted Patients</div></div><div class="dashboard-icon">🛏️</div></div>
     <div class="dashboard-card" id="dash-flags-card" style="display:none;"><div><div class="dashboard-number" id="dash-flags">0</div><div class="dashboard-label">Pharmacy Flags</div></div><div class="dashboard-icon">⚠️</div></div>
     <div class="dashboard-card" id="dash-inventory-card" style="display:none;"><div><div class="dashboard-number" id="dash-low-stock">0</div><div class="dashboard-label">Low Stock Alerts</div></div><div class="dashboard-icon">📦</div></div>
@@ -315,66 +321,165 @@
 <!-- BILLING -->
 <div id="billing-view" style="display:none;">
     <div class="detail-header">
-        <button class="back-btn" onclick="showView('detail')">← Back</button>
-        <h2 id="bill-patient-name"></h2>
-        <div style="font-size:13px;opacity:0.8;font-family:monospace;" id="bill-patient-code"></div>
+        <button class="back-btn" id="billing-back-btn" onclick="billingGoBack()">← Back</button>
+        <div>
+            <h2 id="bill-patient-name"></h2>
+            <div style="font-size:13px;opacity:0.8;font-family:monospace;" id="bill-patient-code"></div>
+        </div>
     </div>
-    <div style="background:white;margin:10px 15px;border-radius:10px;padding:15px;box-shadow:0 2px 5px rgba(0,0,0,0.1);">
-        <div style="font-weight:bold;color:#0066cc;margin-bottom:10px;font-size:14px;">📅 Select Visit To Bill</div>
+
+    <!-- PATIENT STATUS BANNER — shows allergy and status at top of billing -->
+    <div id="bill-patient-banner" style="display:none;padding:10px 15px;font-size:13px;font-weight:bold;"></div>
+
+    <!-- VISIT SELECTOR -->
+    <div id="billing-visit-selector-section" style="background:white;margin:10px 15px;border-radius:10px;padding:15px;box-shadow:0 2px 5px rgba(0,0,0,0.1);">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+            <div style="font-weight:bold;color:#0066cc;font-size:14px;">📅 Select Visit To Bill</div>
+            <div id="bill-patient-summary" style="font-size:12px;color:#666;text-align:right;"></div>
+        </div>
         <div id="visit-selector-list"></div>
+        <!-- No visits yet — quick action -->
+        <div id="no-visits-yet" style="display:none;text-align:center;padding:15px;">
+            <div style="font-size:13px;color:#666;margin-bottom:10px;">No visits recorded for this patient yet.</div>
+            <button onclick="showView('nurse')" style="background:#0066cc;color:white;border:none;padding:10px 20px;border-radius:8px;cursor:pointer;font-size:13px;">👉 Go to Nurse Assessment</button>
+        </div>
     </div>
+
+    <!-- SELECTED VISIT BILLING SECTION -->
     <div id="selected-visit-bill" style="display:none;">
-        <div style="background:#e8f4fd;margin:10px 15px;border-radius:10px;padding:12px;">
-            <div style="font-weight:bold;color:#0066cc;margin-bottom:3px;" id="selected-visit-label"></div>
+
+        <!-- Visit header -->
+        <div style="background:#e8f4fd;margin:0 15px 10px;border-radius:10px;padding:12px;">
+            <div style="font-weight:bold;color:#0066cc;margin-bottom:3px;font-size:14px;" id="selected-visit-label"></div>
             <div id="selected-visit-payment-status"></div>
         </div>
+
+        <!-- HMO section -->
         <div id="bill-hmo-section" style="display:none;margin:0 15px 10px;">
             <div class="hmo-section">
-                <div style="font-weight:bold;color:#0066cc;margin-bottom:5px;">🏥 HMO / Insurance Coverage</div>
+                <div style="font-weight:bold;color:#0066cc;margin-bottom:5px;">🏥 HMO / Insurance</div>
                 <div style="font-size:13px;" id="bill-hmo-info"></div>
-                <div class="form-group" style="margin-top:10px;margin-bottom:0;"><label style="font-size:13px;">HMO Coverage Amount (₦)</label><input type="number" id="bill-hmo-amount" placeholder="Amount covered by HMO" oninput="recalculateBill()"></div>
-            </div>
-        </div>
-        <div class="bill-card">
-            <div style="font-weight:bold;color:#333;margin-bottom:12px;font-size:15px;">📋 Charges For This Visit</div>
-            <div id="bill-auto-charges"></div>
-            <div style="margin-top:12px;margin-bottom:8px;">
-                <div style="font-size:13px;color:#666;font-weight:bold;margin-bottom:8px;">🛏️ Bed Space</div>
-                <div style="display:flex;gap:8px;margin-bottom:5px;">
-                    <input type="number" id="bill-days" placeholder="Days" min="0" style="flex:1;padding:10px;border:1px solid #ddd;border-radius:8px;font-size:14px;" oninput="recalculateBill()">
-                    <input type="number" id="bill-bed-rate" placeholder="Rate per day (₦)" style="flex:2;padding:10px;border:1px solid #ddd;border-radius:8px;font-size:14px;" oninput="recalculateBill()">
+                <div class="form-group" style="margin-top:10px;margin-bottom:0;">
+                    <label style="font-size:13px;">HMO Coverage Amount (₦)</label>
+                    <input type="number" id="bill-hmo-amount" placeholder="Amount covered by HMO" oninput="recalculateBill()">
                 </div>
-                <div id="bill-bed-total" style="font-size:13px;color:#0066cc;"></div>
             </div>
-            <div style="margin-top:12px;margin-bottom:8px;">
-                <div style="font-size:13px;color:#666;font-weight:bold;margin-bottom:8px;">💉 Procedure Fees</div>
-                <div class="add-charge-row"><input type="text" id="proc-name" placeholder="Procedure name"><input type="number" id="proc-amount" placeholder="₦"><button class="add-charge-btn" onclick="addProcedureCharge()">+ Add</button></div>
+        </div>
+
+        <!-- CHARGES SECTION -->
+        <div class="bill-card">
+            <div style="font-weight:bold;color:#333;margin-bottom:12px;font-size:15px;">📋 Charges</div>
+
+            <!-- Auto charges -->
+            <div id="bill-auto-charges" style="margin-bottom:12px;"></div>
+
+            <!-- Live total bar — shows running total as you add charges -->
+            <div id="bill-live-total-bar" style="background:#0066cc;color:white;border-radius:8px;padding:10px 14px;margin-bottom:12px;display:flex;justify-content:space-between;align-items:center;">
+                <span style="font-size:13px;">Running Total</span>
+                <span style="font-size:18px;font-weight:bold;" id="bill-live-total">₦0</span>
+            </div>
+
+            <!-- Bed space -->
+            <div style="background:#f8f9fa;border-radius:8px;padding:12px;margin-bottom:10px;">
+                <div style="font-size:13px;color:#666;font-weight:bold;margin-bottom:8px;">🛏️ Bed Space / Admission</div>
+                <div style="display:flex;gap:8px;margin-bottom:5px;">
+                    <div style="flex:1;">
+                        <label style="font-size:11px;color:#666;">Days</label>
+                        <input type="number" id="bill-days" placeholder="0" min="0" style="width:100%;padding:8px;border:1px solid #ddd;border-radius:6px;font-size:14px;margin-top:3px;" oninput="recalculateBill()">
+                    </div>
+                    <div style="flex:2;">
+                        <label style="font-size:11px;color:#666;">Rate per day (₦)</label>
+                        <input type="number" id="bill-bed-rate" placeholder="e.g. 5000" style="width:100%;padding:8px;border:1px solid #ddd;border-radius:6px;font-size:14px;margin-top:3px;" oninput="recalculateBill()">
+                    </div>
+                </div>
+                <div id="bill-bed-total" style="font-size:13px;color:#0066cc;font-weight:bold;min-height:18px;"></div>
+            </div>
+
+            <!-- Procedure fees -->
+            <div style="background:#f8f9fa;border-radius:8px;padding:12px;margin-bottom:10px;">
+                <div style="font-size:13px;color:#666;font-weight:bold;margin-bottom:8px;">💉 Procedure / Service Fees</div>
+                <div style="display:flex;gap:6px;margin-bottom:8px;">
+                    <input type="text" id="proc-name" placeholder="e.g. Dressing, Injection, Scan" style="flex:2;padding:8px;border:1px solid #ddd;border-radius:6px;font-size:13px;">
+                    <input type="number" id="proc-amount" placeholder="₦" style="flex:1;padding:8px;border:1px solid #ddd;border-radius:6px;font-size:13px;">
+                    <button onclick="addProcedureCharge()" style="background:#0066cc;color:white;border:none;padding:8px 12px;border-radius:6px;cursor:pointer;font-size:13px;white-space:nowrap;">+ Add</button>
+                </div>
                 <div id="procedure-charges-list"></div>
+                <!-- Common procedures quick-add -->
+                <div style="margin-top:8px;">
+                    <div style="font-size:11px;color:#666;margin-bottom:5px;">Quick add:</div>
+                    <div style="display:flex;flex-wrap:wrap;gap:5px;">
+                        ${['Dressing','IV Line','Injection','Nebulization','Urinalysis Stick','Wound Suture','Blood Transfusion'].map(p=>`<button onclick="quickAddProcedure('${p}')" style="background:#e8f4fd;color:#0066cc;border:1px solid #0066cc;padding:4px 8px;border-radius:12px;font-size:11px;cursor:pointer;">${p}</button>`).join('')}
+                    </div>
+                </div>
             </div>
-            <div style="margin-top:12px;margin-bottom:8px;">
+
+            <!-- Additional charges -->
+            <div style="background:#f8f9fa;border-radius:8px;padding:12px;margin-bottom:10px;">
                 <div style="font-size:13px;color:#666;font-weight:bold;margin-bottom:8px;">➕ Additional Charges</div>
-                <div class="add-charge-row"><input type="text" id="extra-name" placeholder="Charge description"><input type="number" id="extra-amount" placeholder="₦"><button class="add-charge-btn" onclick="addExtraCharge()">+ Add</button></div>
-                <div id="extra-charges-list"></div>
+                <div style="display:flex;gap:6px;">
+                    <input type="text" id="extra-name" placeholder="Description" style="flex:2;padding:8px;border:1px solid #ddd;border-radius:6px;font-size:13px;">
+                    <input type="number" id="extra-amount" placeholder="₦" style="flex:1;padding:8px;border:1px solid #ddd;border-radius:6px;font-size:13px;">
+                    <button onclick="addExtraCharge()" style="background:#ff8800;color:white;border:none;padding:8px 12px;border-radius:6px;cursor:pointer;font-size:13px;white-space:nowrap;">+ Add</button>
+                </div>
+                <div id="extra-charges-list" style="margin-top:8px;"></div>
             </div>
-            <div style="margin-top:15px;border-top:2px solid #eee;padding-top:12px;">
-                <div class="bill-row"><span style="color:#333;flex:1;">Subtotal</span><span style="font-weight:bold;color:#0066cc;" id="bill-subtotal">₦0</span></div>
-                <div class="bill-row" id="bill-hmo-deduction-row" style="display:none;"><span style="color:#00aa55;flex:1;">HMO Coverage</span><span style="font-weight:bold;color:#00aa55;" id="bill-hmo-deduction">-₦0</span></div>
-                <div class="bill-total-row"><span>TOTAL DUE</span><span class="bill-total-amount" id="bill-total">₦0</span></div>
+
+            <!-- TOTALS -->
+            <div style="background:#f0f4f8;border-radius:8px;padding:12px;margin-top:5px;">
+                <div class="bill-row"><span style="color:#555;">Subtotal</span><span style="font-weight:bold;" id="bill-subtotal">₦0</span></div>
+                <div class="bill-row" id="bill-hmo-deduction-row" style="display:none;"><span style="color:#00aa55;">HMO Coverage</span><span style="font-weight:bold;color:#00aa55;" id="bill-hmo-deduction">-₦0</span></div>
+                <div style="display:flex;justify-content:space-between;padding:12px 0 0;font-size:18px;font-weight:bold;border-top:2px solid #0066cc;margin-top:8px;">
+                    <span>TOTAL DUE</span>
+                    <span style="color:#0066cc;" id="bill-total">₦0</span>
+                </div>
             </div>
         </div>
+
+        <!-- PAYMENT SECTION -->
         <div class="bill-card" style="margin-top:0;">
-            <div style="font-weight:bold;color:#333;margin-bottom:12px;font-size:15px;">💳 Payment</div>
-            <div class="form-group"><label>Amount Paid (₦)</label><input type="number" id="payment-amount" placeholder="Enter amount paid" oninput="updatePaymentStatus()"></div>
-            <div class="form-group"><label>Payment Method</label><select id="payment-method"><option value="cash">Cash</option><option value="transfer">Bank Transfer</option><option value="pos">POS / Card</option><option value="hmo">HMO / Insurance</option><option value="partial">Partial Payment</option></select></div>
-            <div id="payment-preview" style="background:#f8f9fa;border-radius:8px;padding:12px;margin-bottom:10px;font-size:13px;"></div>
-            <div class="form-group"><label>Billing Notes</label><textarea id="bill-notes" placeholder="Any additional notes..."></textarea></div>
+            <div style="font-weight:bold;color:#333;margin-bottom:12px;font-size:15px;">💳 Record Payment</div>
+
+            <!-- Payment method tabs -->
+            <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px;" id="payment-method-tabs">
+                ${[['cash','💵 Cash'],['transfer','🏦 Transfer'],['pos','💳 POS'],['hmo','🏥 HMO']].map(([v,l])=>`<button onclick="selectPaymentMethod('${v}')" id="pmt-${v}" style="flex:1;min-width:70px;padding:8px;border:2px solid #ddd;border-radius:8px;font-size:12px;cursor:pointer;background:white;color:#666;">${l}</button>`).join('')}
+            </div>
+            <input type="hidden" id="payment-method" value="cash">
+
+            <!-- Amount paid -->
+            <div class="form-group">
+                <label style="font-size:14px;font-weight:bold;">Amount Paid (₦)</label>
+                <input type="number" id="payment-amount" placeholder="0.00" style="font-size:20px;padding:14px;border:2px solid #ddd;border-radius:8px;width:100%;" oninput="updatePaymentStatus()">
+            </div>
+
+            <!-- Payment status preview -->
+            <div id="payment-preview" style="border-radius:8px;padding:12px;margin-bottom:12px;font-size:14px;background:#f8f9fa;min-height:44px;"></div>
+
+            <!-- Change calculator -->
+            <div id="change-calculator" style="display:none;background:#e8f5e9;border-radius:8px;padding:10px;margin-bottom:10px;font-size:14px;color:#2e7d32;font-weight:bold;"></div>
+
+            <!-- Partial payment note -->
+            <div id="partial-note" style="display:none;background:#fff8e1;border-radius:8px;padding:10px;margin-bottom:10px;font-size:13px;color:#f57f17;">
+                💡 Partial payment will be recorded. Balance remains outstanding and will show on reports.
+            </div>
+
+            <div class="form-group">
+                <label>Billing Notes (optional)</label>
+                <textarea id="bill-notes" placeholder="e.g. Patient to pay balance on next visit..." style="height:60px;resize:none;"></textarea>
+            </div>
         </div>
-        <div style="padding:0 15px 15px;">
-            <button onclick="generateInvoice()" class="action-btn" style="background:#0066cc;">🖨️ Generate & Print Invoice</button>
-            <button onclick="saveBillWithPayment()" class="action-btn" style="background:#00aa55;">💾 Save Bill & Payment</button>
+
+        <!-- ACTION BUTTONS -->
+        <div style="padding:0 15px 15px;display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+            <button onclick="generateInvoice()" style="background:#0066cc;color:white;border:none;padding:14px;border-radius:10px;font-size:14px;font-weight:bold;cursor:pointer;">🖨️ Print Invoice</button>
+            <button onclick="saveBillWithPayment()" style="background:#00aa55;color:white;border:none;padding:14px;border-radius:10px;font-size:14px;font-weight:bold;cursor:pointer;">💾 Save Payment</button>
         </div>
+        <!-- Mark as waived / write off -->
+        <div style="padding:0 15px 15px;text-align:center;">
+            <button onclick="wriveBillOff()" style="background:none;border:none;color:#999;font-size:12px;cursor:pointer;text-decoration:underline;">Write off outstanding balance</button>
+        </div>
+
+        <div style="height:80px;"></div>
     </div>
-    <div style="height:80px;"></div>
 </div>
 
 <!-- SHARE -->
@@ -700,35 +805,36 @@
 
 <!-- BILLING LIST VIEW — Outstanding Balance Manager -->
 <div id="billing-list-view" style="display:none;">
-    <div class="section-header">
+    <div class="section-header" style="display:flex;justify-content:space-between;align-items:center;">
         <h2>💰 Billing</h2>
+        <button onclick="showDailyReconciliation()" style="background:rgba(255,255,255,0.2);border:none;color:white;padding:6px 12px;border-radius:8px;cursor:pointer;font-size:12px;">🖨️ Report</button>
     </div>
     <!-- Summary strip -->
     <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;padding:12px 15px;background:#f0f4f8;">
         <div style="background:white;border-radius:10px;padding:12px;text-align:center;box-shadow:0 1px 4px rgba(0,0,0,0.1);">
-            <div style="font-size:11px;color:#666;margin-bottom:3px;">Today's Collections</div>
-            <div style="font-size:18px;font-weight:bold;color:#4CAF50;" id="bl-today-collections">₦0</div>
+            <div style="font-size:10px;color:#666;margin-bottom:3px;">Today Collected</div>
+            <div style="font-size:16px;font-weight:bold;color:#4CAF50;" id="bl-today-collections">₦0</div>
         </div>
         <div style="background:white;border-radius:10px;padding:12px;text-align:center;box-shadow:0 1px 4px rgba(0,0,0,0.1);">
-            <div style="font-size:11px;color:#666;margin-bottom:3px;">Outstanding</div>
-            <div style="font-size:18px;font-weight:bold;color:#ff4444;" id="bl-outstanding">₦0</div>
+            <div style="font-size:10px;color:#666;margin-bottom:3px;">Outstanding</div>
+            <div style="font-size:16px;font-weight:bold;color:#ff4444;" id="bl-outstanding">₦0</div>
         </div>
         <div style="background:white;border-radius:10px;padding:12px;text-align:center;box-shadow:0 1px 4px rgba(0,0,0,0.1);">
-            <div style="font-size:11px;color:#666;margin-bottom:3px;">Unpaid Bills</div>
-            <div style="font-size:18px;font-weight:bold;color:#ff8800;" id="bl-unpaid-count">0</div>
+            <div style="font-size:10px;color:#666;margin-bottom:3px;">Unpaid Bills</div>
+            <div style="font-size:16px;font-weight:bold;color:#ff8800;" id="bl-unpaid-count">0</div>
         </div>
     </div>
     <!-- Search -->
     <div style="padding:10px 15px;background:white;border-bottom:1px solid #eee;">
-        <input type="text" id="bl-search" placeholder="🔍 Search by name, code or phone..." style="width:100%;padding:10px;border:1px solid #ddd;border-radius:8px;font-size:14px;" oninput="renderBillingList()">
+        <input type="text" id="bl-search" placeholder="🔍 Name, code or phone..." style="width:100%;padding:10px;border:1px solid #ddd;border-radius:8px;font-size:14px;" oninput="renderBillingList()">
     </div>
-    <!-- Filter tabs -->
-    <div class="tab-bar" style="overflow-x:auto;">
-        <div id="bl-tab-all" class="tab-item active" onclick="setBillingFilter('all')">All</div>
-        <div id="bl-tab-unpaid" class="tab-item" onclick="setBillingFilter('unpaid')">🔴 Unpaid</div>
-        <div id="bl-tab-partial" class="tab-item" onclick="setBillingFilter('partial')">💛 Partial</div>
-        <div id="bl-tab-paid" class="tab-item" onclick="setBillingFilter('paid')">✅ Paid</div>
-        <div id="bl-tab-nobill" class="tab-item" onclick="setBillingFilter('nobill')">📋 No Bill Yet</div>
+    <!-- Filter tabs with counts -->
+    <div class="tab-bar" style="overflow-x:auto;background:white;border-bottom:2px solid #eee;">
+        <div id="bl-tab-all" class="tab-item active" onclick="setBillingFilter('all')" style="white-space:nowrap;">All <span id="bl-count-all" style="background:#666;color:white;border-radius:8px;padding:1px 5px;font-size:10px;margin-left:3px;">0</span></div>
+        <div id="bl-tab-unpaid" class="tab-item" onclick="setBillingFilter('unpaid')" style="white-space:nowrap;">🔴 Unpaid <span id="bl-count-unpaid" style="background:#ff4444;color:white;border-radius:8px;padding:1px 5px;font-size:10px;margin-left:3px;">0</span></div>
+        <div id="bl-tab-partial" class="tab-item" onclick="setBillingFilter('partial')" style="white-space:nowrap;">💛 Partial <span id="bl-count-partial" style="background:#ff8800;color:white;border-radius:8px;padding:1px 5px;font-size:10px;margin-left:3px;">0</span></div>
+        <div id="bl-tab-paid" class="tab-item" onclick="setBillingFilter('paid')" style="white-space:nowrap;">✅ Paid <span id="bl-count-paid" style="background:#4CAF50;color:white;border-radius:8px;padding:1px 5px;font-size:10px;margin-left:3px;">0</span></div>
+        <div id="bl-tab-nobill" class="tab-item" onclick="setBillingFilter('nobill')" style="white-space:nowrap;">📋 No Bill <span id="bl-count-nobill" style="background:#999;color:white;border-radius:8px;padding:1px 5px;font-size:10px;margin-left:3px;">0</span></div>
     </div>
     <div id="billing-list-items" style="padding-bottom:80px;"></div>
 </div>
@@ -1806,7 +1912,15 @@ function updateDashboard(){
     const unpaidToday=bills.filter(b=>b.date===today&&b.paymentStatus!=='paid').length;
     document.getElementById('dash-unpaid').textContent=unpaidToday;
     document.getElementById('dash-unpaid-card').style.display=unpaidToday>0?'flex':'none';
-    if(currentUser?.role==='admin'){const rev=financialRecords.filter(r=>r.date===today).reduce((s,r)=>s+(r.amount||0),0);document.getElementById('dash-revenue').textContent='₦'+rev.toLocaleString();document.getElementById('dash-revenue-card').style.display='flex';}
+    if(currentUser?.role==='admin'||currentUser?.role==='receptionist'){
+        const rev=financialRecords.filter(r=>r.date===today).reduce((s,r)=>s+(r.amount||0),0);
+        document.getElementById('dash-revenue').textContent='₦'+rev.toLocaleString();
+        document.getElementById('dash-revenue-card').style.display='flex';
+    }
+    // Update ready-to-pay section for receptionist/admin
+    if(typeof updateDashboardBillingSection==='function'){
+        updateDashboardBillingSection();
+    }
 }
 
 window.showView=function(view){
@@ -1953,63 +2067,707 @@ function getStatusBadge(v){if(v.status==='pending-doctor')return '<span class="s
 window.goBack=function(){['detail','share','referral','referral-preview'].forEach(v=>{const el=document.getElementById(v+'-view');if(el)el.style.display='none';});document.getElementById('patients-view').style.display='block';}
 
 // BILLING
-window.openBilling=function(){const p=patients.find(p=>p.id===currentBillingPatientId);if(!p)return;document.getElementById('bill-patient-name').textContent=p.name||'';document.getElementById('bill-patient-code').textContent=p.code||'';document.getElementById('selected-visit-bill').style.display='none';currentBillingVisitIndex=null;const selectorList=document.getElementById('visit-selector-list');if(!p.visits||p.visits.length===0){selectorList.innerHTML='<p style="color:#666;font-size:14px;text-align:center;padding:20px;">No visits recorded yet.</p>';}else{selectorList.innerHTML='';p.visits.slice().reverse().forEach((v,ri)=>{const actualIndex=p.visits.length-1-ri;const existingBill=bills.find(b=>b.patientId===p.id&&b.visitIndex===actualIndex);const payStatus=existingBill?.paymentStatus||'none';const payColor=payStatus==='paid'?'#4CAF50':payStatus==='partial'?'#ffc107':payStatus==='unpaid'?'#ff4444':'#666';const payLabel=payStatus==='paid'?'✅ PAID':payStatus==='partial'?'💛 PARTIAL':payStatus==='unpaid'?'🔴 UNPAID':'💳 No Bill Yet';selectorList.innerHTML+=`<div onclick="selectVisitForBilling(${actualIndex})" style="background:#f8f9fa;border-radius:10px;padding:14px;margin-bottom:8px;cursor:pointer;border-left:4px solid ${payColor};display:flex;justify-content:space-between;align-items:center;"><div><div style="font-weight:bold;font-size:14px;">Visit — ${safe(v.date)}</div><div style="font-size:12px;color:#666;margin-top:2px;">${safe(v.hospitalName||'Unknown')} ${v.doctorName?'• Dr. '+safe(v.doctorName):''}</div><div style="font-size:12px;color:#555;margin-top:2px;">${safe(v.diagnosis||'')}</div>${existingBill?`<div style="font-size:12px;margin-top:3px;color:#0066cc;">Total: ₦${existingBill.totalDue?.toLocaleString()||0} | Paid: ₦${existingBill.amountPaid?.toLocaleString()||0}</div>`:''}</div><div style="font-size:12px;font-weight:bold;color:${payColor};text-align:right;">${payLabel}</div></div>`;});}
-if(p.hmoCompany||p.hmo){document.getElementById('bill-hmo-section').style.display='block';document.getElementById('bill-hmo-info').innerHTML=`<strong>${safe(p.hmoCompany||'HMO')}</strong> — ${safe(p.hmo||'No number')} — Plan: ${safe(p.hmoPlan||'Unknown')}`;document.getElementById('bill-hmo-deduction-row').style.display='flex';}else{document.getElementById('bill-hmo-section').style.display='none';document.getElementById('bill-hmo-deduction-row').style.display='none';}
-document.getElementById('detail-view').style.display='none';document.getElementById('billing-view').style.display='block';}
+// ============================================================
+// BILLING — Complete Improved System
+// ============================================================
 
-window.selectVisitForBilling=function(visitIndex){const p=patients.find(p=>p.id===currentBillingPatientId);if(!p)return;const v=p.visits[visitIndex];if(!v)return;currentBillingVisitIndex=visitIndex;procedureCharges=[];extraCharges=[];document.getElementById('bill-days').value='';document.getElementById('bill-bed-rate').value='';document.getElementById('bill-notes').value='';document.getElementById('bill-hmo-amount').value='';document.getElementById('payment-amount').value='';document.getElementById('payment-method').value='cash';document.getElementById('procedure-charges-list').innerHTML='';document.getElementById('extra-charges-list').innerHTML='';document.getElementById('bill-bed-total').textContent='';const existingBill=bills.find(b=>b.patientId===p.id&&b.visitIndex===visitIndex);document.getElementById('selected-visit-label').textContent=`📅 Visit: ${v.date} — ${v.hospitalName||'Unknown'}`;const psEl=document.getElementById('selected-visit-payment-status');if(existingBill){const statusColor=existingBill.paymentStatus==='paid'?'#4CAF50':existingBill.paymentStatus==='partial'?'#f57f17':'#ff4444';const statusText=existingBill.paymentStatus==='paid'?'✅ FULLY PAID':existingBill.paymentStatus==='partial'?`💛 PARTIAL — ₦${existingBill.amountPaid?.toLocaleString()||0} paid of ₦${existingBill.totalDue?.toLocaleString()||0}`:`🔴 UNPAID — ₦${existingBill.totalDue?.toLocaleString()||0} due`;psEl.innerHTML=`<div style="font-size:13px;font-weight:bold;color:${statusColor};margin-top:5px;">${statusText}</div>`;if(existingBill.bedDays)document.getElementById('bill-days').value=existingBill.bedDays;if(existingBill.bedRate)document.getElementById('bill-bed-rate').value=existingBill.bedRate;if(existingBill.notes)document.getElementById('bill-notes').value=existingBill.notes;if(existingBill.hmoCoverage)document.getElementById('bill-hmo-amount').value=existingBill.hmoCoverage;if(existingBill.procedureCharges){procedureCharges=[...existingBill.procedureCharges];renderChargesList('procedure');}if(existingBill.extraCharges){extraCharges=[...existingBill.extraCharges];renderChargesList('extra');}}else{psEl.innerHTML=`<div style="font-size:13px;color:#666;margin-top:5px;">No bill generated yet for this visit.</div>`;}buildAutoChargesForVisit(p,visitIndex,v);recalculateBill();document.getElementById('selected-visit-bill').style.display='block';document.getElementById('selected-visit-bill').scrollIntoView({behavior:'smooth'});}
+// Track where billing was opened from so back button works correctly
+let billingOpenedFrom='detail';
 
-function buildAutoChargesForVisit(p,visitIndex,v){const container=document.getElementById('bill-auto-charges');let html='<div style="font-size:13px;color:#666;font-weight:bold;margin-bottom:8px;">🏥 Auto-Detected Charges For This Visit</div>';let has=false;if(v.consultationFee&&v.consultationFee>0){html+=`<div class="bill-row"><span style="color:#333;flex:1;">Consultation Fee — ${safe(v.date)}</span><span style="font-weight:bold;color:#0066cc;">₦${v.consultationFee.toLocaleString()}</span></div>`;has=true;}if(visitIndex===0&&p.consultationFee&&p.consultationFee>0){html+=`<div class="bill-row"><span style="color:#333;flex:1;">Registration Consultation Fee</span><span style="font-weight:bold;color:#0066cc;">₦${p.consultationFee.toLocaleString()}</span></div>`;has=true;}prescriptions.filter(pr=>pr.patientId===p.id&&pr.status==='dispensed'&&pr.date===v.date&&pr.doctorName===v.doctorName).forEach(pr=>{if(pr.drugCost&&pr.drugCost>0){html+=`<div class="bill-row"><span style="color:#333;flex:1;">Medications — ${safe(pr.date)}</span><span style="font-weight:bold;color:#0066cc;">₦${pr.drugCost.toLocaleString()}</span></div>`;has=true;}});labRequests.filter(l=>l.patientId===p.id&&l.status==='completed'&&l.date===v.date&&l.doctorName===v.doctorName).forEach(l=>{if(l.testCost&&l.testCost>0){html+=`<div class="bill-row"><span style="color:#333;flex:1;">Lab: ${safe(l.testType)}</span><span style="font-weight:bold;color:#0066cc;">₦${l.testCost.toLocaleString()}</span></div>`;has=true;}});if(!has)html+='<div style="font-size:13px;color:#999;padding:8px 0;">No auto-charges for this visit yet.</div>';container.innerHTML=html;}
+window.billingGoBack=function(){
+    document.getElementById('billing-view').style.display='none';
+    if(billingOpenedFrom==='billing-list'){
+        showView('billing-list');
+    }else{
+        document.getElementById('detail-view').style.display='block';
+    }
+};
 
-function getAutoChargesTotalForVisit(){const p=patients.find(p=>p.id===currentBillingPatientId);if(!p||currentBillingVisitIndex===null)return 0;const v=p.visits[currentBillingVisitIndex];if(!v)return 0;let total=0;if(v.consultationFee)total+=v.consultationFee;if(currentBillingVisitIndex===0&&p.consultationFee)total+=p.consultationFee;prescriptions.filter(pr=>pr.patientId===p.id&&pr.status==='dispensed'&&pr.date===v.date&&pr.doctorName===v.doctorName).forEach(pr=>{if(pr.drugCost)total+=pr.drugCost;});labRequests.filter(l=>l.patientId===p.id&&l.status==='completed'&&l.date===v.date&&l.doctorName===v.doctorName).forEach(l=>{if(l.testCost)total+=l.testCost;});return total;}
+window.quickAddProcedure=function(name){
+    document.getElementById('proc-name').value=name;
+    document.getElementById('proc-amount').focus();
+};
 
-window.recalculateBill=function(){const autoTotal=getAutoChargesTotalForVisit();const days=parseInt(document.getElementById('bill-days').value)||0;const bedRate=parseFloat(document.getElementById('bill-bed-rate').value)||0;const bedTotal=days*bedRate;if(days>0&&bedRate>0)document.getElementById('bill-bed-total').textContent=`${days} days × ₦${bedRate.toLocaleString()} = ₦${bedTotal.toLocaleString()}`;else document.getElementById('bill-bed-total').textContent='';const procTotal=procedureCharges.reduce((s,c)=>s+(c.amount||0),0);const extraTotal=extraCharges.reduce((s,c)=>s+(c.amount||0),0);const subtotal=autoTotal+bedTotal+procTotal+extraTotal;const hmoAmount=parseFloat(document.getElementById('bill-hmo-amount').value)||0;const total=Math.max(0,subtotal-hmoAmount);document.getElementById('bill-subtotal').textContent='₦'+subtotal.toLocaleString();document.getElementById('bill-hmo-deduction').textContent='-₦'+hmoAmount.toLocaleString();document.getElementById('bill-total').textContent='₦'+total.toLocaleString();updatePaymentStatus();}
-window.updatePaymentStatus=function(){const totalText=document.getElementById('bill-total').textContent.replace('₦','').replace(/,/g,'');const total=parseFloat(totalText)||0;const paid=parseFloat(document.getElementById('payment-amount').value)||0;const preview=document.getElementById('payment-preview');if(paid===0){preview.innerHTML='<div style="color:#666;">Enter amount paid to see payment status.</div>';return;}if(paid>=total)preview.innerHTML=`<div style="color:#4CAF50;font-weight:bold;">✅ FULLY PAID — Change: ₦${(paid-total).toLocaleString()}</div>`;else preview.innerHTML=`<div style="color:#f57f17;font-weight:bold;">💛 PARTIAL PAYMENT — Balance: ₦${(total-paid).toLocaleString()}</div>`;}
-window.addProcedureCharge=function(){const name=document.getElementById('proc-name').value.trim();const amount=parseFloat(document.getElementById('proc-amount').value)||0;if(!name||!amount){alert('Enter procedure name and amount');return;}procedureCharges.push({id:Date.now(),name,amount});document.getElementById('proc-name').value='';document.getElementById('proc-amount').value='';renderChargesList('procedure');recalculateBill();}
-window.addExtraCharge=function(){const name=document.getElementById('extra-name').value.trim();const amount=parseFloat(document.getElementById('extra-amount').value)||0;if(!name||!amount){alert('Enter charge description and amount');return;}extraCharges.push({id:Date.now(),name,amount});document.getElementById('extra-name').value='';document.getElementById('extra-amount').value='';renderChargesList('extra');recalculateBill();}
-function renderChargesList(type){const charges=type==='procedure'?procedureCharges:extraCharges;const container=document.getElementById(type+'-charges-list');container.innerHTML='';charges.forEach(c=>{container.innerHTML+=`<div class="charge-item"><span style="font-size:13px;">${safe(c.name)}</span><div style="display:flex;align-items:center;gap:8px;"><span style="font-weight:bold;color:#0066cc;">₦${c.amount.toLocaleString()}</span><button class="charge-remove" onclick="removeCharge('${type}',${c.id})">✕</button></div></div>`;});}
-window.removeCharge=function(type,id){if(type==='procedure')procedureCharges=procedureCharges.filter(c=>c.id!==id);else extraCharges=extraCharges.filter(c=>c.id!==id);renderChargesList(type);recalculateBill();}
+window.selectPaymentMethod=function(method){
+    document.getElementById('payment-method').value=method;
+    // Update tab styles
+    ['cash','transfer','pos','hmo'].forEach(m=>{
+        const btn=document.getElementById('pmt-'+m);
+        if(btn){
+            if(m===method){
+                btn.style.background='#0066cc';
+                btn.style.color='white';
+                btn.style.borderColor='#0066cc';
+            }else{
+                btn.style.background='white';
+                btn.style.color='#666';
+                btn.style.borderColor='#ddd';
+            }
+        }
+    });
+    updatePaymentStatus();
+};
+
+window.wriveBillOff=async function(){
+    if(currentBillingVisitIndex===null){alert('Please select a visit first');return;}
+    const p=patients.find(p=>p.id===currentBillingPatientId);if(!p)return;
+    if(!confirm(`Write off the outstanding balance for ${p.name}?\n\nThis means you are recording the debt as uncollectable. The bill will be marked as paid.`))return;
+    const existingBill=bills.find(b=>b.patientId===p.id&&b.visitIndex===currentBillingVisitIndex);
+    if(!existingBill){alert('No bill exists for this visit yet. Save the bill first.');return;}
+    try{
+        const writeOffData={...existingBill,paymentStatus:'paid',amountPaid:existingBill.totalDue,balance:0,notes:(existingBill.notes||'')+` [Written off ${new Date().toLocaleDateString('en-GB')} by ${currentUser.name}]`};
+        if(connectionMode==='local'){await localPut(`/api/bills/${existingBill.id}`,writeOffData);}
+        else if(isOnline){await updateDoc(doc(db,'bills',existingBill.id),writeOffData);}
+        applyToLocalCache('updateBill',{id:existingBill.id,...writeOffData});
+        addSecurityLog(`Bill written off: ${existingBill.receiptNumber} for ${p.name}`);
+        setStatus('✅ Balance written off');
+        alert('✅ Outstanding balance has been written off.');
+        showView('billing-list');
+    }catch(e){alert('Error: '+e.message);}
+};
+
+window.openBilling=function(fromWhere){
+    billingOpenedFrom=fromWhere||'detail';
+    const p=patients.find(p=>p.id===currentBillingPatientId);
+    if(!p)return;
+
+    document.getElementById('bill-patient-name').textContent=p.name||'';
+    document.getElementById('bill-patient-code').textContent=p.code||'';
+    document.getElementById('selected-visit-bill').style.display='none';
+    currentBillingVisitIndex=null;
+
+    // Show allergy banner if patient has allergy
+    const banner=document.getElementById('bill-patient-banner');
+    if(p.allergy){
+        banner.style.display='block';
+        banner.style.background='#fff0f0';
+        banner.style.color='#ff4444';
+        banner.textContent=`⚠️ KNOWN ALLERGY: ${p.allergy.toUpperCase()}`;
+    }else{
+        banner.style.display='none';
+    }
+
+    // Patient summary
+    const summary=document.getElementById('bill-patient-summary');
+    if(summary){
+        summary.innerHTML=`${safe(p.blood||'Unknown blood group')}<br>${p.hmoCompany?`🏥 ${safe(p.hmoCompany)}`:'No HMO'}`;
+    }
+
+    // Build visit selector
+    const selectorList=document.getElementById('visit-selector-list');
+    const noVisits=document.getElementById('no-visits-yet');
+
+    // Filter visits at this hospital
+    const visitsHere=(p.visits||[]).map((v,i)=>({v,i})).filter(({v})=>{
+        return v.hospitalCode===currentHospital.code||
+            v.hospitalName?.trim().toLowerCase()===currentHospital.name?.trim().toLowerCase();
+    });
+
+    if(visitsHere.length===0){
+        selectorList.innerHTML='';
+        if(noVisits)noVisits.style.display='block';
+    }else{
+        if(noVisits)noVisits.style.display='none';
+        selectorList.innerHTML='';
+        visitsHere.slice().reverse().forEach(({v,i:actualIndex})=>{
+            const existingBill=bills.find(b=>b.patientId===p.id&&b.visitIndex===actualIndex);
+            const payStatus=existingBill?.paymentStatus||'none';
+            const payColor=payStatus==='paid'?'#4CAF50':payStatus==='partial'?'#ffc107':payStatus==='unpaid'?'#ff4444':'#666';
+            const payLabel=payStatus==='paid'?'✅ PAID':payStatus==='partial'?'💛 PARTIAL':payStatus==='unpaid'?'🔴 UNPAID':'💳 Bill Now';
+            const isToday=v.date===new Date().toLocaleDateString('en-GB');
+            selectorList.innerHTML+=`<div onclick="selectVisitForBilling(${actualIndex})"
+                style="background:${isToday?'#e8f4fd':'#f8f9fa'};border-radius:10px;padding:14px;margin-bottom:8px;cursor:pointer;border-left:4px solid ${payColor};">
+                <div style="display:flex;justify-content:space-between;align-items:center;">
+                    <div>
+                        <div style="font-weight:bold;font-size:14px;">
+                            ${isToday?'🟢 Today — ':''}${safe(v.date)}
+                            ${v.status==='pending-doctor'?'<span style="font-size:11px;color:#ff8800;background:#fff8e1;padding:2px 6px;border-radius:8px;margin-left:5px;">Awaiting Doctor</span>':''}
+                        </div>
+                        <div style="font-size:12px;color:#666;margin-top:2px;">${v.doctorName?`Dr. ${safe(v.doctorName)}`:'No doctor yet'}${v.diagnosis?` — ${safe(v.diagnosis)}`:''}
+                        </div>
+                        ${existingBill?`<div style="font-size:12px;color:#0066cc;margin-top:3px;font-weight:bold;">₦${existingBill.amountPaid?.toLocaleString()||0} / ₦${existingBill.totalDue?.toLocaleString()||0}</div>`:'<div style="font-size:12px;color:#999;margin-top:3px;">No bill yet</div>'}
+                    </div>
+                    <div style="font-size:12px;font-weight:bold;color:${payColor};text-align:right;padding-left:8px;white-space:nowrap;">${payLabel}</div>
+                </div>
+            </div>`;
+        });
+    }
+
+    // HMO
+    if(p.hmoCompany||p.hmo){
+        document.getElementById('bill-hmo-section').style.display='block';
+        document.getElementById('bill-hmo-info').innerHTML=`<strong>${safe(p.hmoCompany||'HMO')}</strong> — ${safe(p.hmo||'No number')} — Plan: ${safe(p.hmoPlan||'Unknown')}`;
+        document.getElementById('bill-hmo-deduction-row').style.display='flex';
+    }else{
+        document.getElementById('bill-hmo-section').style.display='none';
+        document.getElementById('bill-hmo-deduction-row').style.display='none';
+    }
+
+    // Show billing view
+    const allViews=['dashboard','patients','emergency','detail','share','referral','referral-preview','register','nurse','doctor','doctor-form','post-result','pharmacy','lab','analytics','admin','billing-list'];
+    allViews.forEach(v=>{const el=document.getElementById(v+'-view');if(el)el.style.display='none';});
+    document.getElementById('billing-view').style.display='block';
+
+    // Init payment method tabs
+    selectPaymentMethod('cash');
+};
+
+window.selectVisitForBilling=function(visitIndex){
+    const p=patients.find(p=>p.id===currentBillingPatientId);if(!p)return;
+    const v=p.visits[visitIndex];if(!v)return;
+    currentBillingVisitIndex=visitIndex;
+    procedureCharges=[];extraCharges=[];
+
+    // Reset fields
+    ['bill-days','bill-bed-rate','bill-notes','bill-hmo-amount','payment-amount'].forEach(id=>{
+        const el=document.getElementById(id);if(el)el.value='';
+    });
+    document.getElementById('payment-method').value='cash';
+    selectPaymentMethod('cash');
+    ['procedure-charges-list','extra-charges-list'].forEach(id=>{
+        const el=document.getElementById(id);if(el)el.innerHTML='';
+    });
+    document.getElementById('bill-bed-total').textContent='';
+
+    // Set visit header
+    const isToday=v.date===new Date().toLocaleDateString('en-GB');
+    document.getElementById('selected-visit-label').textContent=
+        `${isToday?'🟢 Today':'📅'} ${v.date} — ${v.hospitalName||currentHospital.name}`;
+
+    // Load existing bill if any
+    const existingBill=bills.find(b=>b.patientId===p.id&&b.visitIndex===visitIndex);
+    const psEl=document.getElementById('selected-visit-payment-status');
+
+    if(existingBill){
+        const statusColor=existingBill.paymentStatus==='paid'?'#4CAF50':existingBill.paymentStatus==='partial'?'#f57f17':'#ff4444';
+        const statusText=existingBill.paymentStatus==='paid'?
+            `✅ FULLY PAID — ₦${existingBill.amountPaid?.toLocaleString()||0}`:
+            existingBill.paymentStatus==='partial'?
+            `💛 PARTIAL — ₦${existingBill.amountPaid?.toLocaleString()||0} paid, ₦${existingBill.balance?.toLocaleString()||0} remaining`:
+            `🔴 UNPAID — ₦${existingBill.totalDue?.toLocaleString()||0} due`;
+        psEl.innerHTML=`<div style="font-size:13px;font-weight:bold;color:${statusColor};">${statusText}</div>
+            ${existingBill.receiptNumber?`<div style="font-size:11px;color:#999;font-family:monospace;margin-top:2px;">${safe(existingBill.receiptNumber)}</div>`:''}`;
+
+        if(existingBill.bedDays)document.getElementById('bill-days').value=existingBill.bedDays;
+        if(existingBill.bedRate)document.getElementById('bill-bed-rate').value=existingBill.bedRate;
+        if(existingBill.notes)document.getElementById('bill-notes').value=existingBill.notes;
+        if(existingBill.hmoCoverage)document.getElementById('bill-hmo-amount').value=existingBill.hmoCoverage;
+        if(existingBill.procedureCharges){procedureCharges=[...existingBill.procedureCharges];renderChargesList('procedure');}
+        if(existingBill.extraCharges){extraCharges=[...existingBill.extraCharges];renderChargesList('extra');}
+        // Pre-fill balance as suggested payment amount
+        if(existingBill.paymentStatus==='partial'&&existingBill.balance>0){
+            document.getElementById('payment-amount').value=existingBill.balance;
+        }
+    }else{
+        psEl.innerHTML=`<div style="font-size:13px;color:#666;">No bill generated yet — charges will be calculated below.</div>`;
+    }
+
+    buildAutoChargesForVisit(p,visitIndex,v);
+    recalculateBill();
+    document.getElementById('selected-visit-bill').style.display='block';
+    document.getElementById('selected-visit-bill').scrollIntoView({behavior:'smooth'});
+};
+
+function buildAutoChargesForVisit(p,visitIndex,v){
+    const container=document.getElementById('bill-auto-charges');
+    let html='';
+    let has=false;
+    let autoTotal=0;
+
+    if(v.consultationFee&&v.consultationFee>0){
+        html+=`<div class="bill-row" style="background:#f0fff4;padding:8px;border-radius:6px;margin-bottom:4px;">
+            <span style="color:#333;flex:1;font-size:13px;">🩺 Consultation Fee</span>
+            <span style="font-weight:bold;color:#00aa55;">₦${v.consultationFee.toLocaleString()}</span>
+        </div>`;
+        autoTotal+=v.consultationFee;has=true;
+    }
+    if(visitIndex===0&&p.consultationFee&&p.consultationFee>0){
+        html+=`<div class="bill-row" style="background:#f0fff4;padding:8px;border-radius:6px;margin-bottom:4px;">
+            <span style="color:#333;flex:1;font-size:13px;">📋 Registration Fee</span>
+            <span style="font-weight:bold;color:#00aa55;">₦${p.consultationFee.toLocaleString()}</span>
+        </div>`;
+        autoTotal+=p.consultationFee;has=true;
+    }
+    prescriptions.filter(pr=>pr.patientId===p.id&&pr.status==='dispensed'&&pr.date===v.date&&pr.doctorName===v.doctorName).forEach(pr=>{
+        if(pr.drugCost&&pr.drugCost>0){
+            html+=`<div class="bill-row" style="background:#f3e5f5;padding:8px;border-radius:6px;margin-bottom:4px;">
+                <span style="color:#333;flex:1;font-size:13px;">💊 Medications</span>
+                <span style="font-weight:bold;color:#9c27b0;">₦${pr.drugCost.toLocaleString()}</span>
+            </div>`;
+            autoTotal+=pr.drugCost;has=true;
+        }
+    });
+    labRequests.filter(l=>l.patientId===p.id&&l.status==='completed'&&l.date===v.date&&l.doctorName===v.doctorName).forEach(l=>{
+        if(l.testCost&&l.testCost>0){
+            html+=`<div class="bill-row" style="background:#e0f2f1;padding:8px;border-radius:6px;margin-bottom:4px;">
+                <span style="color:#333;flex:1;font-size:13px;">🔬 ${safe(l.testType)}</span>
+                <span style="font-weight:bold;color:#009688;">₦${l.testCost.toLocaleString()}</span>
+            </div>`;
+            autoTotal+=l.testCost;has=true;
+        }
+    });
+
+    if(!has){
+        html='<div style="font-size:13px;color:#999;padding:8px;background:#f8f9fa;border-radius:6px;">No auto-charges yet. Charges appear here as consultation, drugs and lab are completed.</div>';
+    }else{
+        html+=`<div style="display:flex;justify-content:space-between;padding:6px 8px;font-size:13px;font-weight:bold;color:#333;border-top:1px solid #eee;margin-top:4px;">
+            <span>Auto-charges subtotal</span>
+            <span>₦${autoTotal.toLocaleString()}</span>
+        </div>`;
+    }
+    container.innerHTML=html;
+}
+
+function getAutoChargesTotalForVisit(){
+    const p=patients.find(p=>p.id===currentBillingPatientId);
+    if(!p||currentBillingVisitIndex===null)return 0;
+    const v=p.visits[currentBillingVisitIndex];if(!v)return 0;
+    let total=0;
+    if(v.consultationFee)total+=v.consultationFee;
+    if(currentBillingVisitIndex===0&&p.consultationFee)total+=p.consultationFee;
+    prescriptions.filter(pr=>pr.patientId===p.id&&pr.status==='dispensed'&&pr.date===v.date&&pr.doctorName===v.doctorName).forEach(pr=>{if(pr.drugCost)total+=pr.drugCost;});
+    labRequests.filter(l=>l.patientId===p.id&&l.status==='completed'&&l.date===v.date&&l.doctorName===v.doctorName).forEach(l=>{if(l.testCost)total+=l.testCost;});
+    return total;
+}
+
+window.recalculateBill=function(){
+    const autoTotal=getAutoChargesTotalForVisit();
+    const days=parseInt(document.getElementById('bill-days').value)||0;
+    const bedRate=parseFloat(document.getElementById('bill-bed-rate').value)||0;
+    const bedTotal=days*bedRate;
+    const bedTotalEl=document.getElementById('bill-bed-total');
+    if(days>0&&bedRate>0&&bedTotalEl)bedTotalEl.textContent=`${days} days × ₦${bedRate.toLocaleString()} = ₦${bedTotal.toLocaleString()}`;
+    else if(bedTotalEl)bedTotalEl.textContent='';
+    const procTotal=procedureCharges.reduce((s,c)=>s+(c.amount||0),0);
+    const extraTotal=extraCharges.reduce((s,c)=>s+(c.amount||0),0);
+    const subtotal=autoTotal+bedTotal+procTotal+extraTotal;
+    const hmoAmount=parseFloat(document.getElementById('bill-hmo-amount')?.value)||0;
+    const total=Math.max(0,subtotal-hmoAmount);
+
+    const subEl=document.getElementById('bill-subtotal');
+    const hmoEl=document.getElementById('bill-hmo-deduction');
+    const totalEl=document.getElementById('bill-total');
+    const liveEl=document.getElementById('bill-live-total');
+
+    if(subEl)subEl.textContent='₦'+subtotal.toLocaleString();
+    if(hmoEl)hmoEl.textContent='-₦'+hmoAmount.toLocaleString();
+    if(totalEl)totalEl.textContent='₦'+total.toLocaleString();
+    if(liveEl)liveEl.textContent='₦'+total.toLocaleString();
+    updatePaymentStatus();
+};
+
+window.updatePaymentStatus=function(){
+    const totalText=(document.getElementById('bill-total')?.textContent||'0').replace(/[₦,]/g,'');
+    const total=parseFloat(totalText)||0;
+    const paid=parseFloat(document.getElementById('payment-amount')?.value)||0;
+    const preview=document.getElementById('payment-preview');
+    const changeEl=document.getElementById('change-calculator');
+    const partialNote=document.getElementById('partial-note');
+
+    if(!preview)return;
+
+    if(paid===0){
+        preview.innerHTML='<div style="color:#999;font-size:13px;">Enter amount received to see payment status</div>';
+        if(changeEl)changeEl.style.display='none';
+        if(partialNote)partialNote.style.display='none';
+        return;
+    }
+
+    if(paid>=total&&total>0){
+        const change=paid-total;
+        preview.innerHTML=`<div style="color:#4CAF50;font-weight:bold;font-size:15px;">✅ FULLY PAID</div>`;
+        if(changeEl){
+            changeEl.style.display=change>0?'block':'none';
+            changeEl.textContent=change>0?`💵 Change to give: ₦${change.toLocaleString()}`:'';
+        }
+        if(partialNote)partialNote.style.display='none';
+    }else if(paid>0&&paid<total){
+        preview.innerHTML=`<div style="color:#f57f17;font-weight:bold;font-size:15px;">💛 PARTIAL — ₦${(total-paid).toLocaleString()} still owed</div>`;
+        if(changeEl)changeEl.style.display='none';
+        if(partialNote)partialNote.style.display='block';
+    }
+};
+
+window.addProcedureCharge=function(){
+    const name=document.getElementById('proc-name').value.trim();
+    const amount=parseFloat(document.getElementById('proc-amount').value)||0;
+    if(!name){alert('Please enter a procedure name');return;}
+    if(!amount){alert('Please enter the charge amount');return;}
+    procedureCharges.push({id:Date.now(),name,amount});
+    document.getElementById('proc-name').value='';
+    document.getElementById('proc-amount').value='';
+    renderChargesList('procedure');
+    recalculateBill();
+};
+
+window.addExtraCharge=function(){
+    const name=document.getElementById('extra-name').value.trim();
+    const amount=parseFloat(document.getElementById('extra-amount').value)||0;
+    if(!name){alert('Please enter a charge description');return;}
+    if(!amount){alert('Please enter the amount');return;}
+    extraCharges.push({id:Date.now(),name,amount});
+    document.getElementById('extra-name').value='';
+    document.getElementById('extra-amount').value='';
+    renderChargesList('extra');
+    recalculateBill();
+};
+
+function renderChargesList(type){
+    const charges=type==='procedure'?procedureCharges:extraCharges;
+    const container=document.getElementById(type+'-charges-list');
+    if(!container)return;
+    container.innerHTML=charges.map(c=>`
+        <div class="charge-item">
+            <span style="font-size:13px;flex:1;">${safe(c.name)}</span>
+            <div style="display:flex;align-items:center;gap:8px;">
+                <span style="font-weight:bold;color:#0066cc;">₦${c.amount.toLocaleString()}</span>
+                <button class="charge-remove" onclick="removeCharge('${type}',${c.id})">✕</button>
+            </div>
+        </div>`).join('');
+}
+
+window.removeCharge=function(type,id){
+    if(type==='procedure')procedureCharges=procedureCharges.filter(c=>c.id!==id);
+    else extraCharges=extraCharges.filter(c=>c.id!==id);
+    renderChargesList(type);
+    recalculateBill();
+};
 
 window.saveBillWithPayment=async function(){
     if(currentBillingVisitIndex===null){alert('Please select a visit first');return;}
     const p=patients.find(p=>p.id===currentBillingPatientId);if(!p)return;
     const v=p.visits[currentBillingVisitIndex];
-    const days=parseInt(document.getElementById('bill-days').value)||0;const bedRate=parseFloat(document.getElementById('bill-bed-rate').value)||0;const bedTotal=days*bedRate;const hmoAmount=parseFloat(document.getElementById('bill-hmo-amount').value)||0;const autoTotal=getAutoChargesTotalForVisit();const procTotal=procedureCharges.reduce((s,c)=>s+(c.amount||0),0);const extraTotal=extraCharges.reduce((s,c)=>s+(c.amount||0),0);const subtotal=autoTotal+bedTotal+procTotal+extraTotal;const totalDue=Math.max(0,subtotal-hmoAmount);const amountPaid=parseFloat(document.getElementById('payment-amount').value)||0;const paymentMethod=document.getElementById('payment-method').value;
-    let paymentStatus='unpaid';if(amountPaid>=totalDue&&totalDue>0)paymentStatus='paid';else if(amountPaid>0&&amountPaid<totalDue)paymentStatus='partial';
+
+    const days=parseInt(document.getElementById('bill-days').value)||0;
+    const bedRate=parseFloat(document.getElementById('bill-bed-rate').value)||0;
+    const bedTotal=days*bedRate;
+    const hmoAmount=parseFloat(document.getElementById('bill-hmo-amount')?.value)||0;
+    const autoTotal=getAutoChargesTotalForVisit();
+    const procTotal=procedureCharges.reduce((s,c)=>s+(c.amount||0),0);
+    const extraTotal=extraCharges.reduce((s,c)=>s+(c.amount||0),0);
+    const subtotal=autoTotal+bedTotal+procTotal+extraTotal;
+    const totalDue=Math.max(0,subtotal-hmoAmount);
+    const amountPaid=parseFloat(document.getElementById('payment-amount').value)||0;
+    const paymentMethod=document.getElementById('payment-method').value;
+
+    // Validate
+    if(totalDue===0&&amountPaid===0){
+        if(!confirm('Total due is ₦0. Save this bill anyway?'))return;
+    }
+
+    let paymentStatus='unpaid';
+    if(amountPaid>=totalDue&&totalDue>0)paymentStatus='paid';
+    else if(amountPaid>0)paymentStatus='partial';
+    else if(totalDue===0)paymentStatus='paid';
+
     const receiptNumber=await generateReceiptNumber();
-    const billData={patientId:p.id,patientCode:p.code,patientName:p.name,visitIndex:currentBillingVisitIndex,visitDate:v.date,visitHospital:v.hospitalName||currentHospital.name,hospitalCode:currentHospital.code,hospitalName:currentHospital.name,receiptNumber,autoTotal,bedDays:days,bedRate,bedTotal,procedureCharges:[...procedureCharges],extraCharges:[...extraCharges],hmoCompany:p.hmoCompany||'',hmoNumber:p.hmo||'',hmoCoverage:hmoAmount,subtotal,totalDue,amountPaid,paymentMethod,paymentStatus,balance:Math.max(0,totalDue-amountPaid),notes:document.getElementById('bill-notes').value,generatedBy:currentUser.name,date:new Date().toLocaleDateString('en-GB'),createdAt:new Date().toISOString()};
+    const billData={
+        patientId:p.id,patientCode:p.code,patientName:p.name,
+        visitIndex:currentBillingVisitIndex,visitDate:v.date,
+        visitHospital:v.hospitalName||currentHospital.name,
+        hospitalCode:currentHospital.code,hospitalName:currentHospital.name,
+        receiptNumber,autoTotal,bedDays:days,bedRate,bedTotal,
+        procedureCharges:[...procedureCharges],extraCharges:[...extraCharges],
+        hmoCompany:p.hmoCompany||'',hmoNumber:p.hmo||'',hmoCoverage:hmoAmount,
+        subtotal,totalDue,amountPaid,paymentMethod,paymentStatus,
+        balance:Math.max(0,totalDue-amountPaid),
+        notes:document.getElementById('bill-notes').value,
+        generatedBy:currentUser.name,
+        date:new Date().toLocaleDateString('en-GB'),
+        createdAt:new Date().toISOString()
+    };
+
     try{
         setStatus('🔄 Saving bill...');
         let savedId;
+        const existingBill=bills.find(b=>b.patientId===p.id&&b.visitIndex===currentBillingVisitIndex);
+
         if(connectionMode==='local'){
-            const res=await localPost('/api/bills',billData);
-            savedId=res.id||'bill_'+Date.now();
-        }else{
-            const existingBill=bills.find(b=>b.patientId===p.id&&b.visitIndex===currentBillingVisitIndex);
             if(existingBill){
-                await updateDoc(doc(db,'bills',existingBill.id),billData);
+                await localPut(`/api/bills/${existingBill.id}`,{...billData,receiptNumber:existingBill.receiptNumber||receiptNumber});
+                savedId=existingBill.id;
+            }else{
+                const res=await localPost('/api/bills',billData);
+                savedId=res.id||'bill_'+Date.now();
+            }
+        }else if(isOnline){
+            if(existingBill){
+                await updateDoc(doc(db,'bills',existingBill.id),{...billData,receiptNumber:existingBill.receiptNumber||receiptNumber});
                 savedId=existingBill.id;
             }else{
                 const ref=await addDoc(collection(db,'bills'),billData);
                 savedId=ref.id;
             }
+        }else{
+            savedId='bill_'+Date.now();
+            queueOfflineAction('addBill',{id:savedId,...billData});
         }
-        // FIX: Update local bills array immediately so payment badge appears right away
+
+        // Update local bills array immediately — no wait for Firebase
         const billWithId={id:savedId,...billData};
-        const existingIndex=bills.findIndex(b=>b.patientId===p.id&&b.visitIndex===currentBillingVisitIndex);
-        if(existingIndex>=0)bills[existingIndex]=billWithId;
+        const existingIdx=bills.findIndex(b=>b.patientId===p.id&&b.visitIndex===currentBillingVisitIndex);
+        if(existingIdx>=0)bills[existingIdx]=billWithId;
         else bills.push(billWithId);
         saveToCache('bills_'+currentHospital.code,bills);
 
-        if(amountPaid>0)await smartSave('addFinancialRecord','financialRecords',{type:'payment',amount:amountPaid,patientCode:p.code,patientName:p.name,visitDate:v.date,paymentMethod,receiptNumber,hospitalCode:currentHospital.code,hospitalName:currentHospital.name,date:new Date().toLocaleDateString('en-GB'),recordedBy:currentUser.name,createdAt:new Date().toISOString()});
-        if(bedTotal>0)await smartSave('addFinancialRecord','financialRecords',{type:'bed_space',amount:bedTotal,patientCode:p.code,patientName:p.name,hospitalCode:currentHospital.code,hospitalName:currentHospital.name,date:new Date().toLocaleDateString('en-GB'),recordedBy:currentUser.name,createdAt:new Date().toISOString()});
-        addSecurityLog(`Bill saved: ${receiptNumber} — ₦${totalDue.toLocaleString()} — ${paymentStatus}`);
-        setStatus('🟢 Bill saved — '+paymentStatus.toUpperCase());
+        // Record financial transactions
+        if(amountPaid>0){
+            await smartSave('addFinancialRecord','financialRecords',{
+                type:'payment',amount:amountPaid,patientCode:p.code,
+                patientName:p.name,visitDate:v.date,paymentMethod,
+                receiptNumber:existingBill?.receiptNumber||receiptNumber,
+                hospitalCode:currentHospital.code,hospitalName:currentHospital.name,
+                date:new Date().toLocaleDateString('en-GB'),
+                recordedBy:currentUser.name,createdAt:new Date().toISOString()
+            });
+        }
+        if(bedTotal>0){
+            await smartSave('addFinancialRecord','financialRecords',{
+                type:'bed_space',amount:bedTotal,patientCode:p.code,
+                patientName:p.name,hospitalCode:currentHospital.code,
+                hospitalName:currentHospital.name,
+                date:new Date().toLocaleDateString('en-GB'),
+                recordedBy:currentUser.name,createdAt:new Date().toISOString()
+            });
+        }
+
+        addSecurityLog(`Bill: ${existingBill?.receiptNumber||receiptNumber} — ₦${totalDue.toLocaleString()} — ${paymentStatus} — ${p.name}`);
+        setStatus('🟢 Payment saved');
         updateDashboard();
-        alert(`✅ Bill saved!\nReceipt: ${receiptNumber}\nTotal Due: ₦${totalDue.toLocaleString()}\nAmount Paid: ₦${amountPaid.toLocaleString()}\nStatus: ${paymentStatus.toUpperCase()}`);
-    }catch(e){setStatus('🔴 Error: '+e.message);}
+
+        // Success message with clear next action
+        const change=amountPaid-totalDue;
+        let msg=`✅ Bill Saved\n\nPatient: ${p.name}\nReceipt: ${existingBill?.receiptNumber||receiptNumber}\nTotal: ₦${totalDue.toLocaleString()}\nPaid: ₦${amountPaid.toLocaleString()}\nStatus: ${paymentStatus.toUpperCase()}`;
+        if(change>0)msg+=`\n\n💵 Change: ₦${change.toLocaleString()}`;
+        if(paymentStatus==='partial')msg+=`\n\n⚠️ Balance: ₦${Math.max(0,totalDue-amountPaid).toLocaleString()} — patient owes this amount`;
+        alert(msg);
+
+        // Go back to billing list
+        showView('billing-list');
+        renderBillingList();
+
+    }catch(e){
+        setStatus('🔴 Error: '+e.message);
+        alert('Error saving bill: '+e.message);
+    }
+};
+
+// ============================================================
+// BILLING LIST — Complete with working filter tabs + counts
+// ============================================================
+let currentBillingFilter='all';
+
+
+function renderBillingList(){
+    const today=new Date().toLocaleDateString('en-GB');
+    const searchQ=(document.getElementById('bl-search')?.value||'').toLowerCase().trim();
+
+    // Summary stats
+    const todayCollections=financialRecords
+        .filter(r=>r.date===today&&r.type==='payment')
+        .reduce((s,r)=>s+(r.amount||0),0);
+    const outstanding=bills
+        .filter(b=>b.paymentStatus==='unpaid'||b.paymentStatus==='partial')
+        .reduce((s,b)=>s+(b.balance||0),0);
+    const unpaidCount=bills
+        .filter(b=>b.paymentStatus==='unpaid'||b.paymentStatus==='partial').length;
+
+    const todayEl=document.getElementById('bl-today-collections');
+    const outEl=document.getElementById('bl-outstanding');
+    const countEl=document.getElementById('bl-unpaid-count');
+    if(todayEl)todayEl.textContent='₦'+todayCollections.toLocaleString();
+    if(outEl)outEl.textContent='₦'+outstanding.toLocaleString();
+    if(countEl)countEl.textContent=unpaidCount;
+
+    // Build ALL rows first (for counts)
+    const allRows=[];
+    patients.forEach(p=>{
+        const matchesSearch=!searchQ||(
+            p.name?.toLowerCase().includes(searchQ)||
+            p.code?.toLowerCase().includes(searchQ)||
+            p.phone?.includes(searchQ)
+        );
+        if(!matchesSearch)return;
+
+        // Patients with no visits at this hospital
+        const visitsHere=(p.visits||[]).filter(v=>
+            v.hospitalCode===currentHospital.code||
+            v.hospitalName?.trim().toLowerCase()===currentHospital.name?.trim().toLowerCase()
+        );
+
+        if(visitsHere.length===0){
+            allRows.push({patient:p,visit:null,visitIndex:-1,bill:null,status:'nobill'});
+            return;
+        }
+
+        // One row per visit
+        p.visits.forEach((v,visitIndex)=>{
+            const isHere=v.hospitalCode===currentHospital.code||
+                v.hospitalName?.trim().toLowerCase()===currentHospital.name?.trim().toLowerCase();
+            if(!isHere)return;
+            const bill=bills.find(b=>b.patientId===p.id&&b.visitIndex===visitIndex);
+            const status=bill?.paymentStatus||'nobill';
+            allRows.push({patient:p,visit:v,visitIndex,bill,status});
+        });
+    });
+
+    // Count per status — update tab badges
+    const counts={all:allRows.length,unpaid:0,partial:0,paid:0,nobill:0};
+    allRows.forEach(r=>counts[r.status]=(counts[r.status]||0)+1);
+    Object.entries(counts).forEach(([status,count])=>{
+        const el=document.getElementById('bl-count-'+status);
+        if(el)el.textContent=count;
+    });
+
+    // Filter rows for display
+    const displayRows=currentBillingFilter==='all'?allRows:allRows.filter(r=>r.status===currentBillingFilter);
+
+    // Sort — unpaid first, partial second, no-bill third, paid last
+    // Within each group sort by most recent visit first
+    const sortOrder={unpaid:0,partial:1,nobill:2,paid:3};
+    displayRows.sort((a,b)=>{
+        const sa=sortOrder[a.status]??2;
+        const sb=sortOrder[b.status]??2;
+        if(sa!==sb)return sa-sb;
+        // Most recent date first
+        const dateA=a.visit?.visitTimestamp||a.visit?.date||a.patient.createdAt||'';
+        const dateB=b.visit?.visitTimestamp||b.visit?.date||b.patient.createdAt||'';
+        return dateB.localeCompare(dateA);
+    });
+
+    const container=document.getElementById('billing-list-items');
+    if(!container)return;
+
+    if(displayRows.length===0){
+        const emptyMsg={
+            all:'No patients found',
+            unpaid:'No unpaid bills — great job! 🎉',
+            partial:'No partial payments',
+            paid:'No paid bills yet',
+            nobill:'All patients have bills'
+        };
+        container.innerHTML=`<div class="empty-search"><div class="icon">💰</div><p>${emptyMsg[currentBillingFilter]||'No records found'}</p></div>`;
+        return;
+    }
+
+    const statusConfig={
+        paid:{color:'#4CAF50',bg:'#e8f5e9',label:'✅ PAID'},
+        partial:{color:'#f57f17',bg:'#fff8e1',label:'💛 PARTIAL'},
+        unpaid:{color:'#ff4444',bg:'#fff0f0',label:'🔴 UNPAID'},
+        nobill:{color:'#0066cc',bg:'#e8f4fd',label:'💳 Bill Now'}
+    };
+
+    const isToday=(date)=>date===today;
+
+    container.innerHTML=displayRows.map(row=>{
+        const{patient:p,visit:v,bill,status}=row;
+        const cfg=statusConfig[status]||statusConfig.nobill;
+        const totalDue=bill?.totalDue||0;
+        const amountPaid=bill?.amountPaid||0;
+        const balance=bill?.balance||0;
+        const visitIsToday=v&&isToday(v.date);
+
+        return `<div onclick="openBillingFromList('${p.id}',${row.visitIndex})"
+            style="background:white;margin:8px 15px;border-radius:10px;
+            padding:14px;box-shadow:0 2px 5px rgba(0,0,0,0.08);
+            border-left:4px solid ${cfg.color};cursor:pointer;
+            ${visitIsToday?'border:2px solid '+cfg.color+';border-left:4px solid '+cfg.color+';':''}"
+            >
+            <div style="display:flex;justify-content:space-between;align-items:flex-start;">
+                <div style="flex:1;min-width:0;">
+                    <div style="font-weight:bold;font-size:15px;display:flex;align-items:center;gap:6px;">
+                        ${safe(p.name)}
+                        ${visitIsToday?'<span style="font-size:10px;background:#0066cc;color:white;padding:2px 6px;border-radius:8px;">TODAY</span>':''}
+                    </div>
+                    <div style="font-family:monospace;font-size:12px;color:#0066cc;">${safe(p.code)}</div>
+                </div>
+                <span style="background:${cfg.bg};color:${cfg.color};padding:5px 10px;
+                    border-radius:12px;font-size:11px;font-weight:bold;white-space:nowrap;margin-left:8px;">
+                    ${cfg.label}
+                </span>
+            </div>
+            ${v?`<div style="font-size:12px;color:#666;margin-top:6px;display:flex;gap:10px;flex-wrap:wrap;">
+                <span>📅 ${safe(v.date)}</span>
+                ${v.doctorName?`<span>👨‍⚕️ Dr. ${safe(v.doctorName)}</span>`:''}
+                ${v.diagnosis?`<span>🔍 ${safe(v.diagnosis)}</span>`:''}
+            </div>`:'<div style="font-size:12px;color:#999;margin-top:6px;">No visits recorded</div>'}
+            ${bill?`<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin-top:8px;">
+                <div style="background:#f8f9fa;border-radius:6px;padding:6px;text-align:center;">
+                    <div style="font-size:10px;color:#666;">Total</div>
+                    <div style="font-size:13px;font-weight:bold;">₦${totalDue.toLocaleString()}</div>
+                </div>
+                <div style="background:#f8f9fa;border-radius:6px;padding:6px;text-align:center;">
+                    <div style="font-size:10px;color:#666;">Paid</div>
+                    <div style="font-size:13px;font-weight:bold;color:#4CAF50;">₦${amountPaid.toLocaleString()}</div>
+                </div>
+                <div style="background:${balance>0?'#fff0f0':'#f8f9fa'};border-radius:6px;padding:6px;text-align:center;">
+                    <div style="font-size:10px;color:#666;">Balance</div>
+                    <div style="font-size:13px;font-weight:bold;color:${balance>0?'#ff4444':'#4CAF50'};">₦${balance.toLocaleString()}</div>
+                </div>
+            </div>`:`<div style="font-size:12px;color:#0066cc;margin-top:6px;font-style:italic;">Tap to create bill</div>`}
+            ${bill?.receiptNumber?`<div style="font-size:10px;color:#bbb;margin-top:5px;font-family:monospace;">${safe(bill.receiptNumber)}</div>`:''}
+        </div>`;
+    }).join('');
 }
 
+window.openBillingFromList=function(patientId,visitIndex){
+    const p=patients.find(px=>px.id===patientId);
+    if(!p)return;
+    currentBillingPatientId=patientId;
+    openBilling('billing-list');
+    if(visitIndex>=0){
+        setTimeout(()=>selectVisitForBilling(visitIndex),350);
+    }
+};
+
+// Update dashboard with "Ready to Pay" quick access
+function updateDashboardBillingSection(){
+    if(!currentHospital)return;
+    const today=new Date().toLocaleDateString('en-GB');
+    const todayUnpaid=bills.filter(b=>b.date===today&&b.paymentStatus!=='paid');
+    const readySection=document.getElementById('dash-ready-to-pay');
+    const readyList=document.getElementById('dash-ready-to-pay-list');
+
+    if(!readySection||!readyList)return;
+
+    // Show discharged-today patients with unpaid bills
+    const readyPatients=[];
+    patients.forEach(p=>{
+        (p.visits||[]).forEach((v,i)=>{
+            const isHere=v.hospitalCode===currentHospital.code||v.hospitalName?.trim().toLowerCase()===currentHospital.name?.trim().toLowerCase();
+            const isToday=v.date===today;
+            const bill=bills.find(b=>b.patientId===p.id&&b.visitIndex===i);
+            if(isHere&&isToday&&(!bill||bill.paymentStatus!=='paid')){
+                readyPatients.push({patient:p,visit:v,visitIndex:i,bill});
+            }
+        });
+    });
+
+    if(readyPatients.length===0){
+        readySection.style.display='none';
+        return;
+    }
+
+    readySection.style.display='block';
+    readyList.innerHTML=readyPatients.slice(0,3).map(({patient:p,visit:v,bill})=>{
+        const balance=bill?bill.balance:0;
+        const status=bill?.paymentStatus||'nobill';
+        return `<div onclick="currentBillingPatientId='${p.id}';openBilling('billing-list');setTimeout(()=>selectVisitForBilling(${readyPatients.find(r=>r.patient.id===p.id)?.visitIndex||0}),350);"
+            style="background:rgba(255,255,255,0.15);border-radius:8px;padding:10px;margin-bottom:6px;cursor:pointer;display:flex;justify-content:space-between;align-items:center;">
+            <div>
+                <div style="font-weight:bold;font-size:13px;">${safe(p.name)}</div>
+                <div style="font-size:11px;opacity:0.8;">${safe(p.code)} ${v.doctorName?`— Dr. ${safe(v.doctorName)}`:''}</div>
+            </div>
+            <div style="text-align:right;">
+                <div style="font-size:13px;font-weight:bold;">₦${(bill?.totalDue||0).toLocaleString()}</div>
+                <div style="font-size:10px;opacity:0.8;">${status==='partial'?'Partial':'Unpaid'}</div>
+            </div>
+        </div>`;
+    }).join('');
+    if(readyPatients.length>3){
+        readyList.innerHTML+=`<div style="font-size:12px;opacity:0.7;text-align:center;">+${readyPatients.length-3} more</div>`;
+    }
+}
 window.generateInvoice=function(){if(currentBillingVisitIndex===null){alert('Please select a visit first');return;}const p=patients.find(p=>p.id===currentBillingPatientId);if(!p)return;const v=p.visits[currentBillingVisitIndex];const days=parseInt(document.getElementById('bill-days').value)||0;const bedRate=parseFloat(document.getElementById('bill-bed-rate').value)||0;const bedTotal=days*bedRate;const hmoAmount=parseFloat(document.getElementById('bill-hmo-amount').value)||0;const autoTotal=getAutoChargesTotalForVisit();const procTotal=procedureCharges.reduce((s,c)=>s+(c.amount||0),0);const extraTotal=extraCharges.reduce((s,c)=>s+(c.amount||0),0);const subtotal=autoTotal+bedTotal+procTotal+extraTotal;const totalDue=Math.max(0,subtotal-hmoAmount);const amountPaid=parseFloat(document.getElementById('payment-amount').value)||0;const balance=Math.max(0,totalDue-amountPaid);const today=new Date().toLocaleDateString('en-GB');const payStatus=amountPaid>=totalDue&&totalDue>0?'PAID':amountPaid>0?'PARTIAL PAYMENT':'UNPAID';const payColor=payStatus==='PAID'?'#4CAF50':payStatus==='PARTIAL PAYMENT'?'#f57f17':'#ff4444';const existingBill=bills.find(b=>b.patientId===p.id&&b.visitIndex===currentBillingVisitIndex);const receiptRef=existingBill?.receiptNumber||'Draft';let autoLines='';if(currentBillingVisitIndex===0&&p.consultationFee&&p.consultationFee>0)autoLines+=`<tr><td style="padding:8px 0;border-bottom:1px solid #eee;font-size:14px;">Registration Consultation Fee</td><td style="padding:8px 0;border-bottom:1px solid #eee;font-size:14px;text-align:right;">₦${p.consultationFee.toLocaleString()}</td></tr>`;if(v.consultationFee&&v.consultationFee>0)autoLines+=`<tr><td style="padding:8px 0;border-bottom:1px solid #eee;font-size:14px;">Consultation Fee — ${safe(v.date)}</td><td style="padding:8px 0;border-bottom:1px solid #eee;font-size:14px;text-align:right;">₦${v.consultationFee.toLocaleString()}</td></tr>`;prescriptions.filter(pr=>pr.patientId===p.id&&pr.status==='dispensed'&&pr.date===v.date&&pr.doctorName===v.doctorName).forEach(pr=>{if(pr.drugCost&&pr.drugCost>0)autoLines+=`<tr><td style="padding:8px 0;border-bottom:1px solid #eee;font-size:14px;">Medications</td><td style="padding:8px 0;border-bottom:1px solid #eee;font-size:14px;text-align:right;">₦${pr.drugCost.toLocaleString()}</td></tr>`;});labRequests.filter(l=>l.patientId===p.id&&l.status==='completed'&&l.date===v.date&&l.doctorName===v.doctorName).forEach(l=>{if(l.testCost&&l.testCost>0)autoLines+=`<tr><td style="padding:8px 0;border-bottom:1px solid #eee;font-size:14px;">Lab: ${safe(l.testType)}</td><td style="padding:8px 0;border-bottom:1px solid #eee;font-size:14px;text-align:right;">₦${l.testCost.toLocaleString()}</td></tr>`;});const w=window.open('','_blank');w.document.write(`<!DOCTYPE html><html><head><title>Invoice ${receiptRef}</title><style>body{font-family:Arial,sans-serif;padding:0;margin:0;}table{width:100%;border-collapse:collapse;}.invoice{max-width:600px;margin:0 auto;background:white;}.hdr{background:#0066cc;color:white;padding:25px;text-align:center;}.body{padding:25px;}.pay-badge{display:inline-block;padding:10px 25px;border-radius:8px;font-weight:bold;font-size:16px;color:white;background:${payColor};}@media print{body{background:white;}}</style></head><body><div class="invoice"><div class="hdr"><h1 style="font-size:22px;margin:0;">🏥 MEDITRACK</h1><p style="margin:5px 0 0;font-size:13px;opacity:0.8;">${safe(currentHospital.name)} — ${safe(currentHospital.stateName)}</p></div><div class="body"><div style="display:flex;justify-content:space-between;margin-bottom:20px;"><div><div style="font-size:12px;color:#666;">RECEIPT NO.</div><div style="font-weight:bold;font-family:monospace;">${safe(receiptRef)}</div></div><div style="text-align:right;"><div style="font-size:12px;color:#666;">VISIT DATE</div><div style="font-weight:bold;">${safe(v.date)}</div></div></div><div style="background:#e8f4fd;border:2px solid #0066cc;border-radius:8px;padding:10px;text-align:center;margin-bottom:15px;"><div style="font-size:11px;color:#666;">PATIENT CODE</div><div style="font-size:20px;font-weight:bold;color:#0066cc;font-family:monospace;">${safe(p.code)}</div></div><table style="margin-bottom:15px;"><tr><td style="padding:5px 0;font-size:13px;"><strong>Name:</strong> ${safe(p.name)}</td><td style="padding:5px 0;font-size:13px;"><strong>Phone:</strong> ${safe(p.phone)}</td></tr><tr><td style="padding:5px 0;font-size:13px;"><strong>DOB:</strong> ${safe(p.dob)}</td><td style="padding:5px 0;font-size:13px;"><strong>Gender:</strong> ${safe(p.gender)}</td></tr></table><table>${autoLines}${bedTotal>0?`<tr><td style="padding:8px 0;border-bottom:1px solid #eee;font-size:14px;">Bed Space (${days} days × ₦${bedRate.toLocaleString()})</td><td style="padding:8px 0;border-bottom:1px solid #eee;font-size:14px;text-align:right;">₦${bedTotal.toLocaleString()}</td></tr>`:''}${procedureCharges.map(c=>`<tr><td style="padding:8px 0;border-bottom:1px solid #eee;font-size:14px;">💉 ${safe(c.name)}</td><td style="padding:8px 0;border-bottom:1px solid #eee;font-size:14px;text-align:right;">₦${c.amount.toLocaleString()}</td></tr>`).join('')}${extraCharges.map(c=>`<tr><td style="padding:8px 0;border-bottom:1px solid #eee;font-size:14px;">➕ ${safe(c.name)}</td><td style="padding:8px 0;border-bottom:1px solid #eee;font-size:14px;text-align:right;">₦${c.amount.toLocaleString()}</td></tr>`).join('')}</table><div style="background:#f8f9fa;border-radius:8px;padding:15px;margin:15px 0;"><div style="display:flex;justify-content:space-between;padding:8px 0;font-size:15px;font-weight:bold;"><span>Subtotal</span><span>₦${subtotal.toLocaleString()}</span></div>${hmoAmount>0?`<div style="display:flex;justify-content:space-between;padding:8px 0;color:#00aa55;font-weight:bold;font-size:14px;"><span>HMO Coverage</span><span>-₦${hmoAmount.toLocaleString()}</span></div>`:''}<div style="display:flex;justify-content:space-between;padding:12px 0;font-size:18px;font-weight:bold;color:#0066cc;border-top:2px solid #0066cc;"><span>TOTAL DUE</span><span>₦${totalDue.toLocaleString()}</span></div><div style="display:flex;justify-content:space-between;padding:8px 0;color:#00aa55;font-size:14px;"><span>Amount Paid</span><span style="font-weight:bold;">₦${amountPaid.toLocaleString()}</span></div>${balance>0?`<div style="display:flex;justify-content:space-between;padding:8px 0;color:#ff4444;font-size:14px;"><span>Balance Outstanding</span><span style="font-weight:bold;">₦${balance.toLocaleString()}</span></div>`:''}</div><div style="text-align:center;margin:15px 0;"><span class="pay-badge">${payStatus}</span></div><div style="text-align:center;font-size:11px;color:#999;margin-top:20px;padding-top:15px;border-top:1px solid #eee;">MEDITRACK — Unified Patient Health Records Nigeria<br>${safe(currentHospital.name)} • ${safe(receiptRef)} • Generated ${today}</div></div></div><script>window.print();<\/script></body></html>`);}
 
 // SHARE & REFERRAL
@@ -2888,7 +3646,6 @@ function renderAdminPanel(){
 // BILLING LIST — Outstanding Balance Manager
 // Visible to Admin, Receptionist, Doctor
 // ============================================================
-let currentBillingFilter='all';
 
 window.setBillingFilter=function(filter){
     currentBillingFilter=filter;
@@ -2899,147 +3656,6 @@ window.setBillingFilter=function(filter){
     renderBillingList();
 };
 
-function renderBillingList(){
-    const today=new Date().toLocaleDateString('en-GB');
-    const searchQ=(document.getElementById('bl-search')?.value||'').toLowerCase().trim();
-
-    // Calculate summary stats
-    const todayCollections=financialRecords
-        .filter(r=>r.date===today&&r.type==='payment')
-        .reduce((s,r)=>s+(r.amount||0),0);
-    const outstanding=bills
-        .filter(b=>b.paymentStatus==='unpaid'||b.paymentStatus==='partial')
-        .reduce((s,b)=>s+(b.balance||0),0);
-    const unpaidCount=bills
-        .filter(b=>b.paymentStatus==='unpaid'||b.paymentStatus==='partial').length;
-
-    const todayEl=document.getElementById('bl-today-collections');
-    const outEl=document.getElementById('bl-outstanding');
-    const countEl=document.getElementById('bl-unpaid-count');
-    if(todayEl)todayEl.textContent='₦'+todayCollections.toLocaleString();
-    if(outEl)outEl.textContent='₦'+outstanding.toLocaleString();
-    if(countEl)countEl.textContent=unpaidCount;
-
-    // Build rows — one row per visit per patient
-    const rows=[];
-
-    patients.forEach(p=>{
-        // Apply search filter
-        if(searchQ){
-            const matches=p.name?.toLowerCase().includes(searchQ)||
-                p.code?.toLowerCase().includes(searchQ)||
-                p.phone?.includes(searchQ);
-            if(!matches)return;
-        }
-
-        if(!p.visits||p.visits.length===0){
-            // Patient with no visits — only show in 'all' or 'nobill' tab
-            if(currentBillingFilter==='all'||currentBillingFilter==='nobill'){
-                rows.push({patient:p,visit:null,visitIndex:-1,bill:null,status:'nobill'});
-            }
-            return;
-        }
-
-        p.visits.forEach((v,visitIndex)=>{
-            // Only show visits at this hospital
-            const isHere=v.hospitalCode===currentHospital.code||
-                v.hospitalName?.trim().toLowerCase()===currentHospital.name?.trim().toLowerCase();
-            if(!isHere)return;
-
-            const bill=bills.find(b=>b.patientId===p.id&&b.visitIndex===visitIndex);
-            const status=bill?.paymentStatus||'nobill';
-
-            // Filter tab
-            if(currentBillingFilter!=='all'&&status!==currentBillingFilter)return;
-
-            rows.push({patient:p,visit:v,visitIndex,bill,status});
-        });
-    });
-
-    // Sort — unpaid and partial float to top, paid sink to bottom
-    const sortOrder={unpaid:0,partial:1,nobill:2,paid:3};
-    rows.sort((a,b)=>{
-        const sa=sortOrder[a.status]??2;
-        const sb=sortOrder[b.status]??2;
-        if(sa!==sb)return sa-sb;
-        // Within same status, sort by visit date descending
-        const da=a.visit?.date||a.patient.createdAt||'';
-        const db2=b.visit?.date||b.patient.createdAt||'';
-        return db2.localeCompare(da);
-    });
-
-    const container=document.getElementById('billing-list-items');
-    if(!container)return;
-
-    if(rows.length===0){
-        container.innerHTML=`<div class="empty-search"><div class="icon">💰</div><p>No billing records found</p></div>`;
-        return;
-    }
-
-    const statusConfig={
-        paid:{color:'#4CAF50',bg:'#e8f5e9',label:'✅ PAID'},
-        partial:{color:'#f57f17',bg:'#fff8e1',label:'💛 PARTIAL'},
-        unpaid:{color:'#ff4444',bg:'#fff0f0',label:'🔴 UNPAID'},
-        nobill:{color:'#999',bg:'#f5f5f5',label:'📋 No Bill Yet'}
-    };
-
-    container.innerHTML=rows.map(row=>{
-        const {patient:p,visit:v,bill,status}=row;
-        const cfg=statusConfig[status]||statusConfig.nobill;
-        const totalDue=bill?.totalDue||0;
-        const amountPaid=bill?.amountPaid||0;
-        const balance=bill?.balance||0;
-
-        return `<div onclick="openBillingFromList('${p.id}',${row.visitIndex})"
-            style="background:white;margin:8px 15px;border-radius:10px;
-            padding:14px;box-shadow:0 2px 5px rgba(0,0,0,0.08);
-            border-left:4px solid ${cfg.color};cursor:pointer;">
-            <div style="display:flex;justify-content:space-between;align-items:flex-start;">
-                <div style="flex:1;">
-                    <div style="font-weight:bold;font-size:15px;">${safe(p.name)}</div>
-                    <div style="font-family:monospace;font-size:12px;color:#0066cc;">${safe(p.code)}</div>
-                </div>
-                <span style="background:${cfg.bg};color:${cfg.color};padding:4px 10px;
-                    border-radius:12px;font-size:11px;font-weight:bold;white-space:nowrap;">
-                    ${cfg.label}
-                </span>
-            </div>
-            ${v?`<div style="font-size:12px;color:#666;margin-top:6px;">
-                📅 ${safe(v.date)} — ${safe(v.hospitalName||currentHospital.name)}
-                ${v.doctorName?` — Dr. ${safe(v.doctorName)}`:''}
-            </div>`:'<div style="font-size:12px;color:#999;margin-top:6px;">No visits recorded</div>'}
-            ${bill?`<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin-top:8px;text-align:center;">
-                <div style="background:#f8f9fa;border-radius:6px;padding:6px;">
-                    <div style="font-size:10px;color:#666;">Total Due</div>
-                    <div style="font-size:13px;font-weight:bold;color:#333;">₦${totalDue.toLocaleString()}</div>
-                </div>
-                <div style="background:#f8f9fa;border-radius:6px;padding:6px;">
-                    <div style="font-size:10px;color:#666;">Paid</div>
-                    <div style="font-size:13px;font-weight:bold;color:#4CAF50;">₦${amountPaid.toLocaleString()}</div>
-                </div>
-                <div style="background:#f8f9fa;border-radius:6px;padding:6px;">
-                    <div style="font-size:10px;color:#666;">Balance</div>
-                    <div style="font-size:13px;font-weight:bold;color:${balance>0?'#ff4444':'#4CAF50'};">₦${balance.toLocaleString()}</div>
-                </div>
-            </div>`:''}
-            ${bill?.receiptNumber?`<div style="font-size:10px;color:#999;margin-top:5px;font-family:monospace;">${safe(bill.receiptNumber)}</div>`:''}
-        </div>`;
-    }).join('');
-}
-
-window.openBillingFromList=function(patientId,visitIndex){
-    // Find patient and set up billing context
-    const p=patients.find(px=>px.id===patientId);
-    if(!p)return;
-    currentBillingPatientId=patientId;
-    // Navigate to billing view
-    showView('billing');
-    openBilling();
-    // If a specific visit was provided, auto-select it
-    if(visitIndex>=0){
-        setTimeout(()=>selectVisitForBilling(visitIndex),300);
-    }
-};
 
 
 
