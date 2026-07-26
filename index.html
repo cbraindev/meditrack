@@ -408,7 +408,13 @@
                 <div style="margin-top:8px;">
                     <div style="font-size:11px;color:#666;margin-bottom:5px;">Quick add:</div>
                     <div style="display:flex;flex-wrap:wrap;gap:5px;">
-                        ${['Dressing','IV Line','Injection','Nebulization','Urinalysis Stick','Wound Suture','Blood Transfusion'].map(p=>`<button onclick="quickAddProcedure('${p}')" style="background:#e8f4fd;color:#0066cc;border:1px solid #0066cc;padding:4px 8px;border-radius:12px;font-size:11px;cursor:pointer;">${p}</button>`).join('')}
+                        <button onclick="quickAddProcedure('Dressing')" style="background:#e8f4fd;color:#0066cc;border:1px solid #0066cc;padding:4px 8px;border-radius:12px;font-size:11px;cursor:pointer;">Dressing</button>
+                        <button onclick="quickAddProcedure('IV Line')" style="background:#e8f4fd;color:#0066cc;border:1px solid #0066cc;padding:4px 8px;border-radius:12px;font-size:11px;cursor:pointer;">IV Line</button>
+                        <button onclick="quickAddProcedure('Injection')" style="background:#e8f4fd;color:#0066cc;border:1px solid #0066cc;padding:4px 8px;border-radius:12px;font-size:11px;cursor:pointer;">Injection</button>
+                        <button onclick="quickAddProcedure('Nebulization')" style="background:#e8f4fd;color:#0066cc;border:1px solid #0066cc;padding:4px 8px;border-radius:12px;font-size:11px;cursor:pointer;">Nebulization</button>
+                        <button onclick="quickAddProcedure('Urinalysis Stick')" style="background:#e8f4fd;color:#0066cc;border:1px solid #0066cc;padding:4px 8px;border-radius:12px;font-size:11px;cursor:pointer;">Urinalysis Stick</button>
+                        <button onclick="quickAddProcedure('Wound Suture')" style="background:#e8f4fd;color:#0066cc;border:1px solid #0066cc;padding:4px 8px;border-radius:12px;font-size:11px;cursor:pointer;">Wound Suture</button>
+                        <button onclick="quickAddProcedure('Blood Transfusion')" style="background:#e8f4fd;color:#0066cc;border:1px solid #0066cc;padding:4px 8px;border-radius:12px;font-size:11px;cursor:pointer;">Blood Transfusion</button>
                     </div>
                 </div>
             </div>
@@ -441,7 +447,10 @@
 
             <!-- Payment method tabs -->
             <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px;" id="payment-method-tabs">
-                ${[['cash','💵 Cash'],['transfer','🏦 Transfer'],['pos','💳 POS'],['hmo','🏥 HMO']].map(([v,l])=>`<button onclick="selectPaymentMethod('${v}')" id="pmt-${v}" style="flex:1;min-width:70px;padding:8px;border:2px solid #ddd;border-radius:8px;font-size:12px;cursor:pointer;background:white;color:#666;">${l}</button>`).join('')}
+                <button onclick="selectPaymentMethod('cash')" id="pmt-cash" style="flex:1;min-width:70px;padding:8px;border:2px solid #0066cc;border-radius:8px;font-size:12px;cursor:pointer;background:#0066cc;color:white;">💵 Cash</button>
+                <button onclick="selectPaymentMethod('transfer')" id="pmt-transfer" style="flex:1;min-width:70px;padding:8px;border:2px solid #ddd;border-radius:8px;font-size:12px;cursor:pointer;background:white;color:#666;">🏦 Transfer</button>
+                <button onclick="selectPaymentMethod('pos')" id="pmt-pos" style="flex:1;min-width:70px;padding:8px;border:2px solid #ddd;border-radius:8px;font-size:12px;cursor:pointer;background:white;color:#666;">💳 POS</button>
+                <button onclick="selectPaymentMethod('hmo')" id="pmt-hmo" style="flex:1;min-width:70px;padding:8px;border:2px solid #ddd;border-radius:8px;font-size:12px;cursor:pointer;background:white;color:#666;">🏥 HMO</button>
             </div>
             <input type="hidden" id="payment-method" value="cash">
 
@@ -852,7 +861,7 @@
     <div onclick="showView('billing-list');toggleMore();" style="padding:10px 15px;cursor:pointer;font-size:14px;" id="billing-list-menu-item">💰 Billing</div>
     <div onclick="showView('pharmacy');toggleMore();" style="padding:10px 15px;cursor:pointer;font-size:14px;">💊 Pharmacy</div>
     <div onclick="showView('lab');toggleMore();" style="padding:10px 15px;cursor:pointer;font-size:14px;">🔬 Lab</div>
-    <div onclick="showView('billing-list');toggleMore();" id="billing-list-menu-item" style="padding:10px 15px;cursor:pointer;font-size:14px;display:none;">💰 Billing</div>
+    
     <div onclick="showView('analytics');toggleMore();" style="padding:10px 15px;cursor:pointer;font-size:14px;">📊 Analytics</div>
     <div id="admin-menu-item" onclick="showView('admin');toggleMore();" style="padding:10px 15px;cursor:pointer;font-size:14px;display:none;">⚙️ Admin</div>
 </div>
@@ -2558,6 +2567,15 @@ window.saveBillWithPayment=async function(){
 let currentBillingFilter='all';
 
 
+window.setBillingFilter=function(filter){
+    currentBillingFilter=filter;
+    ['all','unpaid','partial','paid','nobill'].forEach(f=>{
+        const el=document.getElementById('bl-tab-'+f);
+        if(el)el.classList.toggle('active',f===filter);
+    });
+    renderBillingList();
+};
+
 function renderBillingList(){
     const today=new Date().toLocaleDateString('en-GB');
     const searchQ=(document.getElementById('bl-search')?.value||'').toLowerCase().trim();
@@ -3642,19 +3660,7 @@ function renderAdminPanel(){
 }
 
 
-// ============================================================
-// BILLING LIST — Outstanding Balance Manager
-// Visible to Admin, Receptionist, Doctor
-// ============================================================
-
-window.setBillingFilter=function(filter){
-    currentBillingFilter=filter;
-    ['all','unpaid','partial','paid','nobill'].forEach(f=>{
-        const el=document.getElementById('bl-tab-'+f);
-        if(el)el.classList.toggle('active',f===filter);
-    });
-    renderBillingList();
-};
+// Billing list functions defined above
 
 
 
@@ -3764,6 +3770,427 @@ window.showDailyReconciliation=function(){
 
 
 
+
+// ============================================================
+// PHARMACY — Flag to Doctor
+// ============================================================
+window.flagToDoctor=async function(prescriptionId){
+    const p=prescriptions.find(p=>p.id===prescriptionId);if(!p)return;
+    const message=prompt('Describe your concern to the doctor:');if(!message)return;
+    const flagData={
+        prescriptionId,patientId:p.patientId,patientCode:p.patientCode,
+        patientName:p.patientName,flagMessage:message,flaggedBy:currentUser.name,
+        hospitalName:currentHospital.name,hospitalCode:currentHospital.code,
+        date:new Date().toLocaleDateString('en-GB'),status:'pending',
+        createdAt:new Date().toISOString()
+    };
+    try{
+        if(connectionMode==='local'){await localPost('/api/pharmacy-flags',flagData);}
+        else{await addDoc(collection(db,'pharmacyFlags'),flagData);}
+        setStatus('🟢 Flag sent to doctor');
+        alert('✅ Flag sent to doctor');
+    }catch(e){setStatus('🔴 Error: '+e.message);}
+};
+
+// ============================================================
+// ADMIN — Staff Management
+// ============================================================
+window.addStaffMember=async function(){
+    const name=document.getElementById('new-staff-name').value.trim();
+    const role=document.getElementById('new-staff-role').value;
+    const license=document.getElementById('new-staff-license').value.trim();
+    const key=document.getElementById('new-staff-key').value.trim();
+    if(!name||!role||!key){alert('Please fill name, role and access key');return;}
+    if(key.length<8){alert('Access key must be at least 8 characters');return;}
+    try{
+        const hDoc=await getDoc(doc(db,'hospitals',currentHospital.code));
+        const data=hDoc.data();
+        const hashedKey=await hashKey(key);
+        if(data.staff?.find(s=>s.keyHash===hashedKey)){alert('This access key already exists. Choose a different key.');return;}
+        const newStaff=[...(data.staff||[]),{
+            name,role,license,keyHash:hashedKey,
+            keyPreview:key.substring(0,4)+'****',
+            addedAt:new Date().toISOString()
+        }];
+        await updateDoc(doc(db,'hospitals',currentHospital.code),{staff:newStaff});
+        document.getElementById('new-staff-name').value='';
+        document.getElementById('new-staff-role').value='';
+        document.getElementById('new-staff-license').value='';
+        document.getElementById('new-staff-key').value='';
+        const msg=document.getElementById('admin-success-msg');
+        msg.textContent=`✅ ${name} added as ${role}. Access key: ${key} — Save this key safely, it cannot be recovered.`;
+        msg.style.display='block';
+        setTimeout(()=>msg.style.display='none',8000);
+        addSecurityLog(`Staff added: ${name} (${role})`);
+        loadStaffList();
+    }catch(e){alert('Error: '+e.message);}
+};
+
+window.removeStaff=async function(index){
+    if(!confirm('Remove this staff member? They will no longer be able to login.'))return;
+    try{
+        const hDoc=await getDoc(doc(db,'hospitals',currentHospital.code));
+        const data=hDoc.data();
+        const removed=data.staff[index];
+        await updateDoc(doc(db,'hospitals',currentHospital.code),{
+            staff:data.staff.filter((_,i)=>i!==index)
+        });
+        loadStaffList();
+        addSecurityLog(`Staff removed: ${removed?.name||'Unknown'}`);
+        const msg=document.getElementById('admin-success-msg');
+        msg.textContent='✅ Staff member removed.';
+        msg.style.display='block';
+        setTimeout(()=>msg.style.display='none',3000);
+    }catch(e){alert('Error: '+e.message);}
+};
+
+async function loadStaffList(){
+    try{
+        const hDoc=await getDoc(doc(db,'hospitals',currentHospital.code));
+        if(!hDoc.exists())return;
+        const data=hDoc.data();const staff=data.staff||[];
+        document.getElementById('admin-staff-count').textContent=staff.length;
+        const list=document.getElementById('staff-list');
+        if(!staff.length){list.innerHTML='<p style="color:#666;font-size:14px;">No staff yet.</p>';return;}
+        list.innerHTML='';
+        staff.forEach((s,i)=>{
+            list.innerHTML+=`<div class="staff-card">
+                <div>
+                    <div class="staff-name">${safe(s.name)}</div>
+                    <div style="margin-top:3px;"><span class="role-badge role-${s.role}">${safe(s.role)}</span></div>
+                    ${s.license?`<div style="font-size:11px;color:#666;margin-top:2px;">License: ${safe(s.license)}</div>`:''}
+                    <div class="staff-key" style="margin-top:3px;">Key: ${safe(s.keyPreview||'****')}</div>
+                </div>
+                ${s.role!=='admin'?
+                    `<button class="remove-btn" onclick="removeStaff(${i})">Remove</button>`:
+                    '<span style="font-size:12px;color:#999;">Admin</span>'
+                }
+            </div>`;
+        });
+    }catch(e){console.error('loadStaffList:',e);}
+}
+
+// ============================================================
+// ADMIN — Diagnostic Tools
+// ============================================================
+window.repairPatientHospitalCodes=async function(){
+    if(!currentHospital||!isOnline){alert('Must be online to run repair');return;}
+    if(!confirm(`Scan Firebase and fix patients missing hospitalCode for ${currentHospital.name}?\n\nOnly run this once. Continue?`))return;
+    setStatus('🔄 Scanning Firebase...');
+    const results={fixed:0,errors:0};
+    try{
+        const byName=await getDocs(query(
+            collection(db,'patients'),
+            where('registeredAtHospital','==',currentHospital.name)
+        ));
+        const toFix=[];
+        byName.forEach(d=>{
+            const data=d.data();
+            if(!data.hospitalCode||data.hospitalCode!==currentHospital.code){
+                toFix.push({id:d.id,...data});
+            }
+        });
+        if(toFix.length===0){
+            setStatus('✅ No repairs needed');
+            alert('✅ All patients already have the correct hospitalCode.');
+            return;
+        }
+        setStatus(`🔄 Fixing ${toFix.length} patients...`);
+        for(const patient of toFix){
+            try{
+                await updateDoc(doc(db,'patients',patient.id),{
+                    hospitalCode:currentHospital.code,
+                    hospitalAbbrev:currentHospital.abbrev,
+                    state:currentHospital.state,
+                    stateName:currentHospital.stateName
+                });
+                results.fixed++;
+            }catch(e){results.errors++;}
+        }
+        setStatus('🟢 Repair complete — reloading data...');
+        alert(`✅ Repair complete!\nFixed: ${results.fixed}\nErrors: ${results.errors}`);
+        addSecurityLog(`Data repair: ${results.fixed} patients fixed`);
+        initialLoadComplete=false;
+        quickLoadFromFirebase();
+    }catch(e){
+        setStatus('🔴 Repair failed: '+e.message);
+        alert('Repair failed: '+e.message);
+    }
+};
+
+window.debugPatientLoad=async function(){
+    if(!currentHospital||!isOnline)return;
+    setStatus('🔍 Running diagnosis...');
+    try{
+        const allSnap=await getDocs(collection(db,'patients'));
+        let total=0,withCode=0,matchingCode=0,missingCode=0;
+        const samples=[];
+        allSnap.forEach(d=>{
+            total++;
+            const data=d.data();
+            if(data.hospitalCode){
+                withCode++;
+                if(data.hospitalCode===currentHospital.code){
+                    matchingCode++;
+                    if(samples.length<3)samples.push({name:data.name,code:data.code});
+                }
+            }else{missingCode++;}
+        });
+        const report=`🔍 MEDITRACK DIAGNOSIS\n\n`+
+            `Hospital: ${currentHospital.name}\n`+
+            `Hospital code: ${currentHospital.code}\n\n`+
+            `Total patients in Firebase: ${total}\n`+
+            `Have hospitalCode field: ${withCode}\n`+
+            `Match YOUR hospital: ${matchingCode}\n`+
+            `Missing hospitalCode: ${missingCode}\n\n`+
+            `Currently loaded in app: ${patients.length}\n\n`+
+            `${matchingCode===0?'⚠️ PROBLEM: No patients match your hospital code.\nRun the Repair Tool.':'✅ Patients match correctly.'}\n\n`+
+            `Sample: ${samples.map(p=>p.name+' ('+p.code+')').join(', ')||'None'}`;
+        alert(report);
+        setStatus('🟢 Diagnosis complete');
+    }catch(e){
+        alert('Diagnosis failed: '+e.message);
+        setStatus('🔴 Error');
+    }
+};
+
+// ============================================================
+// ANALYTICS
+// ============================================================
+window.switchAnalyticsTab=function(tab){
+    ['daily','conditions','staff','finance'].forEach(t=>{
+        document.getElementById('analytics-tab-'+t)?.classList.remove('active');
+        const el=document.getElementById('analytics-'+t);
+        if(el)el.style.display='none';
+    });
+    document.getElementById('analytics-tab-'+tab)?.classList.add('active');
+    const el=document.getElementById('analytics-'+tab);
+    if(el)el.style.display='block';
+    renderAnalytics(tab);
+};
+
+function renderAnalytics(tab){
+    if(tab==='daily')renderDailyAnalytics();
+    else if(tab==='conditions')renderConditionsAnalytics();
+    else if(tab==='staff')renderStaffAnalytics();
+    else if(tab==='finance')renderFinanceAnalytics();
+}
+
+function renderDailyAnalytics(){
+    const container=document.getElementById('analytics-daily');if(!container)return;
+    const dailyCounts={};
+    patients.forEach(p=>{if(p.visits)p.visits.forEach(v=>{
+        const isHere=v.hospitalCode===currentHospital.code||v.hospitalName?.trim().toLowerCase()===currentHospital.name?.trim().toLowerCase();
+        if(isHere)dailyCounts[v.date]=(dailyCounts[v.date]||0)+1;
+    });});
+    const sorted=Object.entries(dailyCounts)
+        .sort((a,b)=>b[0].split('/').reverse().join('-').localeCompare(a[0].split('/').reverse().join('-')))
+        .slice(0,14);
+    const max=Math.max(...sorted.map(d=>d[1]),1);
+    if(!sorted.length){container.innerHTML='<div class="empty-search"><div class="icon">📅</div><p>No visit data yet</p></div>';return;}
+    container.innerHTML='<div style="padding:15px;"><div style="font-weight:bold;color:#333;margin-bottom:15px;">Patient Visits — Last 14 Days</div>';
+    sorted.forEach(([date,count])=>{
+        const width=Math.round(count/max*100);
+        container.innerHTML+=`<div style="margin-bottom:10px;"><div class="chart-label">${safe(date)} — ${count} patient${count>1?'s':''}</div><div class="chart-bar"><div class="chart-bar-fill" style="width:${width}%;">${count}</div></div></div>`;
+    });
+    container.innerHTML+='</div>';
+}
+
+function renderConditionsAnalytics(){
+    const container=document.getElementById('analytics-conditions');if(!container)return;
+    const conditions={};
+    patients.forEach(p=>{if(p.visits)p.visits.forEach(v=>{
+        const isHere=v.hospitalCode===currentHospital.code||v.hospitalName?.trim().toLowerCase()===currentHospital.name?.trim().toLowerCase();
+        if(isHere&&v.diagnosis){const d=v.diagnosis.toLowerCase();conditions[d]=(conditions[d]||0)+1;}
+    });});
+    const sorted=Object.entries(conditions).sort((a,b)=>b[1]-a[1]).slice(0,10);
+    const max=Math.max(...sorted.map(d=>d[1]),1);
+    if(!sorted.length){container.innerHTML='<div class="empty-search"><div class="icon">🩺</div><p>No diagnosis data yet</p></div>';return;}
+    container.innerHTML='<div style="padding:15px;"><div style="font-weight:bold;color:#333;margin-bottom:15px;">Top 10 Conditions</div>';
+    sorted.forEach(([cond,count])=>{
+        const width=Math.round(count/max*100);
+        container.innerHTML+=`<div style="margin-bottom:10px;"><div class="chart-label">${safe(cond.charAt(0).toUpperCase()+cond.slice(1))} — ${count}</div><div class="chart-bar"><div class="chart-bar-fill" style="width:${width}%;background:#00aa55;">${count}</div></div></div>`;
+    });
+    container.innerHTML+='</div>';
+}
+
+function renderStaffAnalytics(){
+    const container=document.getElementById('analytics-staff');if(!container)return;
+    const staffActivity={};
+    patients.forEach(p=>{if(p.visits)p.visits.forEach(v=>{
+        const isHere=v.hospitalCode===currentHospital.code||v.hospitalName?.trim().toLowerCase()===currentHospital.name?.trim().toLowerCase();
+        if(!isHere)return;
+        if(v.doctorName){
+            if(!staffActivity[v.doctorName])staffActivity[v.doctorName]={role:'Doctor',count:0,patients:[]};
+            staffActivity[v.doctorName].count++;
+            staffActivity[v.doctorName].patients.push({name:p.name,code:p.code,date:v.date,diagnosis:v.diagnosis||''});
+        }
+        if(v.nurseName){
+            if(!staffActivity[v.nurseName])staffActivity[v.nurseName]={role:'Nurse',count:0,patients:[]};
+            staffActivity[v.nurseName].count++;
+            staffActivity[v.nurseName].patients.push({name:p.name,code:p.code,date:v.date,diagnosis:''});
+        }
+    });});
+    const sorted=Object.entries(staffActivity).sort((a,b)=>b[1].count-a[1].count);
+    if(!sorted.length){container.innerHTML='<div class="empty-search"><div class="icon">👨‍⚕️</div><p>No staff activity yet</p></div>';return;}
+    container.innerHTML='<div style="padding:15px;"><div style="font-weight:bold;color:#333;margin-bottom:15px;">Staff Activity</div>';
+    sorted.forEach(([name,data])=>{
+        const recent=data.patients.slice(-3).reverse();
+        container.innerHTML+=`<div style="background:white;border-radius:10px;padding:15px;margin-bottom:12px;box-shadow:0 2px 5px rgba(0,0,0,0.08);">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+                <div>
+                    <div style="font-weight:bold;font-size:16px;">${safe(name)}</div>
+                    <div style="font-size:12px;color:#666;">${safe(data.role)}</div>
+                </div>
+                <div style="background:#e8f4fd;padding:8px 15px;border-radius:8px;text-align:center;">
+                    <div style="font-size:24px;font-weight:bold;color:#0066cc;">${data.count}</div>
+                    <div style="font-size:11px;color:#666;">patients</div>
+                </div>
+            </div>
+            ${recent.map(pat=>`<div style="background:#f8f9fa;border-radius:6px;padding:8px;margin-bottom:5px;font-size:12px;">
+                <strong>${safe(pat.name)}</strong> <span style="font-family:monospace;">(${safe(pat.code)})</span>
+                <div style="color:#666;">📅 ${safe(pat.date)}${pat.diagnosis?' — '+safe(pat.diagnosis):''}</div>
+            </div>`).join('')}
+        </div>`;
+    });
+    container.innerHTML+='</div>';
+}
+
+function renderFinanceAnalytics(){
+    const container=document.getElementById('analytics-finance');if(!container)return;
+    const today=new Date().toLocaleDateString('en-GB');
+    const todayRecs=financialRecords.filter(r=>r.date===today);
+    const consultRev=todayRecs.filter(r=>r.type==='consultation').reduce((s,r)=>s+(r.amount||0),0);
+    const labRev=todayRecs.filter(r=>r.type==='lab').reduce((s,r)=>s+(r.amount||0),0);
+    const drugRev=todayRecs.filter(r=>r.type==='drugs').reduce((s,r)=>s+(r.amount||0),0);
+    const bedRev=todayRecs.filter(r=>r.type==='bed_space').reduce((s,r)=>s+(r.amount||0),0);
+    const paymentRev=todayRecs.filter(r=>r.type==='payment').reduce((s,r)=>s+(r.amount||0),0);
+    const totalToday=consultRev+labRev+drugRev+bedRev+paymentRev;
+    const allTime=financialRecords.reduce((s,r)=>s+(r.amount||0),0);
+    const unpaidBills=bills.filter(b=>b.paymentStatus==='unpaid'||b.paymentStatus==='partial');
+    const totalOutstanding=unpaidBills.reduce((s,b)=>s+(b.balance||0),0);
+    container.innerHTML=`<div style="padding:15px;">
+    <div style="font-weight:bold;color:#333;margin-bottom:10px;">💰 Today's Revenue — ${today}</div>
+    <div style="background:white;border-radius:10px;padding:15px;margin-bottom:15px;box-shadow:0 2px 5px rgba(0,0,0,0.1);">
+        ${consultRev>0?`<div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #f5f5f5;font-size:14px;"><span>Consultation Fees</span><span style="color:#0066cc;font-weight:bold;">₦${consultRev.toLocaleString()}</span></div>`:''}
+        ${labRev>0?`<div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #f5f5f5;font-size:14px;"><span>Lab Tests</span><span style="color:#009688;font-weight:bold;">₦${labRev.toLocaleString()}</span></div>`:''}
+        ${drugRev>0?`<div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #f5f5f5;font-size:14px;"><span>Drug Sales</span><span style="color:#9c27b0;font-weight:bold;">₦${drugRev.toLocaleString()}</span></div>`:''}
+        ${bedRev>0?`<div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #f5f5f5;font-size:14px;"><span>Bed Space</span><span style="color:#ff8800;font-weight:bold;">₦${bedRev.toLocaleString()}</span></div>`:''}
+        ${paymentRev>0?`<div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #f5f5f5;font-size:14px;"><span>Payments Received</span><span style="color:#00aa55;font-weight:bold;">₦${paymentRev.toLocaleString()}</span></div>`:''}
+        <div style="display:flex;justify-content:space-between;padding:12px 0;font-size:16px;font-weight:bold;color:#0066cc;border-top:2px solid #0066cc;margin-top:5px;"><span>Total Today</span><span>₦${totalToday.toLocaleString()}</span></div>
+    </div>
+    <div style="background:white;border-radius:10px;padding:15px;margin-bottom:15px;box-shadow:0 2px 5px rgba(0,0,0,0.1);">
+        <div style="font-size:13px;color:#666;margin-bottom:5px;">All-Time Revenue</div>
+        <div style="font-size:28px;font-weight:bold;color:#0066cc;">₦${allTime.toLocaleString()}</div>
+    </div>
+    ${totalOutstanding>0?`<div style="background:#fff0f0;border:2px solid #ff4444;border-radius:10px;padding:15px;margin-bottom:15px;">
+        <div style="font-size:13px;color:#ff4444;font-weight:bold;margin-bottom:5px;">🔴 Outstanding Balances</div>
+        <div style="font-size:24px;font-weight:bold;color:#ff4444;">₦${totalOutstanding.toLocaleString()}</div>
+        <div style="font-size:12px;color:#666;margin-top:3px;">${unpaidBills.length} unpaid/partial bill${unpaidBills.length>1?'s':''}</div>
+    </div>`:''}
+    <button onclick="showDailyReconciliation()" style="width:100%;background:#0066cc;color:white;border:none;padding:14px;border-radius:10px;font-size:15px;font-weight:bold;cursor:pointer;margin-bottom:10px;">🖨️ Print Daily Reconciliation</button>
+    <button onclick="showView('billing-list')" style="width:100%;background:#00aa55;color:white;border:none;padding:12px;border-radius:10px;font-size:14px;cursor:pointer;">💰 Manage Bills &amp; Outstanding</button>
+    </div>`;
+}
+
+// ============================================================
+// PATIENT CARD PRINTING
+// ============================================================
+window.printPatientCard=function(){
+    const p=patients.find(p=>p.id===currentPatientId);if(!p)return;
+    const w=window.open('','_blank');
+    w.document.write(`<!DOCTYPE html><html><head><title>Patient Card</title>
+    <style>body{font-family:Arial,sans-serif;padding:20px;}
+    .card{border:2px solid #0066cc;border-radius:10px;padding:20px;max-width:350px;margin:0 auto;}
+    @media print{body{background:white;}}</style></head><body>
+    <div class="card">
+        <div style="background:#0066cc;color:white;padding:10px;border-radius:8px;text-align:center;margin-bottom:15px;">
+            <div style="font-size:18px;font-weight:bold;">🏥 MEDITRACK</div>
+            <div style="font-size:11px;">Unified Patient Health Records — Nigeria</div>
+        </div>
+        <div style="font-size:22px;font-weight:bold;color:#0066cc;text-align:center;margin:10px 0;letter-spacing:2px;font-family:monospace;">${safe(p.code)}</div>
+        <div style="font-size:13px;margin:5px 0;"><strong>Name:</strong> ${safe(p.name)}</div>
+        <div style="font-size:13px;margin:5px 0;"><strong>Phone:</strong> ${safe(p.phone)}</div>
+        <div style="font-size:13px;margin:5px 0;"><strong>DOB:</strong> ${safe(p.dob)}</div>
+        <div style="font-size:13px;margin:5px 0;"><strong>Blood Group:</strong> ${safe(p.blood||'Not recorded')}</div>
+        <div style="font-size:13px;margin:5px 0;"><strong>State:</strong> ${safe(p.stateName||'Not recorded')}</div>
+        ${p.hmoCompany?`<div style="font-size:13px;margin:5px 0;"><strong>HMO:</strong> ${safe(p.hmoCompany)} — ${safe(p.hmo||'No number')}</div>`:''}
+        ${p.allergy?
+            `<div style="background:#ff4444;color:white;padding:8px;border-radius:5px;text-align:center;margin-top:10px;font-weight:bold;">⚠️ ALLERGIC TO: ${safe(p.allergy.toUpperCase())}</div>`:
+            '<div style="background:#4CAF50;color:white;padding:8px;border-radius:5px;text-align:center;margin-top:10px;font-weight:bold;">✅ NO KNOWN ALLERGIES</div>'
+        }
+        <div style="text-align:center;font-size:11px;color:#666;margin-top:15px;">Present at any MEDITRACK facility for instant health records</div>
+    </div>
+    <script>window.print();<\/script></body></html>\`);
+};
+
+// ============================================================
+// INVENTORY — Update Stock
+// ============================================================
+window.updateStock=async function(itemId){
+    const item=inventory.find(i=>i.id===itemId);if(!item)return;
+    const qty=prompt(`Current: ${item.quantity} units\nNew quantity for ${item.name}:`);
+    if(qty===null)return;
+    const newQty=parseInt(qty);
+    if(isNaN(newQty)||newQty<0){alert('Invalid quantity');return;}
+    try{
+        if(connectionMode==='local'){
+            await localPut(\`/api/inventory/\${itemId}\`,{
+                quantity:newQty,unitPrice:item.unitPrice,
+                reorderLevel:item.reorderLevel
+            });
+        }else{
+            await updateDoc(doc(db,'inventory',itemId),{
+                quantity:newQty,updatedAt:new Date().toISOString()
+            });
+        }
+        const idx=inventory.findIndex(i=>i.id===itemId);
+        if(idx>=0)inventory[idx]={...inventory[idx],quantity:newQty};
+        window.renderInventory();
+        setStatus('✅ Stock updated');
+    }catch(e){alert('Error updating stock: '+e.message);}
+};
+
+// ============================================================
+// LAB — Completed Tests List
+// ============================================================
+function renderLabCompleted(){
+    const list=document.getElementById('lab-completed-list');
+    if(!list)return;
+    const completed=labRequests.filter(l=>l.status==='completed');
+    if(!completed.length){
+        list.innerHTML='<div class="empty-search"><div class="icon">✅</div><p>No completed tests yet</p></div>';
+        return;
+    }
+    list.innerHTML=\`<div class="section-title">\${completed.length} COMPLETED</div>\`;
+    completed.forEach(l=>{
+        const isReviewed=l.reviewedByDoctor||l.reviewed_by_doctor;
+        list.innerHTML+=\`<div style="background:white;margin:8px 15px;border-radius:10px;padding:15px;
+            box-shadow:0 2px 5px rgba(0,0,0,0.08);
+            border-left:4px solid \${isReviewed?'#4CAF50':'#ff8800'};">
+            <div style="font-weight:bold;">\${safe(l.patientName)}
+                <span style="font-family:monospace;font-size:12px;">(\${safe(l.patientCode)})</span>
+            </div>
+            <div style="font-size:14px;margin-top:5px;font-weight:bold;">\${safe(l.testType)}</div>
+            <div style="background:#e8f5e9;padding:8px;border-radius:6px;margin-top:5px;">
+                <div style="font-size:12px;color:#666;">RESULT:</div>
+                <div style="font-size:15px;font-weight:bold;color:#2e7d32;">\${safe(l.result)}</div>
+            </div>
+            \${l.testCost?
+                \`<div style="font-size:12px;color:#0066cc;margin-top:5px;">💰 ₦\${l.testCost?.toLocaleString()}</div>\`:
+                ''}
+            <div style="font-size:12px;color:#666;margin-top:3px;">
+                By: \${safe(l.completedBy||l.completed_by||'Lab')} — \${safe(l.date)}
+            </div>
+            \${l.isCritical?
+                '<div style="font-size:11px;color:#ff4444;font-weight:bold;margin-top:3px;">🚨 CRITICAL VALUE</div>':
+                ''}
+            <div style="margin-top:5px;font-size:11px;font-weight:bold;color:\${isReviewed?'#4CAF50':'#ff8800'};">
+                \${isReviewed?'✅ Doctor reviewed':'⏳ Awaiting doctor review'}
+            </div>
+        </div>\`;
+    });
+}
 </script>
 </body>
 </html>
