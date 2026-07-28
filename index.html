@@ -1087,9 +1087,9 @@ function updateConnectedStaffDisplay(staffList){
     if(!existing)document.body.appendChild(bar);
 }
 
-async function localGet(endpoint){const r=await fetch(`${localServerUrl}${endpoint}`);if(!r.ok)throw new Error(`HTTP ${r.status}`);return await r.json();}
-async function localPost(endpoint,data){const r=await fetch(`${localServerUrl}${endpoint}`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(data)});if(!r.ok)throw new Error(`HTTP ${r.status}`);return await r.json();}
-async function localPut(endpoint,data){const r=await fetch(`${localServerUrl}${endpoint}`,{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify(data)});if(!r.ok)throw new Error(`HTTP ${r.status}`);return await r.json();}
+async function localGet(endpoint){const resp=await fetch(`${localServerUrl}${endpoint}`);if(!resp.ok)throw new Error(`HTTP ${resp.status}`);return await resp.json();}
+async function localPost(endpoint,data){const resp=await fetch(`${localServerUrl}${endpoint}`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(data)});if(!resp.ok)throw new Error(`HTTP ${resp.status}`);return await resp.json();}
+async function localPut(endpoint,data){const resp=await fetch(`${localServerUrl}${endpoint}`,{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify(data)});if(!resp.ok)throw new Error(`HTTP ${resp.status}`);return await resp.json();}
 
 // ============================================================
 // SECURITY FUNCTIONS
@@ -1881,7 +1881,7 @@ async function generatePatientCode(){
         try{
             const controller=new AbortController();
             setTimeout(()=>controller.abort(),2000);
-            const r=await fetch(`${localServerUrl}/api/patients/generate-code`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({state:currentHospital.state,abbrev:currentHospital.abbrev,hospitalCode:currentHospital.code}),signal:controller.signal});
+            const codeResp=await fetch(`${localServerUrl}/api/patients/generate-code`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({state:currentHospital.state,abbrev:currentHospital.abbrev,hospitalCode:currentHospital.code}),signal:controller.signal});
             if(r.ok){const result=await r.json();if(result.code)return result.code;}
         }catch(e){console.log('Local code gen unavailable, using Firebase');}
     }
@@ -2995,7 +2995,7 @@ window.submitReturningVitals=async function(){
     }catch(e){setStatus('🔴 Error: '+e.message);}
 }
 
-window.findPatientForNurse=function(){const q=document.getElementById('nurse-patient-search').value.toLowerCase();const r=document.getElementById('nurse-patient-result');if(q.length<1){r.textContent='';selectedPatientForNurse=null;return;}const found=patients.find(p=>p.name?.toLowerCase().includes(q)||p.code?.toLowerCase().includes(q));if(found){selectedPatientForNurse=found;r.innerHTML=`✅ <strong>${safe(found.name)}</strong> <span style="font-family:monospace;">(${safe(found.code)})</span>${found.allergy?` <span style="color:red;">⚠️ ${safe(found.allergy)}</span>`:''}`;r.style.color='#4CAF50';}else{selectedPatientForNurse=null;r.textContent='❌ Not found';r.style.color='red';}}
+window.findPatientForNurse=function(){const q=document.getElementById('nurse-patient-search').value.toLowerCase();const resultEl=document.getElementById('nurse-patient-result');if(q.length<1){resultEl.textContent='';selectedPatientForNurse=null;return;}const found=patients.find(p=>p.name?.toLowerCase().includes(q)||p.code?.toLowerCase().includes(q));if(found){selectedPatientForNurse=found;resultEl.innerHTML=`✅ <strong>${safe(found.name)}</strong> <span style="font-family:monospace;">(${safe(found.code)})</span>${found.allergy?` <span style="color:red;">⚠️ ${safe(found.allergy)}</span>`:''}`;r.style.color='#4CAF50';}else{selectedPatientForNurse=null;r.textContent='❌ Not found';r.style.color='red';}}
 
 window.submitVitals=async function(){
     if(!selectedPatientForNurse){alert('Please select a patient');return;}
@@ -3273,8 +3273,7 @@ window.renderInventory=function(){
             section.innerHTML+=`<div class="inventory-card" style="border-left:4px solid ${borderColor};margin:8px 0;">
                 <div>
                     <div class="inventory-name">${safe(item.name)}</div>
-                    <div st
-yle="font-size:12px;color:#666;">Unit Price: ₦${item.unitPrice?.toLocaleString()||0}</div>
+                    <div style="font-size:12px;color:#666;">Unit Price: ₦${item.unitPrice?.toLocaleString()||0}</div>
                     <div style="font-size:12px;color:#666;">Reorder at: ${item.reorderLevel} units</div>
                     ${item.expiryDate?`<div style="font-size:12px;color:#666;margin-top:2px;">Expiry: ${safe(item.expiryDate)} ${getExpiryBadge(daysLeft)}</div>`:'<div style="font-size:11px;color:#999;">No expiry date set</div>'}
                     ${isLow?'<div style="font-size:11px;color:#ff4444;font-weight:bold;margin-top:2px;">🔴 LOW STOCK</div>':''}
@@ -4191,6 +4190,32 @@ function renderLabCompleted(){
             </div>
         </div>\`;
     });
+}
+
+window.switchLabTab=function(tab){
+    ['pending','completed','costs'].forEach(function(t){
+        var tabEl=document.getElementById('lab-tab-'+t);
+        if(tabEl)tabEl.classList.remove('active');
+        var listId=t==='costs'?'lab-costs-section':'lab-'+t+'-list';
+        var listEl=document.getElementById(listId);
+        if(listEl)listEl.style.display='none';
+    });
+    var activeTab=document.getElementById('lab-tab-'+tab);
+    if(activeTab)activeTab.classList.add('active');
+    var activeId=tab==='costs'?'lab-costs-section':'lab-'+tab+'-list';
+    var activeEl=document.getElementById(activeId);
+    if(activeEl)activeEl.style.display='block';
+    if(tab==='pending')renderLabPending();
+    else if(tab==='completed')renderLabCompleted();
+    else renderLabCosts();
+};
+function renderLabCosts(){
+    var section=document.getElementById('lab-costs-section');
+    if(!section)return;
+    var today=new Date().toLocaleDateString('en-GB');
+    var done=labRequests.filter(function(l){return l.status==='completed'&&l.date===today;});
+    var total=done.reduce(function(s,l){return s+(l.testCost||0);},0);
+    section.innerHTML='<div style="padding:15px;"><div style="background:white;border-radius:10px;padding:15px;box-shadow:0 2px 5px rgba(0,0,0,0.1);"><div style="font-weight:bold;color:#009688;margin-bottom:10px;">Today Lab Revenue</div><div style="display:flex;justify-content:space-between;padding:8px 0;font-size:14px;"><span>Tests Done</span><span>'+done.length+'</span></div><div style="display:flex;justify-content:space-between;padding:10px 0;font-size:16px;font-weight:bold;color:#009688;border-top:2px solid #009688;"><span>Total</span><span>&#8358;'+total.toLocaleString()+'</span></div></div></div>';
 }
 </script>
 </body>
