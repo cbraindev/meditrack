@@ -4089,7 +4089,7 @@ function renderFinanceAnalytics(){
         <div style="font-size:12px;color:#666;margin-top:3px;">${unpaidBills.length} unpaid/partial bill${unpaidBills.length>1?'s':''}</div>
     </div>`:''}
     <button onclick="showDailyReconciliation()" style="width:100%;background:#0066cc;color:white;border:none;padding:14px;border-radius:10px;font-size:15px;font-weight:bold;cursor:pointer;margin-bottom:10px;">🖨️ Print Daily Reconciliation</button>
-    <button onclick="showView('billing-list')" style="width:100%;background:#00aa55;color:white;border:none;padding:12px;border-radius:10px;font-size:14px;cursor:pointer;">💰 Manage Bills &amp; Outstanding</button>
+    <button onclick="showView('billing-list')" style="width:100%;background:#00aa55;color:white;border:none;padding:12px;border-radius:10px;font-size:14px;cursor:pointer;">💰 Manage Bills & Outstanding</button>
     </div>`;
 }
 
@@ -4121,7 +4121,7 @@ window.printPatientCard=function(){
         }
         <div style="text-align:center;font-size:11px;color:#666;margin-top:15px;">Present at any MEDITRACK facility for instant health records</div>
     </div>
-    <script>window.print();<\/script><\/body><\/html>\`);
+    <script>window.print();<\/script><\/body><\/html>`);
 };
 
 // ============================================================
@@ -4135,7 +4135,7 @@ window.updateStock=async function(itemId){
     if(isNaN(newQty)||newQty<0){alert('Invalid quantity');return;}
     try{
         if(connectionMode==='local'){
-            await localPut(\`/api/inventory/\${itemId}\`,{
+            await localPut(`/api/inventory/${itemId}`,{
                 quantity:newQty,unitPrice:item.unitPrice,
                 reorderLevel:item.reorderLevel
             });
@@ -4162,33 +4162,33 @@ function renderLabCompleted(){
         list.innerHTML='<div class="empty-search"><div class="icon">✅</div><p>No completed tests yet</p></div>';
         return;
     }
-    list.innerHTML=\`<div class="section-title">\${completed.length} COMPLETED</div>\`;
+    list.innerHTML=`<div class="section-title">${completed.length} COMPLETED</div>`;
     completed.forEach(l=>{
         const isReviewed=l.reviewedByDoctor||l.reviewed_by_doctor;
-        list.innerHTML+=\`<div style="background:white;margin:8px 15px;border-radius:10px;padding:15px;
+        list.innerHTML+=`<div style="background:white;margin:8px 15px;border-radius:10px;padding:15px;
             box-shadow:0 2px 5px rgba(0,0,0,0.08);
-            border-left:4px solid \${isReviewed?'#4CAF50':'#ff8800'};">
-            <div style="font-weight:bold;">\${safe(l.patientName)}
-                <span style="font-family:monospace;font-size:12px;">(\${safe(l.patientCode)})</span>
+            border-left:4px solid ${isReviewed?'#4CAF50':'#ff8800'};">
+            <div style="font-weight:bold;">${safe(l.patientName)}
+                <span style="font-family:monospace;font-size:12px;">(${safe(l.patientCode)})</span>
             </div>
-            <div style="font-size:14px;margin-top:5px;font-weight:bold;">\${safe(l.testType)}</div>
+            <div style="font-size:14px;margin-top:5px;font-weight:bold;">${safe(l.testType)}</div>
             <div style="background:#e8f5e9;padding:8px;border-radius:6px;margin-top:5px;">
                 <div style="font-size:12px;color:#666;">RESULT:</div>
-                <div style="font-size:15px;font-weight:bold;color:#2e7d32;">\${safe(l.result)}</div>
+                <div style="font-size:15px;font-weight:bold;color:#2e7d32;">${safe(l.result)}</div>
             </div>
-            \${l.testCost?
-                \`<div style="font-size:12px;color:#0066cc;margin-top:5px;">💰 ₦\${l.testCost?.toLocaleString()}</div>\`:
+            ${l.testCost?
+                `<div style="font-size:12px;color:#0066cc;margin-top:5px;">💰 ₦${l.testCost?.toLocaleString()}</div>`:
                 ''}
             <div style="font-size:12px;color:#666;margin-top:3px;">
-                By: \${safe(l.completedBy||l.completed_by||'Lab')} — \${safe(l.date)}
+                By: ${safe(l.completedBy||l.completed_by||'Lab')} — ${safe(l.date)}
             </div>
-            \${l.isCritical?
+            ${l.isCritical?
                 '<div style="font-size:11px;color:#ff4444;font-weight:bold;margin-top:3px;">🚨 CRITICAL VALUE</div>':
                 ''}
-            <div style="margin-top:5px;font-size:11px;font-weight:bold;color:\${isReviewed?'#4CAF50':'#ff8800'};">
-                \${isReviewed?'✅ Doctor reviewed':'⏳ Awaiting doctor review'}
+            <div style="margin-top:5px;font-size:11px;font-weight:bold;color:${isReviewed?'#4CAF50':'#ff8800'};">
+                ${isReviewed?'✅ Doctor reviewed':'⏳ Awaiting doctor review'}
             </div>
-        </div>\`;
+        </div>`;
     });
 }
 
