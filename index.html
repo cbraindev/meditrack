@@ -867,6 +867,40 @@
 </div>
 
 <script type="module">
+// ============================================================
+// MEDITRACK — Unified Patient Health Identity Platform
+// Nigeria | Version 2.0
+// ============================================================
+// Architecture:
+//   Frontend:     Vanilla JS + Firebase SDK (single HTML file)
+//   Cloud DB:     Firebase Firestore (meditrack-79735)
+//   Local Server: Node.js + SQLite + WebSocket (clinic laptop/Pi)
+//   Hosting:      GitHub Pages
+//
+// Sections:
+//   1.  Firebase Imports & Config
+//   2.  Constants & Role Permissions
+//   3.  Application State (module-level variables)
+//   4.  Local Server (WebSocket + HTTP helpers)
+//   5.  Utilities (safe, hash, validation, logging)
+//   6.  Offline Queue & Cache
+//   7.  Authentication & Session
+//   8.  Data Loading (Firebase + Local)
+//   9.  Dashboard & Navigation
+//  10.  Patient Management
+//  11.  Nurse Module
+//  12.  Doctor Module
+//  13.  Pharmacy Module
+//  14.  Laboratory Module
+//  15.  Billing System
+//  16.  Admin & Analytics
+//  17.  Sharing & Referrals
+// ============================================================
+
+// ============================================================
+// 1. FIREBASE IMPORTS & CONFIG
+// ============================================================
+
 import{initializeApp}from"https://www.gstatic.com/firebasejs/12.15.0/firebase-app.js";
 import{getFirestore,collection,addDoc,doc,updateDoc,orderBy,onSnapshot,query,where,setDoc,getDoc,getDocs,runTransaction}from"https://www.gstatic.com/firebasejs/12.15.0/firebase-firestore.js";
 
@@ -875,7 +909,8 @@ const app=initializeApp(firebaseConfig);
 const db=getFirestore(app);
 
 const stateNames={AB:'Abia',AD:'Adamawa',AK:'Akwa Ibom',AN:'Anambra',BA:'Bauchi',BY:'Bayelsa',BE:'Benue',BO:'Borno',CR:'Cross River',DE:'Delta',EB:'Ebonyi',ED:'Edo',EK:'Ekiti',EN:'Enugu',FC:'FCT Abuja',GO:'Gombe',IM:'Imo',JI:'Jigawa',KD:'Kaduna',KN:'Kano',KT:'Katsina',KE:'Kebbi',KO:'Kogi',KW:'Kwara',LA:'Lagos',NA:'Nasarawa',NI:'Niger',OG:'Ogun',ON:'Ondo',OS:'Osun',OY:'Oyo',PL:'Plateau',RI:'Rivers',SO:'Sokoto',TA:'Taraba',YO:'Yobe',ZA:'Zamfara'};
-const drugWarnings={'penicillin':['amoxicillin','ampicillin','amoxil','augmentin','flucloxacillin'],'aspirin':['ibuprofen','diclofenac','naproxen','indomethacin'],'sulfa':['septrin','cotrimoxazole','trimethoprim'],'codeine':['tramadol','morphine','oxycodone','pethidine'],'ibuprofen':['aspirin','diclofenac','naproxen'],'metformin':['alcohol','contrast'],'warfarin':['aspirin','ibuprofen','naproxen','diclofenac'],'metronidazole':['alcohol','warfarin'],'paracetamol':['alcohol'],'rifampicin':['contraceptives','warfarin']};
+// drugWarnings removed — incomplete clinical data is dangerous
+// Allergy check uses patient.allergy field directly
 const rolePermissions={admin:{views:['dashboard','patients','register','nurse','doctor','doctor-form','post-result','pharmacy','lab','analytics','admin','emergency','detail','share','referral','referral-preview','billing','billing-list'],nav:['dashboard','patients','register','nurse','more']},receptionist:{views:['dashboard','patients','register','emergency','detail','share','billing','billing-list'],nav:['dashboard','patients','register']},nurse:{views:['dashboard','nurse','patients','emergency','detail'],nav:['dashboard','nurse','patients']},doctor:{views:['dashboard','doctor','doctor-form','post-result','patients','emergency','detail','share','referral','referral-preview','billing','billing-list'],nav:['dashboard','patients','more']},pharmacist:{views:['dashboard','pharmacy','patients','emergency','detail'],nav:['dashboard','patients','more']},lab:{views:['dashboard','lab','patients','emergency','detail'],nav:['dashboard','patients','more']}};
 
 let patients=[],prescriptions=[],labRequests=[],pharmacyFlags=[],referrals=[],financialRecords=[],inventory=[],bills=[];
@@ -915,6 +950,10 @@ const LOCAL_SERVER_IPS=[
 ];
 const LOCAL_SERVER_PORT=3000;
 
+
+// ============================================================
+// 4. LOCAL SERVER — WebSocket & HTTP Helpers
+// ============================================================
 async function detectLocalServer(){
     setStatus('🔍 Looking for clinic server...');
 
@@ -1094,6 +1133,10 @@ async function localPut(endpoint,data){const resp=await fetch(`${localServerUrl}
 // ============================================================
 // SECURITY FUNCTIONS
 // ============================================================
+
+// ============================================================
+// 5. UTILITIES — XSS Protection, Hashing, Validation, Logging
+// ============================================================
 function safe(text){if(!text)return'';return String(text).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#x27;').replace(/\//g,'&#x2F;');}
 async function hashKey(key){try{const encoder=new TextEncoder();const data=encoder.encode(key.trim()+'_meditrack_2024_salt');const hash=await crypto.subtle.digest('SHA-256',data);return Array.from(new Uint8Array(hash)).map(b=>b.toString(16).padStart(2,'0')).join('');}catch(e){return key;}}
 function getLoginAttempts(){try{const d=localStorage.getItem('mt_login_attempts');return d?JSON.parse(d):{count:0,lockUntil:null};}catch(e){return{count:0,lockUntil:null};}}
@@ -1171,6 +1214,10 @@ window.showPrivacyPolicy=function(){const w=window.open('','_blank');w.document.
 // ============================================================
 window.addEventListener('online',()=>{isOnline=true;document.getElementById('offline-bar').style.display='none';setStatus('🟢 Back online — syncing...');syncOfflineQueue();if(connectionMode!=='local'&&currentHospital)scheduleListenerReload('reconnected');});
 window.addEventListener('offline',()=>{isOnline=false;document.getElementById('offline-bar').style.display='block';setStatus('📵 Offline — saving locally');});
+
+// ============================================================
+// 6. OFFLINE QUEUE & LOCAL CACHE
+// ============================================================
 function loadOfflineQueue(){try{offlineQueue=JSON.parse(localStorage.getItem('mt_offline_queue')||'[]');}catch(e){offlineQueue=[];}updateOfflineQueueBanner();}
 function saveOfflineQueue(){localStorage.setItem('mt_offline_queue',JSON.stringify(offlineQueue));updateOfflineQueueBanner();}
 function updateOfflineQueueBanner(){const b=document.getElementById('offline-queue-banner');if(offlineQueue.length>0){b.style.display='block';document.getElementById('offline-queue-count').textContent=offlineQueue.length;}else b.style.display='none';}
@@ -1260,6 +1307,7 @@ function setStatus(msg){const b=document.getElementById('status-bar');b.style.di
 function saveToCache(k,d){try{localStorage.setItem('mt_'+k,JSON.stringify(d));}catch(e){}}
 function loadFromCache(k){try{const d=localStorage.getItem('mt_'+k);return d?JSON.parse(d):null;}catch(e){return null;}}
 
+/** Intelligent save: local server → Firebase → offline queue depending on connection. */
 async function smartSave(type,collectionName,data){
     const tempId='local_'+Date.now()+'_'+Math.random().toString(36).substr(2,5);
 
@@ -1335,8 +1383,13 @@ async function smartSave(type,collectionName,data){
 
 window.updateHospitalCodePreview=function(){const abbrev=document.getElementById('reg-hospital-abbrev').value.toUpperCase().replace(/[^A-Z]/g,'').substr(0,4);const state=document.getElementById('reg-hospital-state').value;const preview=document.getElementById('hospital-code-preview');if(state&&abbrev){preview.style.display='block';preview.textContent=`HOS-${state}-${abbrev}-001 (preview)`;}else preview.style.display='none';}
 window.updateNextCodePreview=function(){if(!currentHospital)return;const el=document.getElementById('next-code-preview');if(el)el.textContent=`NG-${currentHospital.state}-${currentHospital.abbrev}-????`;}
+
+// ============================================================
+// 7. AUTHENTICATION & SESSION MANAGEMENT
+// ============================================================
 window.switchAuthTab=function(tab){document.getElementById('login-form').style.display=tab==='login'?'block':'none';document.getElementById('register-form').style.display=tab==='register'?'block':'none';document.getElementById('tab-login').classList.toggle('active',tab==='login');document.getElementById('tab-register').classList.toggle('active',tab==='register');}
 
+/** Register a new hospital and create admin account. */
 window.registerHospital=async function(){
     const name=document.getElementById('reg-hospital-name').value.trim();const abbrev=document.getElementById('reg-hospital-abbrev').value.toUpperCase().replace(/[^A-Z]/g,'').substr(0,4);const state=document.getElementById('reg-hospital-state').value;const adminName=document.getElementById('reg-admin-name').value.trim();const password=document.getElementById('reg-admin-password').value;const confirm=document.getElementById('reg-admin-confirm').value;const terms=document.getElementById('reg-terms').checked;
     const errEl=document.getElementById('register-error');errEl.style.display='none';
@@ -1363,6 +1416,7 @@ window.registerHospital=async function(){
 
 window.proceedToAdmin=function(){document.getElementById('reg-success-overlay').style.display='none';initializeMainApp();}
 
+/** Authenticate staff member using access key. Rate-limited. */
 window.loginStaff=async function(){
     const lockMsg=checkLoginLock();
     if(lockMsg){const notice=document.getElementById('rate-limit-notice');notice.textContent=lockMsg;notice.style.display='block';return;}
@@ -1451,6 +1505,10 @@ window.logoutStaff=function(){
     document.getElementById('auth-overlay').style.display='flex';
 }
 
+
+// ============================================================
+// 8. DATA LOADING — Firebase Listeners & Local Server Sync
+// ============================================================
 function loadAllData(){
     if(connectionMode==='local'){loadAllDataLocal();}
     else{loadAllDataFirebase();}
@@ -1548,6 +1606,7 @@ function scheduleListenerReload(reason){
 }
 
 // Fast parallel initial load
+/** Fast parallel load of all collections on login. Much faster than waiting for onSnapshot. */
 async function quickLoadFromFirebase(){
     if(!isOnline||!currentHospital)return;
     try{
@@ -1637,6 +1696,7 @@ async function quickLoadFromFirebase(){
     }
 }
 
+/** Start real-time Firebase listeners for live updates across all collections. */
 function loadAllDataFirebase(){
     // Detach any previously active listeners
     _activeListeners.forEach(unsub=>{try{unsub();}catch(e){}});
@@ -1893,6 +1953,10 @@ async function generatePatientCode(){
 
 async function sendSMS(phone,message){console.log(`📱 SMS to ${phone}: ${message}`);}
 
+
+// ============================================================
+// 9. DASHBOARD & NAVIGATION
+// ============================================================
 function updateDashboard(){
     if(!currentHospital)return;
     document.getElementById('dash-hospital-title').textContent=`${safe(currentHospital.name)} — ${safe(currentHospital.stateName||'')}`;
@@ -1955,6 +2019,10 @@ window.toggleMore=function(){const m=document.getElementById('more-menu');m.styl
 window.toggleLabFields=function(){document.getElementById('lab-request-fields').style.display=document.getElementById('doctor-request-lab').value==='yes'?'block':'none';}
 document.addEventListener('click',e=>{const m=document.getElementById('more-menu');const b=document.getElementById('nav-more');if(m&&b&&!m.contains(e.target)&&!b.contains(e.target))m.style.display='none';});
 
+
+// ============================================================
+// 10. PATIENT MANAGEMENT
+// ============================================================
 window.searchPatients=async function(){
     const q=document.getElementById('search-input').value.toLowerCase().trim();
     const list=document.getElementById('patients-list');
@@ -2083,6 +2151,10 @@ window.goBack=function(){['detail','share','referral','referral-preview'].forEac
 // Track where billing was opened from so back button works correctly
 let billingOpenedFrom='detail';
 
+
+// ============================================================
+// 15. BILLING SYSTEM
+// ============================================================
 window.billingGoBack=function(){
     document.getElementById('billing-view').style.display='none';
     if(billingOpenedFrom==='billing-list'){
@@ -2442,6 +2514,7 @@ window.removeCharge=function(type,id){
     recalculateBill();
 };
 
+/** Save bill with payment details. Updates local array immediately for instant UI refresh. */
 window.saveBillWithPayment=async function(){
     if(currentBillingVisitIndex===null){alert('Please select a visit first');return;}
     const p=patients.find(p=>p.id===currentBillingPatientId);if(!p)return;
@@ -2576,6 +2649,7 @@ window.setBillingFilter=function(filter){
     renderBillingList();
 };
 
+/** Render the billing list with filter tabs, counts, and sorted rows. */
 function renderBillingList(){
     const today=new Date().toLocaleDateString('en-GB');
     const searchQ=(document.getElementById('bl-search')?.value||'').toLowerCase().trim();
@@ -2789,6 +2863,10 @@ function updateDashboardBillingSection(){
 window.generateInvoice=function(){if(currentBillingVisitIndex===null){alert('Please select a visit first');return;}const p=patients.find(p=>p.id===currentBillingPatientId);if(!p)return;const v=p.visits[currentBillingVisitIndex];const days=parseInt(document.getElementById('bill-days').value)||0;const bedRate=parseFloat(document.getElementById('bill-bed-rate').value)||0;const bedTotal=days*bedRate;const hmoAmount=parseFloat(document.getElementById('bill-hmo-amount').value)||0;const autoTotal=getAutoChargesTotalForVisit();const procTotal=procedureCharges.reduce((s,c)=>s+(c.amount||0),0);const extraTotal=extraCharges.reduce((s,c)=>s+(c.amount||0),0);const subtotal=autoTotal+bedTotal+procTotal+extraTotal;const totalDue=Math.max(0,subtotal-hmoAmount);const amountPaid=parseFloat(document.getElementById('payment-amount').value)||0;const balance=Math.max(0,totalDue-amountPaid);const today=new Date().toLocaleDateString('en-GB');const payStatus=amountPaid>=totalDue&&totalDue>0?'PAID':amountPaid>0?'PARTIAL PAYMENT':'UNPAID';const payColor=payStatus==='PAID'?'#4CAF50':payStatus==='PARTIAL PAYMENT'?'#f57f17':'#ff4444';const existingBill=bills.find(b=>b.patientId===p.id&&b.visitIndex===currentBillingVisitIndex);const receiptRef=existingBill?.receiptNumber||'Draft';let autoLines='';if(currentBillingVisitIndex===0&&p.consultationFee&&p.consultationFee>0)autoLines+=`<tr><td style="padding:8px 0;border-bottom:1px solid #eee;font-size:14px;">Registration Consultation Fee</td><td style="padding:8px 0;border-bottom:1px solid #eee;font-size:14px;text-align:right;">₦${p.consultationFee.toLocaleString()}</td></tr>`;if(v.consultationFee&&v.consultationFee>0)autoLines+=`<tr><td style="padding:8px 0;border-bottom:1px solid #eee;font-size:14px;">Consultation Fee — ${safe(v.date)}</td><td style="padding:8px 0;border-bottom:1px solid #eee;font-size:14px;text-align:right;">₦${v.consultationFee.toLocaleString()}</td></tr>`;prescriptions.filter(pr=>pr.patientId===p.id&&pr.status==='dispensed'&&pr.date===v.date&&pr.doctorName===v.doctorName).forEach(pr=>{if(pr.drugCost&&pr.drugCost>0)autoLines+=`<tr><td style="padding:8px 0;border-bottom:1px solid #eee;font-size:14px;">Medications</td><td style="padding:8px 0;border-bottom:1px solid #eee;font-size:14px;text-align:right;">₦${pr.drugCost.toLocaleString()}</td></tr>`;});labRequests.filter(l=>l.patientId===p.id&&l.status==='completed'&&l.date===v.date&&l.doctorName===v.doctorName).forEach(l=>{if(l.testCost&&l.testCost>0)autoLines+=`<tr><td style="padding:8px 0;border-bottom:1px solid #eee;font-size:14px;">Lab: ${safe(l.testType)}</td><td style="padding:8px 0;border-bottom:1px solid #eee;font-size:14px;text-align:right;">₦${l.testCost.toLocaleString()}</td></tr>`;});const w=window.open('','_blank');w.document.write(`<!DOCTYPE html><html><head><title>Invoice ${receiptRef}<\/title><style>body{font-family:Arial,sans-serif;padding:0;margin:0;}table{width:100%;border-collapse:collapse;}.invoice{max-width:600px;margin:0 auto;background:white;}.hdr{background:#0066cc;color:white;padding:25px;text-align:center;}.body{padding:25px;}.pay-badge{display:inline-block;padding:10px 25px;border-radius:8px;font-weight:bold;font-size:16px;color:white;background:${payColor};}@media print{body{background:white;}}<\/style><\/head><body><div class="invoice"><div class="hdr"><h1 style="font-size:22px;margin:0;">🏥 MEDITRACK</h1><p style="margin:5px 0 0;font-size:13px;opacity:0.8;">${safe(currentHospital.name)} — ${safe(currentHospital.stateName)}</p></div><div class="body"><div style="display:flex;justify-content:space-between;margin-bottom:20px;"><div><div style="font-size:12px;color:#666;">RECEIPT NO.</div><div style="font-weight:bold;font-family:monospace;">${safe(receiptRef)}</div></div><div style="text-align:right;"><div style="font-size:12px;color:#666;">VISIT DATE</div><div style="font-weight:bold;">${safe(v.date)}</div></div></div><div style="background:#e8f4fd;border:2px solid #0066cc;border-radius:8px;padding:10px;text-align:center;margin-bottom:15px;"><div style="font-size:11px;color:#666;">PATIENT CODE</div><div style="font-size:20px;font-weight:bold;color:#0066cc;font-family:monospace;">${safe(p.code)}</div></div><table style="margin-bottom:15px;"><tr><td style="padding:5px 0;font-size:13px;"><strong>Name:</strong> ${safe(p.name)}</td><td style="padding:5px 0;font-size:13px;"><strong>Phone:</strong> ${safe(p.phone)}</td></tr><tr><td style="padding:5px 0;font-size:13px;"><strong>DOB:</strong> ${safe(p.dob)}</td><td style="padding:5px 0;font-size:13px;"><strong>Gender:</strong> ${safe(p.gender)}</td></tr></table><table>${autoLines}${bedTotal>0?`<tr><td style="padding:8px 0;border-bottom:1px solid #eee;font-size:14px;">Bed Space (${days} days × ₦${bedRate.toLocaleString()})</td><td style="padding:8px 0;border-bottom:1px solid #eee;font-size:14px;text-align:right;">₦${bedTotal.toLocaleString()}</td></tr>`:''}${procedureCharges.map(c=>`<tr><td style="padding:8px 0;border-bottom:1px solid #eee;font-size:14px;">💉 ${safe(c.name)}</td><td style="padding:8px 0;border-bottom:1px solid #eee;font-size:14px;text-align:right;">₦${c.amount.toLocaleString()}</td></tr>`).join('')}${extraCharges.map(c=>`<tr><td style="padding:8px 0;border-bottom:1px solid #eee;font-size:14px;">➕ ${safe(c.name)}</td><td style="padding:8px 0;border-bottom:1px solid #eee;font-size:14px;text-align:right;">₦${c.amount.toLocaleString()}</td></tr>`).join('')}</table><div style="background:#f8f9fa;border-radius:8px;padding:15px;margin:15px 0;"><div style="display:flex;justify-content:space-between;padding:8px 0;font-size:15px;font-weight:bold;"><span>Subtotal</span><span>₦${subtotal.toLocaleString()}</span></div>${hmoAmount>0?`<div style="display:flex;justify-content:space-between;padding:8px 0;color:#00aa55;font-weight:bold;font-size:14px;"><span>HMO Coverage</span><span>-₦${hmoAmount.toLocaleString()}</span></div>`:''}<div style="display:flex;justify-content:space-between;padding:12px 0;font-size:18px;font-weight:bold;color:#0066cc;border-top:2px solid #0066cc;"><span>TOTAL DUE</span><span>₦${totalDue.toLocaleString()}</span></div><div style="display:flex;justify-content:space-between;padding:8px 0;color:#00aa55;font-size:14px;"><span>Amount Paid</span><span style="font-weight:bold;">₦${amountPaid.toLocaleString()}</span></div>${balance>0?`<div style="display:flex;justify-content:space-between;padding:8px 0;color:#ff4444;font-size:14px;"><span>Balance Outstanding</span><span style="font-weight:bold;">₦${balance.toLocaleString()}</span></div>`:''}</div><div style="text-align:center;margin:15px 0;"><span class="pay-badge">${payStatus}</span></div><div style="text-align:center;font-size:11px;color:#999;margin-top:20px;padding-top:15px;border-top:1px solid #eee;">MEDITRACK — Unified Patient Health Records Nigeria<br>${safe(currentHospital.name)} • ${safe(receiptRef)} • Generated ${today}</div></div></div><script>window.print();<\/script><\/body><\/html>`);}
 
 // SHARE & REFERRAL
+
+// ============================================================
+// 17. SHARING & REFERRALS
+// ============================================================
 window.sharePatientHistory=function(){const p=patients.find(p=>p.id===currentSharePatientId);if(!p)return;const today=new Date().toLocaleDateString('en-GB');let s=`━━━━━━━━━━━━━━━━━━━\n🏥 MEDITRACK HEALTH SUMMARY\n━━━━━━━━━━━━━━━━━━━\n\n👤 ${p.name}\n🆔 ${p.code}\n📱 ${p.phone}\n🎂 DOB: ${p.dob||'-'}\n⚧ ${p.gender||'-'}\n🩸 Blood: ${p.blood||'-'}\n`;if(p.hmoCompany)s+=`🏥 HMO: ${p.hmoCompany} (${p.hmo||'No number'})\n`;s+=p.allergy?`⚠️ ALLERGY: ${p.allergy.toUpperCase()}\n`:`✅ No Known Allergies\n`;s+=`\n📋 VISIT HISTORY\n──────────────\n`;if(p.visits?.length){p.visits.slice().reverse().forEach(v=>{s+=`\n📅 ${v.date} — ${v.hospitalName||'Unknown'}\n`;if(v.doctorName)s+=`Dr. ${v.doctorName}\n`;if(v.diagnosis)s+=`Diagnosis: ${v.diagnosis}\n`;if(v.medications)s+=`Medications: ${v.medications}\n`;if(v.labResult)s+=`Lab (${v.labResult.testType}): ${v.labResult.result}\n`;if(v.followup)s+=`Follow-up: ${v.followup}\n`;s+=`─────────────\n`;});}else s+=`No visits yet.\n`;s+=`\nGenerated: ${today}\nMEDITRACK — Unified Patient Health Records Nigeria`;document.getElementById('share-content').textContent=s;document.getElementById('detail-view').style.display='none';document.getElementById('share-view').style.display='block';}
 window.copyShareContent=function(){navigator.clipboard.writeText(document.getElementById('share-content').textContent).then(()=>alert('✅ Copied!')).catch(()=>alert('Please manually copy.'));}
 window.printShareContent=function(){const c=document.getElementById('share-content').textContent;const w=window.open('','_blank');w.document.write(`<!DOCTYPE html><html><head><title>Patient Summary<\/title><style>body{font-family:monospace;padding:20px;white-space:pre-wrap;}<\/style><\/head><body>${safe(c)}<script>window.print();<\/script><\/body><\/html>`);}
@@ -2798,6 +2876,10 @@ window.printReferralLetter=function(){const c=document.getElementById('referral-
 window.copyReferralWhatsApp=function(){const p=patients.find(p=>p.id===currentReferralPatientId);if(!p)return;const text=`MEDITRACK REFERRAL\nPatient: ${p.name} (${p.code})\nFrom: ${currentHospital.name}\nTo: ${document.getElementById('referral-to').value}\nReason: ${document.getElementById('referral-reason').value}\n${p.allergy?'⚠️ ALLERGY: '+p.allergy.toUpperCase():'✅ No Known Allergies'}`;navigator.clipboard.writeText(text).then(()=>alert('✅ Copied!')).catch(()=>{});}
 
 // NURSE
+
+// ============================================================
+// 11. NURSE MODULE
+// ============================================================
 window.switchNurseTab=function(tab){document.getElementById('nurse-tab-returning').classList.toggle('active',tab==='returning');document.getElementById('nurse-tab-new').classList.toggle('active',tab==='new');document.getElementById('nurse-returning-section').style.display=tab==='returning'?'block':'none';document.getElementById('nurse-new-section').style.display=tab==='new'?'block':'none';}
 window.searchReturningPatient=async function(){
     const q=document.getElementById('returning-search').value.toLowerCase().trim();
@@ -3038,11 +3120,19 @@ window.submitVitals=async function(){
 window.addMedication=function(){const input=document.getElementById('med-input');const med=input.value.trim();if(!med){alert('Please type a medication name and dosage');return;}prescribedMedications.push(med);renderMedicationsList();input.value='';document.getElementById('drug-warning-live').style.display='none';}
 window.removeMedication=function(index){prescribedMedications.splice(index,1);renderMedicationsList();}
 function renderMedicationsList(){const container=document.getElementById('medications-list');if(!container)return;if(!prescribedMedications.length){container.innerHTML='';return;}container.innerHTML=prescribedMedications.map((med,i)=>`<div class="med-item"><span>💊 ${safe(med)}</span><button class="med-remove" onclick="removeMedication(${i})">✕</button></div>`).join('');}
-window.checkDrugWarningLive=function(){const meds=document.getElementById('med-input').value;const allMeds=[...prescribedMedications,meds].join(', ');const warningEl=document.getElementById('drug-warning-live');if(!consultingPatientAllergy||!meds){warningEl.style.display='none';return;}const warning=checkDrugInteraction(consultingPatientAllergy,allMeds);if(warning){warningEl.style.display='block';warningEl.textContent=warning;}else warningEl.style.display='none';}
-
-// DOCTOR
-window.switchDoctorTab=function(tab){['pending','results','flags','referrals'].forEach(t=>{document.getElementById('doctor-tab-'+t).classList.remove('active');const id=t==='pending'?'pending-visits-list':t==='results'?'lab-results-list':t==='flags'?'pharmacy-flags-list':'referrals-inbox-list';document.getElementById(id).style.display='none';});document.getElementById('doctor-tab-'+tab).classList.add('active');const map={pending:'pending-visits-list',results:'lab-results-list',flags:'pharmacy-flags-list',referrals:'referrals-inbox-list'};document.getElementById(map[tab]).style.display='block';if(tab==='pending')renderPendingVisits();else if(tab==='results')renderLabResults();else if(tab==='flags')renderDoctorFlags();else renderReferralsInbox();}
-
+window.checkDrugWarningLive=function(drugInput){
+    // Simple allergy check — drugWarnings dict removed (incomplete = dangerous)
+    const drug = (drugInput||document.getElementById('med-drug')?.value||'').toLowerCase().trim();
+    const allergy = (consultingPatientAllergy||'').toLowerCase();
+    const warningEl = document.getElementById('drug-warning-display');
+    if(!warningEl) return;
+    if(allergy && drug && allergy.split(/[,\s]+/).some(a=>a.length>2&&drug.includes(a))){
+        warningEl.innerHTML='<div style="background:#fff0f0;border:2px solid #ff4444;border-radius:8px;padding:10px;color:#ff4444;font-weight:bold;">⚠️ ALLERGY ALERT: Patient is allergic to ' + safe(allergy.toUpperCase()) + '. Verify this medication is safe.</div>';
+    } else {
+        warningEl.innerHTML='';
+    }
+};
+/** Render doctor pending queue. Matches by hospitalCode OR hospitalName for cross-device reliability. */
 function renderPendingVisits(){
     const list=document.getElementById('pending-visits-list');
     if(!list)return;
@@ -3170,11 +3260,11 @@ window.submitPostResult=async function(){
     }catch(e){setStatus('🔴 Error: '+e.message);}
 }
 
-function checkDrugInteraction(allergy,meds){if(!allergy||!meds)return null;const al=allergy.toLowerCase();const ml=meds.toLowerCase();const w=drugWarnings[al];if(w)for(const d of w)if(ml.includes(d))return `⚠️ WARNING: ${meds} may interact with known allergy to ${allergy}. Verify before prescribing.`;for(const [drug,conflicts] of Object.entries(drugWarnings)){if(ml.includes(drug)){for(const conflict of conflicts){if(conflict!==drug&&ml.includes(conflict))return `⚠️ Drug Interaction: ${drug} and ${conflict} may interact.`;}}}return null;}
-
-// PHARMACY
-window.switchPharmacyTab=function(tab){['pending','dispensed','inventory','costs'].forEach(t=>{document.getElementById('pharm-tab-'+t).classList.remove('active');document.getElementById('pharmacy-'+t+(t==='costs'||t==='inventory'?'-section':'-list')).style.display='none';});document.getElementById('pharm-tab-'+tab).classList.add('active');document.getElementById('pharmacy-'+tab+(tab==='costs'||tab==='inventory'?'-section':'-list')).style.display='block';if(tab==='pending')renderPharmacyPending();else if(tab==='dispensed')renderPharmacyDispensed();else if(tab==='inventory')renderInventory();else renderPharmacyCosts();}
-
+function checkDrugInteraction(medications){
+    // Drug interaction checking removed — hardcoded dict was clinically incomplete
+    // Use patient allergy field for known allergies only
+    return [];
+}
 function renderPharmacyPending(){const list=document.getElementById('pharmacy-pending-list');if(!list)return;const pending=prescriptions.filter(p=>p.status==='pending');if(!pending.length){list.innerHTML='<div class="empty-search"><div class="icon">✅</div><p>No pending prescriptions</p></div>';return;}list.innerHTML=`<div class="section-title">${pending.length} PENDING</div>`;pending.forEach(p=>{const medLines=p.medications?p.medications.split(',').map(m=>m.trim()).filter(m=>m):[];list.innerHTML+=`<div class="pharmacy-full-card"><div class="pharmacy-card-header"><div style="font-size:16px;font-weight:bold;">${safe(p.patientName)}</div><div style="font-size:12px;opacity:0.8;font-family:monospace;">${safe(p.patientCode)} — Dr. ${safe(p.doctorName)}</div></div><div class="pharmacy-card-body">${p.allergy?`<div style="background:#fff0f0;border:1px solid #ff4444;border-radius:8px;padding:8px;margin-bottom:8px;"><div style="color:#ff4444;font-weight:bold;font-size:12px;">⚠️ ALLERGIC TO: ${safe(p.allergy.toUpperCase())}</div></div>`:'<div style="background:#f0fff0;border:1px solid #4CAF50;border-radius:8px;padding:6px;margin-bottom:8px;color:#4CAF50;font-size:12px;font-weight:bold;">✅ No Known Allergies</div>'}<div style="font-size:13px;font-weight:bold;color:#9c27b0;margin-bottom:10px;">💊 Prescribed Medications</div>${medLines.map((med,idx)=>{const drugName=med.split(' ')[0].toLowerCase();const invItem=inventory.find(i=>i.name?.toLowerCase().includes(drugName));const autoPrice=invItem?invItem.unitPrice:0;const stockWarn=invItem&&invItem.quantity<=invItem.reorderLevel?`<div style="font-size:11px;color:#ff4444;">⚠️ LOW STOCK: ${invItem.quantity} units</div>`:'';return `<div style="background:#f8f9fa;border-radius:8px;padding:10px;margin-bottom:8px;"><div style="font-size:13px;font-weight:bold;color:#9c27b0;margin-bottom:6px;">💊 ${safe(med)}</div>${stockWarn}<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin-bottom:5px;"><div style="font-size:11px;color:#666;">Units</div><div style="font-size:11px;color:#666;">Unit Price (₦)</div><div style="font-size:11px;color:#666;">Cost</div></div><div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;"><input type="number" id="units-${p.id}-${idx}" placeholder="Qty" min="1" style="padding:8px;border:1px solid #ddd;border-radius:6px;font-size:13px;" oninput="calcLineCost('${p.id}',${idx},${autoPrice})"><input type="number" id="price-${p.id}-${idx}" value="${autoPrice||''}" placeholder="₦" style="padding:8px;border:1px solid #ddd;border-radius:6px;font-size:13px;" oninput="calcLineCost('${p.id}',${idx},0)"><div id="cost-${p.id}-${idx}" style="background:#e8f4fd;border:1px solid #0066cc;border-radius:6px;padding:8px;text-align:center;font-weight:bold;color:#0066cc;font-size:13px;">₦0</div></div>${autoPrice>0?`<div style="font-size:11px;color:#00aa55;margin-top:4px;">💡 Inventory price: ₦${autoPrice}</div>`:''}</div>`;}).join('')}<div style="background:#fff8e1;border:1px solid #ffc107;border-radius:8px;padding:10px;margin-bottom:10px;"><div style="font-size:13px;font-weight:bold;color:#f57f17;margin-bottom:8px;">➕ Add Extra Items</div><div style="display:flex;gap:6px;margin-bottom:8px;"><input type="text" id="extra-item-name-${p.id}" placeholder="Item name e.g. Syringe 5ml" style="flex:2;padding:8px;border:1px solid #ddd;border-radius:6px;font-size:13px;"><input type="number" id="extra-item-qty-${p.id}" placeholder="Qty" style="flex:1;padding:8px;border:1px solid #ddd;border-radius:6px;font-size:13px;"><input type="number" id="extra-item-price-${p.id}" placeholder="₦" style="flex:1;padding:8px;border:1px solid #ddd;border-radius:6px;font-size:13px;"><button onclick="addExtraPharmItem('${p.id}')" style="background:#ff8800;color:white;border:none;padding:8px 10px;border-radius:6px;cursor:pointer;font-size:12px;white-space:nowrap;">+ Add</button></div><div id="extra-pharm-items-${p.id}"></div></div><div style="background:#e8f4fd;border-radius:8px;padding:10px;margin-bottom:10px;display:flex;justify-content:space-between;align-items:center;"><span style="font-weight:bold;color:#333;">Total Cost</span><span style="font-size:18px;font-weight:bold;color:#0066cc;" id="grand-total-${p.id}">₦0</span></div><button onclick="recalcGrandTotal('${p.id}',${medLines.length})" style="background:#f0f4f8;color:#0066cc;border:1px solid #0066cc;padding:6px;border-radius:6px;cursor:pointer;font-size:12px;width:100%;margin-bottom:10px;">🔄 Recalculate Total</button><div class="form-group"><label style="font-size:13px;">Note to Patient</label><textarea id="pharm-note-${p.id}" placeholder="e.g. Take with food. Complete the full course." style="width:100%;padding:10px;border:1px solid #ddd;border-radius:8px;font-size:13px;height:65px;resize:none;"></textarea></div><button style="width:100%;background:#9c27b0;color:white;border:none;padding:12px;border-radius:8px;cursor:pointer;font-size:14px;font-weight:bold;margin-bottom:8px;" onclick="dispenseAllItems('${p.id}',${medLines.length})">✅ Dispense All Items</button><button style="width:100%;background:#ff8800;color:white;border:none;padding:8px;border-radius:8px;cursor:pointer;font-size:12px;" onclick="flagToDoctor('${p.id}')">⚠️ Flag Concern to Doctor</button></div></div>`;});}
 
 window.calcLineCost=function(prescriptionId,idx,defaultPrice){const units=parseInt(document.getElementById(`units-${prescriptionId}-${idx}`)?.value)||0;const price=parseFloat(document.getElementById(`price-${prescriptionId}-${idx}`)?.value)||defaultPrice||0;const costEl=document.getElementById(`cost-${prescriptionId}-${idx}`);if(costEl)costEl.textContent='₦'+(units*price).toLocaleString();recalcGrandTotal(prescriptionId,null);}
@@ -3214,9 +3304,6 @@ window.dispenseAllItems=async function(prescriptionId,medCount){
 }
 
 function renderPharmacyDispensed(){const list=document.getElementById('pharmacy-dispensed-list');const dispensed=prescriptions.filter(p=>p.status==='dispensed');if(!dispensed.length){list.innerHTML='<div class="empty-search"><div class="icon">💊</div><p>No dispensed prescriptions yet</p></div>';return;}list.innerHTML=`<div class="section-title">${dispensed.length} DISPENSED</div>`;dispensed.forEach(p=>{list.innerHTML+=`<div style="background:white;margin:8px 15px;border-radius:10px;padding:15px;box-shadow:0 2px 5px rgba(0,0,0,0.08);"><div style="font-weight:bold;">${safe(p.patientName)} <span style="font-family:monospace;font-size:12px;">(${safe(p.patientCode)})</span></div><div style="font-size:13px;color:#555;margin-top:5px;">💊 ${safe(p.medications)}</div>${p.dispensingSummary?`<div style="font-size:12px;color:#666;margin-top:3px;">${(Array.isArray(p.dispensingSummary)?p.dispensingSummary:JSON.parse(p.dispensingSummary||'[]')).map(d=>`${safe(d.item)}: ${d.units} × ₦${d.unitPrice||0}`).join(' | ')}</div>`:''} ${p.pharmacistNote?`<div class="pharmacist-note">Note: ${safe(p.pharmacistNote)}</div>`:''}<div style="font-size:12px;color:#666;margin-top:3px;">By: ${safe(p.dispensedBy||'Unknown')} — ${safe(p.date)}</div><div style="font-size:12px;color:#0066cc;font-weight:bold;margin-top:3px;">Total: ₦${p.drugCost?.toLocaleString()||0}</div><div style="background:#e8f5e9;color:#4CAF50;padding:4px 10px;border-radius:12px;font-size:12px;font-weight:bold;display:inline-block;margin-top:5px;">✅ Dispensed</div></div>`;});}
-
-
-
 
 
 window.renderInventory=function(){
@@ -3595,6 +3682,10 @@ window.openDailyReconciliation=showDailyReconciliation;
 
 
 // Complete renderAdminPanel with diagnostic tools
+
+// ============================================================
+// 16. ADMIN MODULE
+// ============================================================
 function renderAdminPanel(){
     document.getElementById('admin-hospital-name').textContent=currentHospital.name||'';
     document.getElementById('admin-hospital-code').textContent=currentHospital.code||'';
@@ -3663,8 +3754,10 @@ function renderAdminPanel(){
 // Billing list functions defined above
 
 
-
-
+// ============================================================
+// 10b. PATIENT REGISTRATION
+// ============================================================
+/** Register a new patient and generate unique national code. */
 window.registerPatient=async function(){
     const name=document.getElementById('reg-name').value.trim();const phone=document.getElementById('reg-phone').value.trim();const dob=document.getElementById('reg-dob').value;const gender=document.getElementById('reg-gender').value;const consent=document.getElementById('reg-consent').checked;const consultationFee=parseFloat(document.getElementById('reg-consultation-fee').value)||0;
     if(!name||!phone||!dob||!gender){alert('Please fill required fields');return;}
@@ -3688,8 +3781,6 @@ window.registerPatient=async function(){
         setTimeout(()=>{msg.style.display='none';showView('dashboard');},3000);
     }catch(e){setStatus('🔴 Error: '+e.message);}
 }
-
-
 
 
 // ============================================================
@@ -3769,10 +3860,12 @@ window.showDailyReconciliation=function(){
 };
 
 
-
-
 // ============================================================
 // PHARMACY — Flag to Doctor
+// ============================================================
+
+// ============================================================
+// 13b. PHARMACY — ADDITIONAL FUNCTIONS
 // ============================================================
 window.flagToDoctor=async function(prescriptionId){
     const p=prescriptions.find(p=>p.id===prescriptionId);if(!p)return;
@@ -3794,6 +3887,10 @@ window.flagToDoctor=async function(prescriptionId){
 
 // ============================================================
 // ADMIN — Staff Management
+// ============================================================
+
+// ============================================================
+// 16c. STAFF MANAGEMENT
 // ============================================================
 window.addStaffMember=async function(){
     const name=document.getElementById('new-staff-name').value.trim();
@@ -3957,6 +4054,10 @@ window.debugPatientLoad=async function(){
 // ============================================================
 // ANALYTICS
 // ============================================================
+
+// ============================================================
+// 16b. ANALYTICS MODULE
+// ============================================================
 window.switchAnalyticsTab=function(tab){
     ['daily','conditions','staff','finance'].forEach(t=>{
         document.getElementById('analytics-tab-'+t)?.classList.remove('active');
@@ -4096,6 +4197,10 @@ function renderFinanceAnalytics(){
 // ============================================================
 // PATIENT CARD PRINTING
 // ============================================================
+
+// ============================================================
+// 17b. PRINTING UTILITIES
+// ============================================================
 window.printPatientCard=function(){
     const p=patients.find(p=>p.id===currentPatientId);if(!p)return;
     const w=window.open('','_blank');
@@ -4192,6 +4297,10 @@ function renderLabCompleted(){
     });
 }
 
+
+// ============================================================
+// 14. LABORATORY MODULE
+// ============================================================
 window.switchLabTab=function(tab){
     ['pending','completed','costs'].forEach(function(t){
         var tabEl=document.getElementById('lab-tab-'+t);
@@ -4216,6 +4325,90 @@ function renderLabCosts(){
     var done=labRequests.filter(function(l){return l.status==='completed'&&l.date===today;});
     var total=done.reduce(function(s,l){return s+(l.testCost||0);},0);
     section.innerHTML='<div style="padding:15px;"><div style="background:white;border-radius:10px;padding:15px;box-shadow:0 2px 5px rgba(0,0,0,0.1);"><div style="font-weight:bold;color:#009688;margin-bottom:10px;">Today Lab Revenue</div><div style="display:flex;justify-content:space-between;padding:8px 0;font-size:14px;"><span>Tests Done</span><span>'+done.length+'</span></div><div style="display:flex;justify-content:space-between;padding:10px 0;font-size:16px;font-weight:bold;color:#009688;border-top:2px solid #009688;"><span>Total</span><span>&#8358;'+total.toLocaleString()+'</span></div></div></div>';
+}
+</script>
+// ============================================================
+// DOCTOR TAB SWITCHING
+// ============================================================
+window.switchDoctorTab=function(tab){
+    ['pending','results','flags','referrals'].forEach(function(t){
+        var el=document.getElementById('doctor-tab-'+t);
+        if(el)el.classList.remove('active');
+        var map={pending:'pending-visits-list',results:'lab-results-list',
+                 flags:'pharmacy-flags-list',referrals:'referrals-inbox-list'};
+        var listEl=document.getElementById(map[t]);
+        if(listEl)listEl.style.display='none';
+    });
+    var activeTab=document.getElementById('doctor-tab-'+tab);
+    if(activeTab)activeTab.classList.add('active');
+    var mapActive={pending:'pending-visits-list',results:'lab-results-list',
+                   flags:'pharmacy-flags-list',referrals:'referrals-inbox-list'};
+    var activeList=document.getElementById(mapActive[tab]);
+    if(activeList)activeList.style.display='block';
+    if(tab==='pending')renderPendingVisits();
+    else if(tab==='results')renderLabResults();
+    else if(tab==='flags')renderDoctorFlags();
+    else if(tab==='referrals')renderReferralsInbox();
+};
+
+// ============================================================
+// PHARMACY TAB SWITCHING
+// ============================================================
+window.switchPharmacyTab=function(tab){
+    ['pending','dispensed','inventory','costs'].forEach(function(t){
+        var el=document.getElementById('pharm-tab-'+t);
+        if(el)el.classList.remove('active');
+        var listId=t==='inventory'?'pharmacy-inventory-section':
+                   t==='costs'?'pharmacy-costs-section':'pharmacy-'+t+'-list';
+        var listEl=document.getElementById(listId);
+        if(listEl)listEl.style.display='none';
+    });
+    var activeTab=document.getElementById('pharm-tab-'+tab);
+    if(activeTab)activeTab.classList.add('active');
+    var activeId=tab==='inventory'?'pharmacy-inventory-section':
+                 tab==='costs'?'pharmacy-costs-section':'pharmacy-'+tab+'-list';
+    var activeEl=document.getElementById(activeId);
+    if(activeEl)activeEl.style.display='block';
+    if(tab==='pending')renderPharmacyPending();
+    else if(tab==='dispensed')renderPharmacyDispensed();
+    else if(tab==='inventory')window.renderInventory();
+    else if(tab==='costs')renderPharmacyCosts();
+};
+
+function renderPharmacyCosts(){
+    var section=document.getElementById('pharmacy-costs-section');
+    if(!section)return;
+    var today=new Date().toLocaleDateString('en-GB');
+    var done=prescriptions.filter(function(p){
+        return p.status==='dispensed'&&p.date===today;
+    });
+    var total=done.reduce(function(s,p){return s+(p.drugCost||0);},0);
+    section.innerHTML='<div style="padding:15px;">'
+        +'<div style="background:white;border-radius:10px;padding:15px;box-shadow:0 2px 5px rgba(0,0,0,0.1);">'
+        +'<div style="font-weight:bold;color:#9c27b0;margin-bottom:10px;">💊 Today\'s Drug Revenue</div>'
+        +'<div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #f5f5f5;font-size:14px;">'
+        +'<span>Prescriptions Dispensed</span><span>'+done.length+'</span></div>'
+        +'<div style="display:flex;justify-content:space-between;padding:10px 0;font-size:16px;font-weight:bold;color:#9c27b0;border-top:2px solid #9c27b0;margin-top:5px;">'
+        +'<span>Total Revenue</span><span>&#8358;'+total.toLocaleString()+'</span></div>'
+        +'</div></div>';
+}
+
+// ============================================================
+// DRUG EXPIRY — getDaysUntilExpiry
+// ============================================================
+function getDaysUntilExpiry(expiryDate){
+    if(!expiryDate)return null;
+    try{
+        var d;
+        if(expiryDate.includes('/')){
+            var parts=expiryDate.split('/');
+            d=new Date(parts[2],parts[1]-1,parts[0]);
+        }else{
+            d=new Date(expiryDate);
+        }
+        var diff=d-new Date();
+        return Math.ceil(diff/(1000*60*60*24));
+    }catch(e){return null;}
 }
 </script>
 </body>
