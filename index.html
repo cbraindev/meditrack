@@ -3679,7 +3679,7 @@ window.submitLabResult=async function(labId,testType,isStructured){
 };
 
 // Add daily reconciliation button to admin and analytics
-window.openDailyReconciliation=showDailyReconciliation;
+window.openDailyReconciliation=function(){return window.showDailyReconciliation.apply(this,arguments);};
 
 
 // Complete renderAdminPanel with diagnostic tools
